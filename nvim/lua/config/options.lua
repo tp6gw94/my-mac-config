@@ -48,8 +48,8 @@ vim.opt.splitright = true
 vim.opt.splitbelow = true
 
 -- List chars
-vim.opt.list = true
-vim.opt.listchars = { tab = "» ", trail = "·", nbsp = "␣" }
+-- vim.opt.list = true
+-- vim.opt.listchars = { tab = "» ", trail = "·", nbsp = "␣" }
 
 -- Live preview
 vim.opt.inccommand = "split"
@@ -64,9 +64,8 @@ vim.o.foldenable = true
 vim.diagnostic.config({
 	severity_sort = true,
 	float = { border = "rounded", source = "if_many" },
-	underline = { severity = vim.diagnostic.severity.ERROR },
+	underline = false,
 	virtual_text = {
-		current_line = true,
 		source = "if_many",
 		spacing = 4,
 	},

@@ -49,22 +49,6 @@ return {
 		require("mini.icons").setup()
 		require("mini.indentscope").setup()
 		require("mini.statusline").setup()
-		require("mini.pick").setup({
-			mappings = {
-				choose_marked = "<C-q>",
-			},
-			source = {
-				choose_marked = function(items)
-					MiniPick.default_choose_marked(items, { list_type = "quickfix" })
-					-- close quickfix from mini pick
-					vim.defer_fn(function()
-						vim.cmd("cclose")
-					end, 10)
-					require("trouble").open("qflist")
-				end,
-			},
-		})
-		require("mini.extra").setup()
 		require("mini.files").setup()
 		require("mini.misc").setup()
 

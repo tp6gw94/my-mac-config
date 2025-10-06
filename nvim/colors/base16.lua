@@ -38,5 +38,5 @@ vim.api.nvim_set_hl(0, "CursorLine", {
 
 vim.api.nvim_set_hl(0, "Cursor", {
 	bg = "#92c3f7",
-	fg = "#FFFFFF",
+	fg = "#000000",
 })

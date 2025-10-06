@@ -30,6 +30,11 @@ return {
 			silent = true,
 		},
 		{
+				"<leader>F",
+				"<CMD>FzfLua files no_ignore=true<CR>",
+			silent = true,
+		},
+		{
 			"<leader>ca",
 			"<CMD>FzfLua lsp_code_actions<CR>",
 			silent = true,
