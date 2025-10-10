@@ -52,6 +52,28 @@ return {
 		require("mini.files").setup()
 		require("mini.misc").setup()
 
+		-- Custom keymaps for mini.files
+		vim.api.nvim_create_autocmd("User", {
+			pattern = "MiniFilesBufferCreate",
+			callback = function(args)
+				local buf_id = args.data.buf_id
+				vim.keymap.set("n", "<C-v>", function()
+					local entry = require("mini.files").get_fs_entry()
+					if entry and entry.fs_type == "file" then
+						require("mini.files").close()
+						vim.cmd("vsplit " .. vim.fn.fnameescape(entry.path))
+					end
+				end, { buffer = buf_id, desc = "Open in vertical split" })
+				vim.keymap.set("n", "<C-s>", function()
+					local entry = require("mini.files").get_fs_entry()
+					if entry and entry.fs_type == "file" then
+						require("mini.files").close()
+						vim.cmd("split " .. vim.fn.fnameescape(entry.path))
+					end
+				end, { buffer = buf_id, desc = "Open in horizontal split" })
+			end,
+		})
+
 		vim.api.nvim_set_hl(0, "MiniHipatternsTodo", {
 			bg = "#ffbb00",
 			fg = "#ffffff",

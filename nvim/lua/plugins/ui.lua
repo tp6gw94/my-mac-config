@@ -69,38 +69,6 @@ return {
 				"<cmd>Trouble symbols toggle focus=false<cr>",
 				desc = "Symbols (Trouble)",
 			},
-			{
-				"<leader>cl",
-				"<cmd>Trouble lsp focus=true win.postion=bottom<cr>",
-			},
-			{
-				"gr",
-				"<cmd>Trouble lsp_references focus=true win.position=bottom<cr>",
-			},
-			{
-				"gD",
-				"<cmd>Trouble lsp_declarations focus=true win.position=bottom<cr>",
-			},
-			{
-				"gt",
-				"<cmd>Trouble lsp_type_definitions focus=true win.position=bottom<cr>",
-			},
-			{
-				"gd",
-				"<cmd>Trouble lsp_definitions focus=true win.position=bottom<cr>",
-			},
-			{
-				"gi",
-				"<cmd>Trouble lsp_implementations focus=true win.position=bottom<cr>",
-			},
-			{
-				"gci",
-				"<cmd>Trouble lsp_incoming_calls focus=true win.position=bottom<cr>",
-			},
-			{
-				"gco",
-				"<cmd>Trouble lsp_outgoing_calls focus=true win.position=bottom<cr>",
-			},
 		},
 	},
 	{
@@ -139,10 +107,10 @@ return {
 		"shortcuts/no-neck-pain.nvim",
 		version = "*",
 		keys = {
-				{
-						"<leader>wn",
-						"<CMD>NoNeckPain<CR>"
-				}
-		}
+			{
+				"<leader>wn",
+				"<CMD>NoNeckPain<CR>",
+			},
+		},
 	},
 }

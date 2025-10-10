@@ -11,11 +11,15 @@ return {
 		},
 		fzf_colors = {
 			true,
-
-			["bg+"] = { "bg", "Visual" },
-			["fg+"] = { "fg", "Visual" },
-
-			["hl+"] = { "fg", "IncSearch", "bold" },
+			["fg+"] = { "fg", "Normal", "underline" },
+			["bg+"] = { "bg", { "CursorLine", "Normal" } },
+			["hl+"] = { "fg", "Statement" },
+		},
+		winopts = {
+			preview = {
+				wrap = true,
+				layout = "vertical",
+			},
 		},
 	},
 	config = function(_, opts)
@@ -30,8 +34,8 @@ return {
 			silent = true,
 		},
 		{
-				"<leader>F",
-				"<CMD>FzfLua files no_ignore=true<CR>",
+			"<leader>F",
+			"<CMD>FzfLua files no_ignore=true<CR>",
 			silent = true,
 		},
 		{
@@ -40,17 +44,37 @@ return {
 			silent = true,
 		},
 		{
+			"gr",
+			"<CMD>FzfLua lsp_references<CR>",
+			silent = true,
+		},
+		{
 			"gf",
 			"<CMD>FzfLua lsp_finder<CR>",
 			silent = true,
 		},
 		{
-			"<C-f>",
+			"gd",
+			"<CMD>FzfLua lsp_definitions<CR>",
+			silent = true,
+		},
+		{
+			"gD",
+			"<CMD>FzfLua lsp_declarations<CR>",
+			silent = true,
+		},
+		{
+			"gi",
+			"<CMD>FzfLua lsp_implementations<CR>",
+			silent = true,
+		},
+		{
+			"<leader>bs",
 			"<CMD>FzfLua blines<CR>",
 			silent = true,
 		},
 		{
-			"<C-F>",
+			"<leader>bS",
 			"<CMD>FzfLua lines<CR>",
 			silent = true,
 		},
