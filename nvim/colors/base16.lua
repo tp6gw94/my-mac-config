@@ -22,20 +22,3 @@ require("mini.base16").setup({
 	use_cterm = true,
 	plugins = { default = true },
 })
-
-vim.g.colors_name = "base16"
-
-vim.cmd([[highlight Visual guibg=#A67C52 guifg=#F5F0E8]])
-
-vim.api.nvim_set_hl(0, "CursorLine", {
-	bg = "#E8DFD0",
-	fg = "NONE",
-
-	ctermbg = "darkgrey",
-	ctermfg = "NONE",
-})
-
-vim.api.nvim_set_hl(0, "Cursor", {
-	bg = "#6B4423",
-	fg = "#F5F0E8",
-})

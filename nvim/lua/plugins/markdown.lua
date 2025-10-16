@@ -16,14 +16,14 @@ return {
 		"3rd/image.nvim",
 		build = false,
 		opts = {
-				processor = "magick_cli",
-				integrations = {
-						markdown = {
-								only_render_image_at_cursor = true,
-								only_render_image_at_cursor_mode = "inline"
-						}
-				}
-		}
+			processor = "magick_cli",
+			integrations = {
+				markdown = {
+					only_render_image_at_cursor = true,
+					only_render_image_at_cursor_mode = "inline",
+				},
+			},
+		},
 	},
 	{
 		"MeanderingProgrammer/render-markdown.nvim",
@@ -32,15 +32,6 @@ return {
 		opts = {
 			completions = { lsp = { enabled = true } },
 		},
-	},
-	{
-		"iamcco/markdown-preview.nvim",
-		cmd = { "MarkdownPreviewToggle", "MarkdownPreview", "MarkdownPreviewStop" },
-		build = "cd app && npm install",
-		init = function()
-			vim.g.mkdp_filetypes = { "markdown" }
-		end,
-		ft = { "markdown" },
 	},
 	{
 		"obsidian-nvim/obsidian.nvim",
@@ -68,22 +59,24 @@ return {
 					path = "~/vaults/work",
 				},
 			},
-			note_frontmatter_func = function(note)
-				local frontmatter = note:frontmatter()
+			frontmatter = {
+				func = function(note)
+					local frontmatter = note:frontmatter()
 
-				frontmatter.title = note.title
-				frontmatter.aliases = note.aliases
-				frontmatter.tags = note.tags
+					frontmatter.title = note.title
+					frontmatter.aliases = note.aliases
+					frontmatter.tags = note.tags
 
-				-- Snacks.debug.inspect(frontmatter)
-				return frontmatter
-			end,
+					-- Snacks.debug.inspect(frontmatter)
+					return frontmatter
+				end,
+			},
 		},
 		config = function(_, opts)
 			require("obsidian").setup(opts)
 
-			vim.keymap.set('n', "<leader>oo", "<CMD>Obsidian<CR>")
-			vim.keymap.set("n", "<leader>o/", "<CMD>Obsidian search<CR>")
+			vim.keymap.set("n", "<leader>oo", "<CMD>Obsidian<CR>")
+			vim.keymap.set("n", "<leader>os", "<CMD>Obsidian search<CR>")
 			vim.keymap.set("n", "<leader>ow", "<CMD>Obsidian workspace<CR>")
 		end,
 	},

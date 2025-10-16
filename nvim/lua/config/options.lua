@@ -61,12 +61,18 @@ vim.o.foldlevelstart = 99
 vim.o.foldenable = true
 
 -- Diagnostics configuration
-vim.diagnostic.config({
-	severity_sort = true,
-	float = { border = "rounded", source = "if_many" },
-	underline = false,
-	virtual_text = {
-		source = "if_many",
-		spacing = 4,
-	},
-})
+-- vim.diagnostic.config({
+-- 	severity_sort = true,
+-- 	float = { border = "rounded", source = "if_many" },
+-- 	underline = {
+-- 		severity = 'ERROR'
+-- 	},
+-- 	virtual_text = {
+-- 		source = "if_many",
+-- 		spacing = 4,
+-- 	},
+-- })
+-- vim.api.nvim_set_hl(0, "DiagnosticVirtualTextError", { fg = "#8c2d26", italic = true })
+-- vim.api.nvim_set_hl(0, "DiagnosticVirtualTextWarn", { fg = "#ffbb00", italic = true })
+-- vim.api.nvim_set_hl(0, "DiagnosticVirtualTextInfo", { fg = "#1d1899", italic = true })
+-- vim.api.nvim_set_hl(0, "DiagnosticVirtualTextHint", { fg = "#048a66", italic = true })

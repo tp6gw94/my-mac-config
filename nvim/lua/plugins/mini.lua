@@ -33,6 +33,7 @@ return {
 			},
 		})
 		require("mini.cursorword").setup()
+
 		local hipatterns = require("mini.hipatterns")
 		hipatterns.setup({
 			highlighters = {
@@ -46,11 +47,30 @@ return {
 				hex_color = hipatterns.gen_highlighter.hex_color(),
 			},
 		})
+		vim.api.nvim_set_hl(0, "MiniHipatternsTodo", {
+			bg = "#ffbb00",
+			fg = "#ffffff",
+		})
+		vim.api.nvim_set_hl(0, "MiniHipatternsNote", {
+			bg = "#1d1899",
+			fg = "#ffffff",
+		})
+		vim.api.nvim_set_hl(0, "MiniHipatternsFixme", {
+			bg = "#8c2d26",
+			fg = "#ffffff",
+		})
+
 		require("mini.icons").setup()
 		require("mini.indentscope").setup()
 		require("mini.statusline").setup()
 		require("mini.files").setup()
 		require("mini.misc").setup()
+		require("mini.hues").setup({
+			background = "#F5F0E8",
+			foreground = "#261b0d",
+			n_hues = 2,
+			saturation = "low",
+		})
 
 		-- Custom keymaps for mini.files
 		vim.api.nvim_create_autocmd("User", {
@@ -72,11 +92,6 @@ return {
 					end
 				end, { buffer = buf_id, desc = "Open in horizontal split" })
 			end,
-		})
-
-		vim.api.nvim_set_hl(0, "MiniHipatternsTodo", {
-			bg = "#ffbb00",
-			fg = "#ffffff",
 		})
 	end,
 	keys = {
