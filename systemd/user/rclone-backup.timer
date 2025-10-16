@@ -1,0 +1,11 @@
+
+[Unit]
+Description=Run rclone backup periodically
+
+[Timer]
+OnBootSec=1min
+OnUnitActiveSec=1h
+Unit=rclone-backup.service
+
+[Install]
+WantedBy=timers.target

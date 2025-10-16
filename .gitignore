@@ -1,0 +1,14 @@
+*
+!.gitignore
+!nvim
+!nvim/**
+!kitty
+!kitty/**
+!mise
+!mise/**
+!zsh
+!zsh/**
+!paperwm
+!paperwm/**
+!systemd
+!systemd/**
