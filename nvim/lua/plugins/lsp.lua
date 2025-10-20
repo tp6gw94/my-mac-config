@@ -44,6 +44,7 @@ return {
 
 			vim.lsp.enable({
 				"lua_ls",
+				"pyright",
 				"vtsls",
 				"vue_ls",
 				"eslint",

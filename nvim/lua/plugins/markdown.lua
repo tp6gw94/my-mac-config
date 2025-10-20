@@ -45,6 +45,9 @@ return {
 			picker = {
 				name = "fzf-lua",
 			},
+			completion = {
+				blink = true,
+			},
 			legacy_commands = false,
 			ui = {
 				enable = false,
@@ -59,13 +62,17 @@ return {
 					path = "~/vaults/work",
 				},
 			},
+			pre_write_note = function(note)
+				local template = vim.fn.readfile(vim.fn.expand("~/vaults/personal/templates/00 Default.md"))
+				vim.api.nvim_buf_set_lines(0, 0, 0, false, template)
+				Snacks.debug.inspect(note)
+			end,
 			frontmatter = {
 				func = function(note)
 					local frontmatter = note:frontmatter()
 
 					frontmatter.title = note.title
-					frontmatter.aliases = note.aliases
-					frontmatter.tags = note.tags
+					frontmatter.aliases = nil
 
 					-- Snacks.debug.inspect(frontmatter)
 					return frontmatter

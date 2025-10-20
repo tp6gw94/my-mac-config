@@ -22,6 +22,7 @@ return {
 					vue = prettier,
 					json = { "biome", "prettierd", "prettier", sto_after_first = true },
 					jsonc = { "biome", "prettierd", "prettier", sto_after_first = true },
+					python = { "black", "isort" },
 				},
 			})
 			vim.keymap.set("n", "<leader>cf", function(args)
