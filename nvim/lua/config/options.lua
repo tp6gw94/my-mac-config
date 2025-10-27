@@ -1,58 +1,64 @@
--- Neovim options configuration
+-- Neovim opt configuration
 
 -- Line numbers
-vim.opt.number = true
-vim.opt.relativenumber = true
+vim.o.number = true
+vim.o.relativenumber = true
 
-vim.opt.numberwidth = 3
-vim.opt.signcolumn = "yes:1"
-vim.opt.statuscolumn = "%l%s"
+vim.o.numberwidth = 3
+vim.o.signcolumn = "yes:1"
+vim.o.statuscolumn = "%l%s"
 
 -- No swap files
 vim.o.swapfile = false
 
 -- Text wrapping
-vim.opt.wrap = true
+vim.o.wrap = false
+vim.o.linebreak = true
 
 -- Indentation
-vim.o.shiftwidth = 4
-vim.o.tabstop = 4
-vim.opt.tabstop = 2
-vim.opt.breakindent = true
+vim.o.shiftwidth = 2
+vim.o.tabstop = 2
+vim.o.breakindent = true
+vim.o.expandtab = true
+vim.o.smartindent = true
 
 -- UI
-vim.opt.showmode = false
-vim.opt.background = "light"
-vim.opt.cursorline = true
-vim.opt.scrolloff = 12
-vim.opt.winborder = "rounded"
+vim.o.showmode = false
+vim.o.background = "light"
+vim.o.cursorline = true
+vim.o.cursorlineopt = "screenline,number" -- Show cursor line per screen line
+vim.o.scrolloff = 12
+vim.o.winborder = "rounded"
+vim.o.colorcolumn = "+1"
+vim.o.ruler = false
 
 -- Clipboard (scheduled to avoid startup delay)
 vim.schedule(function()
-	vim.opt.clipboard = "unnamedplus"
+	vim.o.clipboard = "unnamedplus"
 end)
 
 -- Undo
-vim.opt.undofile = true
+vim.o.undofile = true
 
 -- Search
-vim.opt.ignorecase = true
-vim.opt.smartcase = true
+vim.o.ignorecase = true
+vim.o.smartcase = true
+vim.o.incsearch = true
 
 -- Timeouts
-vim.opt.timeoutlen = 500
-vim.opt.ttimeoutlen = 10
+vim.o.timeoutlen = 500
+vim.o.ttimeoutlen = 10
 
 -- Split behavior
-vim.opt.splitright = true
-vim.opt.splitbelow = true
+vim.o.splitright = true
+vim.o.splitbelow = true
 
 -- List chars
--- vim.opt.list = true
--- vim.opt.listchars = { tab = "» ", trail = "·", nbsp = "␣" }
+vim.o.list = true
+vim.o.listchars = 'tab:> ,trail:·,nbsp:␣'
 
 -- Live preview
-vim.opt.inccommand = "split"
+vim.o.inccommand = "split"
 
 -- Folding (will be configured by nvim-ufo)
 vim.o.foldcolumn = "1"
@@ -60,19 +66,11 @@ vim.o.foldlevel = 99
 vim.o.foldlevelstart = 99
 vim.o.foldenable = true
 
--- Diagnostics configuration
--- vim.diagnostic.config({
--- 	severity_sort = true,
--- 	float = { border = "rounded", source = "if_many" },
--- 	underline = {
--- 		severity = 'ERROR'
--- 	},
--- 	virtual_text = {
--- 		source = "if_many",
--- 		spacing = 4,
--- 	},
--- })
--- vim.api.nvim_set_hl(0, "DiagnosticVirtualTextError", { fg = "#8c2d26", italic = true })
--- vim.api.nvim_set_hl(0, "DiagnosticVirtualTextWarn", { fg = "#ffbb00", italic = true })
--- vim.api.nvim_set_hl(0, "DiagnosticVirtualTextInfo", { fg = "#1d1899", italic = true })
--- vim.api.nvim_set_hl(0, "DiagnosticVirtualTextHint", { fg = "#048a66", italic = true })
+vim.o.iskeyword = "@,48-57,_,192-255,-" -- Treat dash as `word` textobject part
+
+vim.o.switchbuf = "usetab"
+vim.o.shada = "'100,<50,s10,:1000,/100,@100,h" -- Limit ShaDa file (for startup)
+
+-- Enable all filetype plugins and syntax (if not enabled, for better startup)
+vim.cmd('filetype plugin indent on')
+if vim.fn.exists('syntax_on') ~= 1 then vim.cmd('syntax enable') end

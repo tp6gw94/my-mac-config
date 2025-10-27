@@ -71,6 +71,29 @@ return {
 			n_hues = 2,
 			saturation = "low",
 		})
+		local miniclue = require("mini.clue")
+		miniclue.setup({
+			triggers = {
+				{ mode = "n", keys = "<leader>" },
+				{ mode = "i", keys = "<C-x>" },
+			},
+			clues = {
+				{ mode = "n", keys = "<leader>c", desc = "Code" },
+				miniclue.gen_clues.builtin_completion(),
+				miniclue.gen_clues.g(),
+				miniclue.gen_clues.marks(),
+				miniclue.gen_clues.registers(),
+				miniclue.gen_clues.windows(),
+				miniclue.gen_clues.z(),
+			},
+			window = {
+				delay = 0,
+				config = {
+					width = "auto",
+					border = "double",
+				},
+			},
+		})
 
 		-- Custom keymaps for mini.files
 		vim.api.nvim_create_autocmd("User", {

@@ -2,6 +2,11 @@ return {
 	"ibhagwan/fzf-lua",
 	dependencies = { "nvim-mini/mini.icons" },
 	opts = {
+    lsp = {
+      code_actions = {
+        previewer = false
+      }
+    },
 		keymap = {
 			fzf = {
 				["ctrl-q"] = "select-all+accept",
@@ -92,6 +97,7 @@ return {
 			"<leader>h",
 			"<CMD>FzfLua helptags<CR>",
 			silent = true,
+			desc = "Help",
 		},
 		{
 			"<leader>gl",
