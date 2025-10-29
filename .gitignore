@@ -12,3 +12,8 @@
 !paperwm/**
 !systemd
 !systemd/**
+!aerospace
+!aerospace/**
+!borders
+!borders/**
+zsh/.zsh_history
