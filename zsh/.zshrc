@@ -4,6 +4,8 @@ eval "$(mise activate zsh)"
 eval "$(zoxide init zsh)"
 eval "$(starship init zsh)"
 
+source ~/.config/zsh/functions/brew-auto-dump.sh
+
 alias pn="pnpm"
 alias lg="lazygit"
 alias ld="lazydocker"
