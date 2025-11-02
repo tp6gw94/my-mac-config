@@ -1,5 +1,5 @@
 -- UI plugins
-return {	
+return {
 	{
 		"kevinhwang91/nvim-ufo",
 		dependencies = { "kevinhwang91/promise-async" },
@@ -25,7 +25,7 @@ return {
 		"folke/trouble.nvim",
 		opts = {
 			focus = true,
-			auto_preview = false,
+			auto_preview = true,
 			keys = {
 				["<Tab>"] = "toggle_preview",
 			},
@@ -84,11 +84,10 @@ return {
 	{
 		"shortcuts/no-neck-pain.nvim",
 		version = "*",
-		keys = {
-			{
-				"<leader>wn",
-				"<CMD>NoNeckPain<CR>",
-			},
-		},
+		config = function()
+			require("no-neck-pain").setup()
+			local utils = require("config.utils")
+			utils.nmap_leader("wn", "<CMD>NoNeckPain<CR>", "NoNeckPain")
+		end,
 	},
 }

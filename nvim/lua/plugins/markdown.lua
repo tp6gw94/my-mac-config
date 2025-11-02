@@ -13,19 +13,6 @@ return {
 		},
 	},
 	{
-		"3rd/image.nvim",
-		build = false,
-		opts = {
-			processor = "magick_cli",
-			integrations = {
-				markdown = {
-					only_render_image_at_cursor = true,
-					only_render_image_at_cursor_mode = "inline",
-				},
-			},
-		},
-	},
-	{
 		"MeanderingProgrammer/render-markdown.nvim",
 		---@module 'render-markdown'
 		---@type render.md.UserConfig
@@ -43,7 +30,7 @@ return {
 				folder = "templates",
 			},
 			picker = {
-				name = "fzf-lua",
+				name = "mini.pick",
 			},
 			completion = {
 				blink = true,
@@ -81,10 +68,10 @@ return {
 		},
 		config = function(_, opts)
 			require("obsidian").setup(opts)
-
-			vim.keymap.set("n", "<leader>oo", "<CMD>Obsidian<CR>")
-			vim.keymap.set("n", "<leader>os", "<CMD>Obsidian search<CR>")
-			vim.keymap.set("n", "<leader>ow", "<CMD>Obsidian workspace<CR>")
+			local utils = require("config.utils")
+			utils.nmap_leader("oo", "<CMD>Obsidian<CR>", "Obsidian")
+			utils.nmap_leader("os", "<CMD>Obsidian search<CR>", "Search")
+			utils.nmap_leader("ow", "<CMD>Obsidian workspace<CR>", "Workspace")
 		end,
 	},
 }

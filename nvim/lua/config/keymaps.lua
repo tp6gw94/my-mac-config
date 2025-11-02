@@ -17,7 +17,6 @@ vim.keymap.set({ "n", "x" }, "<Up>", "v:count == 0 ? 'gk' : 'k'", { desc = "Up",
 
 -- Buffer navigation
 vim.keymap.set("n", "<leader>`", "<cmd>e #<cr>", { desc = "Switch to Other Buffer" })
-vim.keymap.set("n", "<leader>q", "<CMD>bd<CR>", { desc = "Delete Buffer" })
 
 -- Command line navigation
 vim.keymap.set("c", "<C-h>", "<Left>", { noremap = true })
@@ -43,10 +42,32 @@ vim.keymap.set("n", "<C-v>", "<C-W>v", { desc = "Split Window Right", remap = tr
 vim.keymap.set("n", "<leader>wd", "<C-W>c", { desc = "Delete Window", remap = true })
 
 -- LSP mappings
+vim.keymap.set("n", "<leader>ca", vim.lsp.buf.code_action, { desc = "Code Action" })
 vim.keymap.set("n", "<leader>cA", function()
 	vim.lsp.buf.code_action({ context = { only = { "source" } } })
-end)
+end, { desc = "Code Action(source)" })
 vim.keymap.set("n", "<leader>cd", vim.diagnostic.open_float, { desc = "Line Diangostics" })
 vim.keymap.set("n", "<leader>cr", vim.lsp.buf.rename, { desc = "Reanem" })
 vim.keymap.set("n", "K", vim.lsp.buf.hover, { desc = "Hover" })
 vim.keymap.set("i", "<C-s>", vim.lsp.buf.signature_help, { desc = "Signature Help" })
+
+-- Snacks mappings
+local utils = require("config.utils")
+utils.nmap_leader("gg", function()
+	Snacks.lazygit()
+end, "Lazygit")
+utils.nmap_leader("gv", function()
+	Snacks.gitbrowse()
+end, "Gitbrowse")
+utils.nmap_leader("gb", function()
+	Snacks.git.blame_line()
+end, "Blame")
+utils.nmap_leader("bd", function()
+	Snacks.bufdelete()
+end, "Delete")
+utils.nmap_leader("ba", function()
+	Snacks.bufdelete.all()
+end, "Delete(all)")
+utils.nmap_leader("bo", function()
+	Snacks.bufdelete.other()
+end, "Delete(other)")

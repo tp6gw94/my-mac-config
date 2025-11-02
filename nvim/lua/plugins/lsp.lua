@@ -55,6 +55,7 @@ return {
 				"harper_ls",
 				"cucumber_language_server",
 				"markdown_oxide",
+        "cspell_ls"
 			})
 		end,
 	},

@@ -27,7 +27,7 @@ return {
 			})
 			vim.keymap.set("n", "<leader>cf", function(args)
 				conform.format()
-			end)
+			end, { desc = "Format" })
 		end,
 	},
 	{

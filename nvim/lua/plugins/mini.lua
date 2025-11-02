@@ -32,6 +32,12 @@ return {
 				start_jumping = "ss",
 			},
 		})
+		require("mini.hues").setup({
+			background = "#F5F0E8",
+			foreground = "#261b0d",
+			n_hues = 8,
+			saturation = "mediumhigh",
+		})
 		require("mini.cursorword").setup()
 
 		local hipatterns = require("mini.hipatterns")
@@ -65,12 +71,6 @@ return {
 		require("mini.statusline").setup()
 		require("mini.files").setup()
 		require("mini.misc").setup()
-		require("mini.hues").setup({
-			background = "#F5F0E8",
-			foreground = "#261b0d",
-			n_hues = 2,
-			saturation = "low",
-		})
 		local miniclue = require("mini.clue")
 		miniclue.setup({
 			triggers = {
@@ -78,7 +78,14 @@ return {
 				{ mode = "i", keys = "<C-x>" },
 			},
 			clues = {
+				{ mode = "n", keys = "<leader>b", desc = "Buffer" },
 				{ mode = "n", keys = "<leader>c", desc = "Code" },
+				{ mode = "n", keys = "<leader>f", desc = "Pick" },
+				{ mode = "n", keys = "<leader>g", desc = "Git" },
+				{ mode = "n", keys = "<leader>o", desc = "Obsidian" },
+				{ mode = "n", keys = "<leader>w", desc = "Window" },
+				{ mode = "n", keys = "<leader>x", desc = "Trouble" },
+
 				miniclue.gen_clues.builtin_completion(),
 				miniclue.gen_clues.g(),
 				miniclue.gen_clues.marks(),
@@ -116,22 +123,44 @@ return {
 				end, { buffer = buf_id, desc = "Open in horizontal split" })
 			end,
 		})
+
+		require("mini.pick").setup()
+		vim.ui.select = function(items, opts, on_choice)
+			local start_opts = { window = { config = { width = vim.o.columns } } }
+			Snacks.debug.inspect(items)
+			return require("mini.pick").ui_select(items, opts, on_choice, start_opts)
+		end
+
+		require("mini.extra").setup()
+
+		local smartpick = require("config.smartpick")
+		smartpick.setup()
+
+		vim.api.nvim_set_hl(0, "SmartPickPathMatch", {
+			fg = "#8c2d26",
+			bold = true,
+		})
+		vim.api.nvim_set_hl(0, "SmartPickBuffer", {
+			fg = "#1d1899",
+			italic = true,
+		})
+
+		local utils = require("config.utils")
+		utils.nmap_leader("ff", smartpick.picker, "Smart Pick")
+		utils.nmap_leader("fl", '<CMD>Pick buf_lines scope="current"<CR>', "Lines(buf)")
+		utils.nmap_leader("fL", '<CMD>Pick buf_lines scope="all"<CR>', "Lines(all)")
+		utils.nmap_leader("fg", "<CMD>Pick grep_live<CR>", "Grep live")
+		utils.nmap_leader("fG", '<CMD>Pick grep pattern="<cword>"<CR>', "Grep word")
+		utils.nmap_leader("fh", "<CMD>Pick help<CR>", "Help")
+		utils.nmap_leader("f'", "<CMD>Pick resume<CR>", "Resume")
+		utils.nmap_leader("e", "<CMD>lua MiniFiles.open(vim.api.nvim_buf_get_name(0), false)<CR>", "Explore(current)")
+		utils.nmap_leader("E", "<CMD>lua MiniFiles.open(nil, false)<CR>", "Explore(root)")
+		utils.nmap_leader("wz", "<CMD>lua MiniMisc.zoom()<CR>", "Zoom")
+
+		vim.keymap.set("n", "gr", '<CMD>Pick lsp scope="references"<CR>', { desc = "References" })
+		vim.keymap.set("n", "gd", '<CMD>Pick lsp scope="definition"<CR>', { desc = "Definition" })
+		vim.keymap.set("n", "gD", '<CMD>Pick lsp scope="declaration"<CR>', { desc = "Declaration" })
+		vim.keymap.set("n", "gt", '<CMD>Pick lsp scope="type_definition"<CR>', { desc = "Type definition" })
+		vim.keymap.set("n", "gi", '<CMD>Pick lsp scope="implementation"<CR>', { desc = "Implementation" })
 	end,
-	keys = {
-		{
-			"<leader>e",
-			"<CMD>lua MiniFiles.open(vim.api.nvim_buf_get_name(0), false)<CR>",
-			{ desc = "MiniFiles directory of current file" },
-		},
-		{
-			"<leader>E",
-			"<CMD>lua MiniFiles.open(nil, false)<CR>",
-			{ desc = "MiniFiles current working directory" },
-		},
-		{
-			"<leader>wz",
-			"<CMD>lua MiniMisc.zoom()<CR>",
-			{ desc = "Zoom" },
-		},
-	},
 }

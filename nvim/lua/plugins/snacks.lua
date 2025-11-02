@@ -4,42 +4,25 @@ return {
 	lazy = false,
 	---@type snacks.Config
 	opts = {
-		debug = { enabled = true },
-		dashboard = { enabled = false },
-		explorer = { enabled = false },
-		scroll = { enabled = false },
 		bigfile = { enabled = true },
-		indent = { enabled = false },
+		bufdelete = { enabled = true },
+		debug = { enabled = true },
+		gitbrowse = { enabled = true },
 		input = { enabled = true },
-		picker = { enabled = false },
+		lazygit = { enabled = true },
+		lazygit = { enabled = true },
 		notifier = { enabled = true },
 		quickfile = { enabled = true },
+		rename = { enabled = true },
 		scope = { enabled = true },
 		statuscolumn = { enabled = true, folds = { open = true } },
 		words = { enabled = true },
-		lazygit = { enabled = true },
-		gitbrowse = { enabled = true },
-		lazygit = { enabled = true },
-		rename = { enabled = true },
-	},
-	keys = {
-		{
-			"<leader>gg",
-			function()
-				Snacks.lazygit()
-			end,
-		},
-		{
-			"<leader>gv",
-			function()
-				Snacks.gitbrowse()
-			end,
-		},
-		{
-			"<leader>gb",
-			function()
-				Snacks.git.blame_line()
-			end,
-		},
+		image = { enabled = true },
+		--
+		dashboard = { enabled = false },
+		explorer = { enabled = false },
+		scroll = { enabled = false },
+		indent = { enabled = false },
+		picker = { enabled = false },
 	},
 }
