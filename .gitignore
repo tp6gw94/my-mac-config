@@ -18,4 +18,5 @@
 !borders/**
 !lazygit
 !lazygit/**
+!Brewfile
 zsh/.zsh_history

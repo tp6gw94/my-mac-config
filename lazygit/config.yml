@@ -5,6 +5,9 @@ os:
   open: "open {{filename}}"
   editPreset: "nvim"
 confirmOnQuit: false
+git:
+  pagers:
+    - pager: delta --light -s --paging=never --diff-highlight
 customCommands:
   - key: "w"
     prompts:
