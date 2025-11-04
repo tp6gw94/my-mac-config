@@ -127,7 +127,6 @@ return {
 		require("mini.pick").setup()
 		vim.ui.select = function(items, opts, on_choice)
 			local start_opts = { window = { config = { width = vim.o.columns } } }
-			Snacks.debug.inspect(items)
 			return require("mini.pick").ui_select(items, opts, on_choice, start_opts)
 		end
 

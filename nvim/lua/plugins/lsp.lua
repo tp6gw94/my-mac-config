@@ -42,6 +42,16 @@ return {
 			vim.lsp.config("vtsls", vtsls_config)
 			vim.lsp.config("vue_ls", vue_ls_config)
 
+			local cucumber_ls_config = {
+				settings = {
+					cucumber = {
+						featurePath = { "features", "src/e2e/**/*.feature" }, -- Feature 檔案路徑
+						gluePath = { "src/e2e/**/*.step.ts" }, -- Step 定義路徑
+					},
+				},
+			}
+			vim.lsp.config("cucumber_language_server", cucumber_ls_config)
+
 			vim.lsp.enable({
 				"lua_ls",
 				"pyright",
@@ -55,7 +65,7 @@ return {
 				"harper_ls",
 				"cucumber_language_server",
 				"markdown_oxide",
-        "cspell_ls"
+				"cspell_ls",
 			})
 		end,
 	},
