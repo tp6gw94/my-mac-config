@@ -11,7 +11,7 @@ git:
 customCommands:
   - key: "w"
     prompts:
-      - type: "Input"
+      - type: "input"
         title: "Commit"
         initialValue: "WIP"
     command: git commit -m "{{index .PromptResponses 0}}" --no-verify
