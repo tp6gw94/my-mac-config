@@ -19,4 +19,6 @@
 !lazygit
 !lazygit/**
 !Brewfile
+!sketchybar
+!sketchybar/**
 zsh/.zsh_history
