@@ -165,6 +165,7 @@ backspace = ['close-all-windows-but-current', 'mode main']
 # See: https://nikitabobko.github.io/AeroSpace/commands#layout
 t = ['layout tiles horizontal vertical', 'mode main']
 a = ['layout accordion horizontal vertical', 'mode main']
+z = ["exec-and-forget brew services restart sketchybar"]
 
 alt-h = ['join-with left', 'mode main']
 alt-j = ['join-with down', 'mode main']
