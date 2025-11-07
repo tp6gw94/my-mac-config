@@ -13,7 +13,7 @@ after-startup-command = ['exec-and-forget sketchybar']
 
 # Notify Sketchybar about workspace change
 exec-on-workspace-change = ['/bin/bash', '-c',
-    'sketchybar --trigger aerospace_workspace_change FOCUSED_WORKSPACE=$AEROSPACE_FOCUSED_WORKSPACE'
+    'sketchybar --trigger aerospace_workspace_change AEROSPACE_FOCUSED_WORKSPACE=$AEROSPACE_FOCUSED_WORKSPACE AEROSPACE_PREV_WORKSPACE=$AEROSPACE_PREV_WORKSPACE'
 ]
 
 # Start AeroSpace at login
@@ -26,7 +26,7 @@ enable-normalization-opposite-orientation-for-nested-containers = true
 # See: https://nikitabobko.github.io/AeroSpace/guide#layouts
 # The 'accordion-padding' specifies the size of accordion padding
 # You can set 0 to disable the padding feature
-accordion-padding = 30
+accordion-padding = 20
 
 # Possible values: tiles|accordion
 default-root-container-layout = 'tiles'
@@ -42,6 +42,7 @@ default-root-container-orientation = 'auto'
 # See https://nikitabobko.github.io/AeroSpace/commands#move-mouse
 # Fallback value (if you omit the key): on-focused-monitor-changed = []
 on-focused-monitor-changed = ['move-mouse monitor-lazy-center']
+on-focus-changed = ['move-mouse window-lazy-center']
 
 # You can effectively turn off macOS "Hide application" (cmd-h) feature by toggling this flag
 # Useful if you don't use this macOS feature, but accidentally hit cmd-h or cmd-alt-h key
@@ -65,8 +66,8 @@ preset = 'qwerty'
 inner.horizontal = 10
 inner.vertical = 10
 outer.left = 10
-outer.bottom = 10
-outer.top = 40
+outer.bottom = 30
+outer.top = 10
 outer.right = 10
 
 # 'main' binding mode declaration
@@ -145,7 +146,10 @@ alt-ctrl-cmd-shift-7 = ['move-node-to-workspace 7 --focus-follows-window']
 alt-ctrl-cmd-shift-8 = ['move-node-to-workspace 8 --focus-follows-window']
 alt-ctrl-cmd-shift-9 = ['move-node-to-workspace 9 --focus-follows-window']
 
-alt-ctrl-cmd-shift-tab = 'move-workspace-to-monitor --wrap-around next'
+alt-ctrl-cmd-shift-tab = [
+    'move-workspace-to-monitor --wrap-around next',
+    'exec-and-forget sketchybar --trigger aerospace_refresh_layout'
+]
 
 # 'service' binding mode declaration.
 # See: https://nikitabobko.github.io/AeroSpace/guide#binding-modes
@@ -176,18 +180,22 @@ l = ['move right']
 
 shift-left = [
 	'move-workspace-to-monitor left --wrap-around',
+	'exec-and-forget sketchybar --trigger aerospace_refresh_layout',
 	'mode main',
 ]
 shift-down = [
 	'move-workspace-to-monitor down --wrap-around',
+	'exec-and-forget sketchybar --trigger aerospace_refresh_layout',
 	'mode main',
 ]
 shift-up = [
 	'move-workspace-to-monitor up --wrap-around',
+	'exec-and-forget sketchybar --trigger aerospace_refresh_layout',
 	'mode main',
 ]
 shift-right = [
 	'move-workspace-to-monitor right --wrap-around',
+	'exec-and-forget sketchybar --trigger aerospace_refresh_layout',
 	'mode main',
 ]
 
