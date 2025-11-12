@@ -21,4 +21,6 @@
 !Brewfile
 !sketchybar
 !sketchybar/**
+!scooter
+!scooter/**
 zsh/.zsh_history
