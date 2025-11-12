@@ -5,6 +5,31 @@ return {
 	dependencies = { "JoosepAlviste/nvim-ts-context-commentstring", "folke/trouble.nvim" },
 	lazy = false,
 	config = function()
+		local colors = require("config.colors")
+
+		require("mini.hues").setup({
+			background = colors.theme.background,
+			foreground = colors.theme.foreground,
+			n_hues = 4,
+			saturation = "lowmedium",
+		})
+
+		local hipatterns = require("mini.hipatterns")
+		hipatterns.setup({
+			highlighters = {
+				-- Highlight standalone 'FIXME', 'HACK', 'TODO', 'NOTE'
+				fixme = { pattern = "%f[%w]()FIXME()%f[%W]", group = "MiniHipatternsFixme" },
+				hack = { pattern = "%f[%w]()HACK()%f[%W]", group = "MiniHipatternsHack" },
+				todo = { pattern = "%f[%w]()TODO()%f[%W]", group = "MiniHipatternsTodo" },
+				note = { pattern = "%f[%w]()NOTE()%f[%W]", group = "MiniHipatternsNote" },
+
+				-- Highlight hex color strings (`#rrggbb`) using that color
+				hex_color = hipatterns.gen_highlighter.hex_color(),
+			},
+		})
+
+		colors.setup()
+
 		require("ts_context_commentstring").setup({
 			enable_autocmd = false,
 		})
@@ -27,45 +52,15 @@ return {
 		})
 		require("mini.bracketed").setup()
 		require("mini.diff").setup()
+		require("mini.jump").setup()
 		require("mini.jump2d").setup({
+			allowed_windows = { not_current = false },
 			mappings = {
-				start_jumping = "ss",
+				start_jumping = "",
 			},
 		})
-		require("mini.hues").setup({
-			background = "#F5F0E8",
-			foreground = "#261b0d",
-			n_hues = 8,
-			saturation = "mediumhigh",
-		})
+
 		require("mini.cursorword").setup()
-
-		local hipatterns = require("mini.hipatterns")
-		hipatterns.setup({
-			highlighters = {
-				-- Highlight standalone 'FIXME', 'HACK', 'TODO', 'NOTE'
-				fixme = { pattern = "%f[%w]()FIXME()%f[%W]", group = "MiniHipatternsFixme" },
-				hack = { pattern = "%f[%w]()HACK()%f[%W]", group = "MiniHipatternsHack" },
-				todo = { pattern = "%f[%w]()TODO()%f[%W]", group = "MiniHipatternsTodo" },
-				note = { pattern = "%f[%w]()NOTE()%f[%W]", group = "MiniHipatternsNote" },
-
-				-- Highlight hex color strings (`#rrggbb`) using that color
-				hex_color = hipatterns.gen_highlighter.hex_color(),
-			},
-		})
-		vim.api.nvim_set_hl(0, "MiniHipatternsTodo", {
-			bg = "#ffbb00",
-			fg = "#ffffff",
-		})
-		vim.api.nvim_set_hl(0, "MiniHipatternsNote", {
-			bg = "#1d1899",
-			fg = "#ffffff",
-		})
-		vim.api.nvim_set_hl(0, "MiniHipatternsFixme", {
-			bg = "#8c2d26",
-			fg = "#ffffff",
-		})
-
 		require("mini.icons").setup()
 		require("mini.indentscope").setup()
 		require("mini.statusline").setup()
@@ -76,6 +71,7 @@ return {
 			triggers = {
 				{ mode = "n", keys = "<leader>" },
 				{ mode = "i", keys = "<C-x>" },
+				{ mode = "v", keys = "<leader>"},
 			},
 			clues = {
 				{ mode = "n", keys = "<leader>b", desc = "Buffer" },
@@ -85,6 +81,7 @@ return {
 				{ mode = "n", keys = "<leader>o", desc = "Obsidian" },
 				{ mode = "n", keys = "<leader>w", desc = "Window" },
 				{ mode = "n", keys = "<leader>x", desc = "Trouble" },
+				{ mode = "n", keys = "<leader>s", desc = "Search/Jump" },
 
 				miniclue.gen_clues.builtin_completion(),
 				miniclue.gen_clues.g(),
@@ -135,15 +132,6 @@ return {
 		local smartpick = require("config.smartpick")
 		smartpick.setup()
 
-		vim.api.nvim_set_hl(0, "SmartPickPathMatch", {
-			fg = "#8c2d26",
-			bold = true,
-		})
-		vim.api.nvim_set_hl(0, "SmartPickBuffer", {
-			fg = "#1d1899",
-			italic = true,
-		})
-
 		local utils = require("config.utils")
 		utils.nmap_leader("ff", smartpick.picker, "Smart Pick")
 		utils.nmap_leader("fl", '<CMD>Pick buf_lines scope="current"<CR>', "Lines(buf)")
@@ -155,11 +143,15 @@ return {
 		utils.nmap_leader("e", "<CMD>lua MiniFiles.open(vim.api.nvim_buf_get_name(0), false)<CR>", "Explore(current)")
 		utils.nmap_leader("E", "<CMD>lua MiniFiles.open(nil, false)<CR>", "Explore(root)")
 		utils.nmap_leader("wz", "<CMD>lua MiniMisc.zoom()<CR>", "Zoom")
+    utils.nmap_leader("gd", "<CMD>lua MiniDiff.toggle_overlay()<CR>", "Git Diff")
 
 		vim.keymap.set("n", "gr", '<CMD>Pick lsp scope="references"<CR>', { desc = "References" })
 		vim.keymap.set("n", "gd", '<CMD>Pick lsp scope="definition"<CR>', { desc = "Definition" })
 		vim.keymap.set("n", "gD", '<CMD>Pick lsp scope="declaration"<CR>', { desc = "Declaration" })
 		vim.keymap.set("n", "gt", '<CMD>Pick lsp scope="type_definition"<CR>', { desc = "Type definition" })
 		vim.keymap.set("n", "gi", '<CMD>Pick lsp scope="implementation"<CR>', { desc = "Implementation" })
+
+		utils.nmap_leader("sw", "<CMD>lua MiniJump2d.start(MiniJump2d.builtin_opts.word_start)<CR>", "Jump Word")
+		utils.nmap_leader("sl", "<CMD>lua MiniJump2d.start(MiniJump2d.builtin_opts.line_start)<CR>", "Jump Word")
 	end,
 }

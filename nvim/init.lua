@@ -18,4 +18,4 @@ require("lazy").setup({
 	install = { colorscheme = { "base16" } },
 })
 
--- vim.cmd([[colorscheme base16]])
+require("config.scooter")
