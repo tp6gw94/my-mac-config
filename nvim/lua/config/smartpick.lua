@@ -427,15 +427,21 @@ function H.match_items(stritems, inds, query, picker_items)
         local meta = picker_items.items[text]
 
         -- Apply boosts (higher score is better for matchfuzzypos)
-        if meta and meta.type == 'buffer' then
-          score = score * 2 -- Double score for buffers
-        end
+        local is_buffer = meta and meta.type == 'buffer'
 
         -- Check filename match boost
         local filename = H.get_filename(text)
         local filename_result = vim.fn.matchfuzzypos({ filename }, query)
-        if #filename_result[1] > 0 then
-          score = score * 3 -- Triple score for filename matches
+        local is_filename_match = #filename_result[1] > 0
+
+        -- Buffer gets highest priority
+        if is_buffer then
+          score = score * 10 -- Buffers get 10x boost (highest priority)
+          if is_filename_match then
+            score = score * 1.5 -- Additional 1.5x if filename matches
+          end
+        elseif is_filename_match then
+          score = score * 3 -- Files with filename match get 3x boost
         end
 
         table.insert(scored_items, { idx = orig_idx, score = score })

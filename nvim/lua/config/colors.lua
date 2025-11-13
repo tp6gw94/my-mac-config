@@ -1,31 +1,30 @@
 -- Centralized color configuration
 local M = {}
 
--- Theme base colors
 M.theme = {
 	background = "#F5F0E8",
-	foreground = "#884499",
+	foreground = "#333333",
 }
 
 -- Semantic colors derived from theme
 M.colors = {
 	-- Status colors
-	add = "#2d8c26",      -- Green for additions
-	change = "#ffbb00",   -- Yellow for changes
-	delete = "#8c2d26",   -- Red for deletions
-	info = "#1d1899",     -- Blue for information
+	add = "#8DA101",
+	change = "#DFA000",
+	delete = "#F85552",
+	info = "#3A94C5",
 
 	-- Light backgrounds for overlays
-	add_bg = "#d4f0d4",
-	change_bg = "#fff5cc",
-	change_buf_bg = "#ffe8b3",
-	delete_bg = "#f0d4d4",
-	context_bg = "#f5ebe8",
-	context_buf_bg = "#f9f5ed",
+	add_bg = "#e8ecc0",
+	change_bg = "#ffd0b8",
+	change_buf_bg = "#d8ebe0",
+	delete_bg = "#ffd0b8",
+	context_bg = "#F5F0E8",
+	context_buf_bg = "#F5F0E8",
 
 	-- Text colors
 	white = "#ffffff",
-	gray = "#666666",
+	gray = "#727272",
 }
 
 -- Apply all highlight groups
@@ -61,15 +60,12 @@ function M.setup()
 	-- MiniDiff overlay highlights
 	vim.api.nvim_set_hl(0, "MiniDiffOverAdd", {
 		bg = M.colors.add_bg,
-    bold = true
 	})
 	vim.api.nvim_set_hl(0, "MiniDiffOverChange", {
 		bg = M.colors.change_bg,
-    bold = true
 	})
 	vim.api.nvim_set_hl(0, "MiniDiffOverChangeBuf", {
 		bg = M.colors.change_buf_bg,
-    bold = true
 	})
 	vim.api.nvim_set_hl(0, "MiniDiffOverContext", {
 		bg = M.colors.context_bg,
@@ -81,7 +77,7 @@ function M.setup()
 	})
 	vim.api.nvim_set_hl(0, "MiniDiffOverDelete", {
 		bg = M.colors.delete_bg,
-    bold = true
+		bold = true,
 	})
 
 	-- SmartPick highlights

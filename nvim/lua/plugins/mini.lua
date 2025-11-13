@@ -10,7 +10,8 @@ return {
 		require("mini.hues").setup({
 			background = colors.theme.background,
 			foreground = colors.theme.foreground,
-			n_hues = 4,
+			n_hues = 8,
+			-- Saturation. One of 'low', 'lowmedium', 'medium', 'mediumhigh', 'high'.
 			saturation = "lowmedium",
 		})
 
@@ -71,7 +72,7 @@ return {
 			triggers = {
 				{ mode = "n", keys = "<leader>" },
 				{ mode = "i", keys = "<C-x>" },
-				{ mode = "v", keys = "<leader>"},
+				{ mode = "v", keys = "<leader>" },
 			},
 			clues = {
 				{ mode = "n", keys = "<leader>b", desc = "Buffer" },
@@ -143,7 +144,7 @@ return {
 		utils.nmap_leader("e", "<CMD>lua MiniFiles.open(vim.api.nvim_buf_get_name(0), false)<CR>", "Explore(current)")
 		utils.nmap_leader("E", "<CMD>lua MiniFiles.open(nil, false)<CR>", "Explore(root)")
 		utils.nmap_leader("wz", "<CMD>lua MiniMisc.zoom()<CR>", "Zoom")
-    utils.nmap_leader("gd", "<CMD>lua MiniDiff.toggle_overlay()<CR>", "Git Diff")
+		utils.nmap_leader("gd", "<CMD>lua MiniDiff.toggle_overlay()<CR>", "Git Diff")
 
 		vim.keymap.set("n", "gr", '<CMD>Pick lsp scope="references"<CR>', { desc = "References" })
 		vim.keymap.set("n", "gd", '<CMD>Pick lsp scope="definition"<CR>', { desc = "Definition" })
