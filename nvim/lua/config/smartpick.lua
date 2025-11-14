@@ -122,6 +122,108 @@ function SmartPick.picker()
 
   local picker_items = { items = {} }
 
+  -- Custom mapping to delete current buffer with <C-d>
+  local delete_buffer = function()
+    local matches = MiniPick.get_picker_matches()
+    if not matches or not matches.current then
+      return
+    end
+
+    local current_item = matches.current
+    local item_meta = picker_items.items[H.get_item_text(current_item)]
+
+    -- Only delete if it's a buffer
+    if item_meta and item_meta.type == 'buffer' and item_meta.bufnr then
+      local bufnr = item_meta.bufnr
+      local picker_state = MiniPick.get_picker_state()
+      local is_current_buf = false
+
+      -- Check if it's the current buffer in the target window
+      if picker_state and picker_state.windows and picker_state.windows.target then
+        local target_bufnr = vim.api.nvim_win_get_buf(picker_state.windows.target)
+        is_current_buf = (bufnr == target_bufnr)
+      end
+
+      -- If it's the current buffer, switch to another buffer first
+      if is_current_buf then
+        -- Get list of valid buffers to switch to
+        local valid_bufs = vim.tbl_filter(function(b)
+          return b ~= bufnr
+            and vim.api.nvim_buf_is_valid(b)
+            and vim.bo[b].buflisted
+            and vim.bo[b].buftype == ''
+        end, vim.api.nvim_list_bufs())
+
+        -- Switch to another buffer or create new one
+        if #valid_bufs > 0 then
+          vim.api.nvim_win_set_buf(picker_state.windows.target, valid_bufs[1])
+        else
+          -- Create a new empty buffer if no other buffers exist
+          vim.api.nvim_win_call(picker_state.windows.target, function()
+            vim.cmd('enew')
+          end)
+        end
+      end
+
+      -- Delete the buffer (force delete to avoid "unsaved changes" prompt)
+      local success = pcall(vim.api.nvim_buf_delete, bufnr, { force = true })
+
+      if success then
+        -- Remove from picker_items metadata
+        local text = H.get_item_text(current_item)
+        picker_items.items[text] = nil
+
+        -- Stop and restart picker to refresh the list
+        vim.schedule(function()
+          MiniPick.stop()
+          vim.schedule(function()
+            SmartPick.picker()
+          end)
+        end)
+      end
+    end
+  end
+
+  -- Custom mapping to open directory with mini.files using <C-e>
+  local open_in_minifiles = function()
+    local matches = MiniPick.get_picker_matches()
+    if not matches or not matches.current then
+      return
+    end
+
+    local current_item = matches.current
+    local text = H.get_item_text(current_item)
+    local item_meta = picker_items.items[text]
+
+    -- Determine the path to open
+    local path_to_open
+    if item_meta and item_meta.is_file then
+      -- If it's a file or buffer with a file path, get its directory
+      if item_meta.type == 'buffer' and item_meta.bufnr then
+        local bufname = vim.api.nvim_buf_get_name(item_meta.bufnr)
+        if bufname ~= '' then
+          path_to_open = vim.fn.fnamemodify(bufname, ':h')
+        end
+      elseif item_meta.type == 'file' then
+        path_to_open = vim.fn.fnamemodify(text, ':h')
+      end
+    end
+
+    -- If we have a valid path, close picker and open mini.files
+    if path_to_open and vim.fn.isdirectory(path_to_open) == 1 then
+      MiniPick.stop()
+      vim.schedule(function()
+        -- Check if MiniFiles is available
+        local has_minifiles, minifiles = pcall(require, 'mini.files')
+        if has_minifiles then
+          minifiles.open(path_to_open)
+        else
+          vim.notify('mini.files is not available', vim.log.levels.WARN)
+        end
+      end)
+    end
+  end
+
   MiniPick.builtin.cli({
     command = {
       'sh',
@@ -141,6 +243,16 @@ function SmartPick.picker()
       match = function(stritems, inds, query)
         return H.match_items(stritems, inds, query, picker_items)
       end,
+    },
+    mappings = {
+      delete_buffer = {
+        char = '<C-d>',
+        func = delete_buffer,
+      },
+      open_in_minifiles = {
+        char = '<C-e>',
+        func = open_in_minifiles,
+      },
     },
   })
 end

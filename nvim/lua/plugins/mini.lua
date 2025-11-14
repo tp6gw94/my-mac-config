@@ -12,7 +12,7 @@ return {
 			foreground = colors.theme.foreground,
 			n_hues = 8,
 			-- Saturation. One of 'low', 'lowmedium', 'medium', 'mediumhigh', 'high'.
-			saturation = "lowmedium",
+			saturation = "mediumhigh",
 		})
 
 		local hipatterns = require("mini.hipatterns")

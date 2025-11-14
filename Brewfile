@@ -1,6 +1,7 @@
 tap "felixkratz/formulae"
 tap "nikitabobko/tap"
 brew "fzf"
+brew "gh"
 brew "git-delta"
 brew "lazygit"
 brew "mise"

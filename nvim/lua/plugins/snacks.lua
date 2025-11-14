@@ -8,6 +8,7 @@ return {
 		bufdelete = { enabled = true },
 		debug = { enabled = true },
 		gitbrowse = { enabled = true },
+		gh = { enabled = true },
 		input = { enabled = true },
 		lazygit = { enabled = true },
 		notifier = { enabled = true },

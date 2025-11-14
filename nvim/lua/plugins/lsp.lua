@@ -86,19 +86,22 @@ return {
 		config = function(_, opts)
 			require("tiny-inline-diagnostic").setup(opts)
 			vim.diagnostic.config({ virtual_text = false }) -- Disable default virtual text
-
-			vim.api.nvim_set_hl(0, "TinyInlineDiagnosticVirtualTextError", { fg = "#8c2d26", italic = true })
-			vim.api.nvim_set_hl(0, "TinyInlineDiagnosticVirtualTextWarn", { fg = "#ffbb00", italic = true })
-			vim.api.nvim_set_hl(0, "TinyInlineDiagnosticVirtualTextInfo", { fg = "#1d1899", italic = true })
-			vim.api.nvim_set_hl(0, "TinyInlineDiagnosticVirtualTextHint", { fg = "#048a66", italic = true })
 		end,
 	},
+	-- TS
 	{
 		"windwp/nvim-ts-autotag",
 		config = function()
 			require("nvim-ts-autotag").setup()
 		end,
 	},
+	{
+		"dmmulroy/ts-error-translator.nvim",
+		config = function()
+			require("ts-error-translator").setup()
+		end,
+	},
+	-- kitty
 	{
 		"fladson/vim-kitty",
 		ft = "kitty",

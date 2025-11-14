@@ -3,22 +3,22 @@ local M = {}
 
 M.theme = {
 	background = "#F5F0E8",
-	foreground = "#333333",
+	foreground = "#000000",
 }
 
 -- Semantic colors derived from theme
 M.colors = {
 	-- Status colors
-	add = "#8DA101",
-	change = "#DFA000",
-	delete = "#F85552",
-	info = "#3A94C5",
+	add = "#228B22",
+	change = "#DAA520",
+	delete = "#DC143C",
+	info = "#4169E1",
 
 	-- Light backgrounds for overlays
-	add_bg = "#e8ecc0",
-	change_bg = "#ffd0b8",
-	change_buf_bg = "#d8ebe0",
-	delete_bg = "#ffd0b8",
+	add_bg = "#90EE90",
+	change_bg = "#FF8C00",
+	change_buf_bg = "#87CEEB",
+	delete_bg = "#CD5C5C",
 	context_bg = "#F5F0E8",
 	context_buf_bg = "#F5F0E8",
 
@@ -82,13 +82,19 @@ function M.setup()
 
 	-- SmartPick highlights
 	vim.api.nvim_set_hl(0, "SmartPickPathMatch", {
-		fg = M.colors.delete,
+		fg = M.colors.add,
 		bold = true,
 	})
 	vim.api.nvim_set_hl(0, "SmartPickBuffer", {
-		fg = M.colors.info,
+    fg = M.colors.info,
 		italic = true,
 	})
 end
+
+-- TinyInlineDiagnostic
+vim.api.nvim_set_hl(0, "TinyInlineDiagnosticVirtualTextError", { bg = M.colors.delete, italic = true })
+vim.api.nvim_set_hl(0, "TinyInlineDiagnosticVirtualTextWarn", { bg = M.colors.change, italic = true })
+vim.api.nvim_set_hl(0, "TinyInlineDiagnosticVirtualTextInfo", { bg = M.colors.info, italic = true })
+vim.api.nvim_set_hl(0, "TinyInlineDiagnosticVirtualTextHint", { bg = M.colors.add_bg, italic = true })
 
 return M
