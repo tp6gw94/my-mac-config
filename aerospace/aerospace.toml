@@ -201,3 +201,52 @@ shift-right = [
 ]
 
 tab = ['workspace-back-and-forth', 'mode main']
+
+[[on-window-detected]]
+  if.workspace = '6'
+  check-further-callbacks = true
+  run = ['layout floating']
+
+[[on-window-detected]]
+  if.app-id = "com.apple.calculator"
+  run = ['layout floating']
+
+[[on-window-detected]]
+  if.app-id = "com.apple.iCal"
+  run = ['layout floating']
+
+[[on-window-detected]]
+  if.app-id = "com.apple.finder"
+  run = ['layout floating']
+
+[[on-window-detected]]
+  if.app-id = "com.fortinet.forticlient.macos.vpn"
+  run = ['layout floating']
+
+[[on-window-detected]]
+  if.app-id = "com.fortinet.FortiClient"
+  run = ['layout floating']
+
+[[on-window-detected]]
+  if.app-id = "cc.ffitch.shottr"
+  run = ['layout floating']
+
+[[on-window-detected]]
+  if.app-id = "com.microsoft.teams2"
+  run = ['move-node-to-workspace 4']
+
+[[on-window-detected]]
+  if.app-id = "md.obsidian"
+  run = ['move-node-to-workspace 5']
+
+[[on-window-detected]]
+  if.app-id = "com.codeweavers.CrossOver"
+  run = ['move-node-to-workspace 6']
+
+[[on-window-detected]]
+  if.app-id = "com.valvesoftware.steam"
+  run = ['move-node-to-workspace 6']
+
+[[on-window-detected]]
+  if.app-id = "com.valvesoftware.steam.helper"
+  run = ['move-node-to-workspace 6']
