@@ -8,6 +8,7 @@ vim.g.maplocalleader = " "
 vim.keymap.set("n", "<Esc>", "<cmd>nohl<cr>")
 vim.keymap.set("i", "jk", "<Esc>")
 vim.keymap.set("n", "U", "<C-r>", { noremap = true })
+vim.keymap.set("n", "<C-a>", "ggVG")
 
 -- Better navigation for wrapped lines
 vim.keymap.set({ "n", "x" }, "j", "v:count == 0 ? 'gj' : 'j'", { desc = "Down", expr = true, silent = true })
@@ -43,6 +44,7 @@ vim.keymap.set("n", "<leader>wd", "<C-W>c", { desc = "Delete Window", remap = tr
 
 -- LSP mappings
 vim.keymap.set("n", "<leader>ca", vim.lsp.buf.code_action, { desc = "Code Action" })
+vim.keymap.set("v", "<leader>ca", vim.lsp.buf.code_action, { desc = "Code Action" })
 vim.keymap.set("n", "<leader>cA", function()
 	vim.lsp.buf.code_action({ context = { only = { "source" } } })
 end, { desc = "Code Action(source)" })
@@ -50,6 +52,7 @@ vim.keymap.set("n", "<leader>cd", vim.diagnostic.open_float, { desc = "Line Dian
 vim.keymap.set("n", "<leader>cr", vim.lsp.buf.rename, { desc = "Reanem" })
 vim.keymap.set("n", "K", vim.lsp.buf.hover, { desc = "Hover" })
 vim.keymap.set("i", "<C-s>", vim.lsp.buf.signature_help, { desc = "Signature Help" })
+vim.keymap.set("n", "<leader>br", vim.lsp.buf.references, { desc = "Buffer reference" })
 
 -- Snacks mappings
 local utils = require("config.utils")

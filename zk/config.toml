@@ -1,0 +1,37 @@
+[notebook]
+dir = "~/vaults/personal"
+
+[note]
+language = "zh"
+default-title = "Untitled"
+filename = "{{id}}-{{title}}"
+template = "00 default.md"
+
+
+id-charset = "alphanum"
+id-length = 4
+id-case = "lower"
+
+[group.notes]
+paths = ["notes"]
+
+[group.daily]
+paths = ["daily"]
+[group.daily.note]
+filename = "{{format-date now}}"
+template = "01 daily.md"
+
+[group.work]
+paths = ["work"]
+
+[group.private]
+paths = ["private"]
+
+[group.tools]
+paths = ["tools"]
+
+[lsp.diagnostics]
+# Report titles of wiki-links as hints.
+wiki-title = "hint"
+# Warn for dead links between notes.
+dead-link = "error"

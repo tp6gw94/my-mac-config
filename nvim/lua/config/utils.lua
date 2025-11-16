@@ -6,4 +6,8 @@ M.nmap_leader = function(suffix, rhs, desc)
 	vim.keymap.set("n", "<Leader>" .. suffix, rhs, { desc = desc })
 end
 
+M.vmap_leader = function(suffix, rhs, desc)
+	vim.keymap.set("v", "<Leader>" .. suffix, rhs, { desc = desc })
+end
+
 return M

@@ -23,4 +23,6 @@
 !sketchybar/**
 !scooter
 !scooter/**
+!zk
+!zk/**
 zsh/.zsh_history
