@@ -19,8 +19,10 @@ export SUDO_EDITOR="nvim"
 export BAT_THEME="base16-256"
 export FZF_DEFAULT_OPTS='--color=bg+:#ffffff,fg+:#000000,hl+:#0066cc'
 export CARGO_TARGET_DIR="$HOME/cargo-global-target"
-export PATH="/opt/homebrew/bin:$PATH"
 export ZK_NOTEBOOK_DIR="$(realpath ~/vaults/personal)"
+
+path=(/opt/homebrew/bin $path)
+path=($HOME/.local/bin $path)
 
 function y() {
 	local tmp="$(mktemp -t "yazi-cwd.XXXXXX")" cwd
