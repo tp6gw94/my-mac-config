@@ -7,10 +7,12 @@ default-title = "Untitled"
 filename = "{{id}}-{{title}}"
 template = "00 default.md"
 
-
 id-charset = "alphanum"
 id-length = 4
 id-case = "lower"
+
+[format.markdown]
+link-format = "wiki"
 
 [group.notes]
 paths = ["notes"]
