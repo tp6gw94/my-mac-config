@@ -55,7 +55,7 @@ vim.o.splitbelow = true
 
 -- List chars
 vim.o.list = true
-vim.o.listchars = 'tab:·┈,trail:·,nbsp:␣'
+vim.o.listchars = 'trail:-,nbsp:+,tab:▏ '
 
 -- Live preview
 vim.o.inccommand = "split"

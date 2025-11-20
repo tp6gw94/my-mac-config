@@ -5,31 +5,21 @@ return {
 	dependencies = { "JoosepAlviste/nvim-ts-context-commentstring", "folke/trouble.nvim" },
 	lazy = false,
 	config = function()
-		local colors = require("config.colors")
+		vim.cmd.colorscheme("my-theme")
 
-		require("mini.hues").setup({
-			background = colors.theme.background,
-			foreground = colors.theme.foreground,
-			n_hues = 8,
-			-- Saturation. One of 'low', 'lowmedium', 'medium', 'mediumhigh', 'high'.
-			saturation = "mediumhigh",
-		})
+		require("mini.starter").setup()
 
 		local hipatterns = require("mini.hipatterns")
 		hipatterns.setup({
 			highlighters = {
-				-- Highlight standalone 'FIXME', 'HACK', 'TODO', 'NOTE'
 				fixme = { pattern = "%f[%w]()FIXME()%f[%W]", group = "MiniHipatternsFixme" },
 				hack = { pattern = "%f[%w]()HACK()%f[%W]", group = "MiniHipatternsHack" },
 				todo = { pattern = "%f[%w]()TODO()%f[%W]", group = "MiniHipatternsTodo" },
+				warning = { pattern = "%f[%w]()WARNING()%f[%W]", group = "MiniHipatternsTodo" },
 				note = { pattern = "%f[%w]()NOTE()%f[%W]", group = "MiniHipatternsNote" },
-
-				-- Highlight hex color strings (`#rrggbb`) using that color
 				hex_color = hipatterns.gen_highlighter.hex_color(),
 			},
 		})
-
-		colors.setup()
 
 		require("ts_context_commentstring").setup({
 			enable_autocmd = false,
@@ -132,6 +122,62 @@ return {
 		end
 
 		require("mini.extra").setup()
+
+		require("mini.visits").setup()
+
+		local map_vis = function(keys, call, desc)
+			local rhs = "<Cmd>lua MiniVisits." .. call .. "<CR>"
+			vim.keymap.set("n", "<Leader>" .. keys, rhs, { desc = desc })
+		end
+
+		map_vis("a", 'add_label("pin")', "Pin file")
+		map_vis("A", 'remove_label("pin")', "Unpin file")
+
+		vim.keymap.set("n", "<Leader><Space>", function()
+			MiniExtra.pickers.visit_paths({
+				filter = "pin",
+				cwd = vim.fn.getcwd(),
+			}, {
+				mappings = {
+					unpin = {
+						char = "<C-d>",
+						func = function()
+							local picker = MiniPick.get_picker_matches()
+							local current = picker and picker.current
+							if current then
+								MiniVisits.remove_label("pin", current, vim.fn.getcwd())
+								-- Refresh picker
+								local items = MiniVisits.list_paths(vim.fn.getcwd(), { filter = "pin" })
+								MiniPick.set_picker_items(items)
+							end
+						end,
+					},
+					clear = {
+						char = "<C-x>",
+						func = function()
+							MiniVisits.remove_label("pin", "", vim.fn.getcwd())
+
+							local items = MiniVisits.list_paths(vim.fn.getcwd(), { filter = "pin" })
+							MiniPick.set_picker_items(items)
+						end,
+					},
+				},
+			})
+		end, { desc = "Pick pinned" })
+
+		local sort_latest = MiniVisits.gen_sort.default({ recency_weight = 1 })
+		local iterate_pin = function(direction)
+			return function()
+				MiniVisits.iterate_paths(direction, vim.fn.getcwd(), {
+					filter = "pin",
+					sort = sort_latest,
+					wrap = true,
+				})
+			end
+		end
+
+		vim.keymap.set("n", "[p", iterate_pin("forward"), { desc = "Prev pinned" })
+		vim.keymap.set("n", "]p", iterate_pin("backward"), { desc = "Next pinned" })
 
 		local smartpick = require("config.smartpick")
 		smartpick.setup()

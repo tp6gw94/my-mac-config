@@ -53,6 +53,7 @@ return {
 			vim.lsp.config("cucumber_language_server", cucumber_ls_config)
 
 			vim.lsp.enable({
+        "bashls",
 				"lua_ls",
 				"pyright",
 				"vtsls",

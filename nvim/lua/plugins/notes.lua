@@ -85,10 +85,12 @@ return {
 					local search_opts = {
 						select = { "title", "path", "tags" },
 						sort = { "modified" },
+						matchStrategy = "re",
 					}
 
 					if pattern ~= "" then
 						search_opts.match = { pattern }
+            Snacks.debug(pattern)
 					end
 
 					-- Set items options with do_match = false to avoid re-triggering match
@@ -139,7 +141,7 @@ return {
 						-- Start with empty items to trigger match function
 						items = {},
 						name = "ZK Notes Search",
-						cwd = expanded_path,
+						cwd = notebook_path,
 
 						match = match_zk_live,
 
