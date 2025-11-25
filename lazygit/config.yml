@@ -1,4 +1,7 @@
 gui:
+  theme:
+    selectedLineBgColor:
+      - "#E3D794"
   language: "zh-TW"
   showIcons: true
 os:
