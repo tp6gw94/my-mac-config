@@ -212,11 +212,19 @@ tab = ['workspace-back-and-forth', 'mode main']
   run = ['layout floating']
 
 [[on-window-detected]]
+  if.app-id = "com.apple.Notes"
+  run = ['layout floating']
+
+[[on-window-detected]]
   if.app-id = "com.apple.iCal"
   run = ['layout floating']
 
 [[on-window-detected]]
   if.app-id = "com.apple.finder"
+  run = ['layout floating']
+
+[[on-window-detected]]
+  if.app-id = "com.apple.UserNotificationCenter"
   run = ['layout floating']
 
 [[on-window-detected]]
@@ -229,6 +237,26 @@ tab = ['workspace-back-and-forth', 'mode main']
 
 [[on-window-detected]]
   if.app-id = "cc.ffitch.shottr"
+  run = ['layout floating']
+
+[[on-window-detected]]
+  if.app-id = "com.apple.Preview"
+  run = ['layout floating']
+
+[[on-window-detected]]
+  if.app-id = "com.anthropic.claudefordesktop"
+  run = ['layout floating']
+
+[[on-window-detected]]
+  if.app-id = "com.apple.accessibility.universalAccessAuthWarn"
+  run = ['layout floating']
+
+[[on-window-detected]]
+  if.app-id = "com.goodsnooze.MacWhisper"
+  run = ['layout floating']
+
+[[on-window-detected]]
+  if.app-id = "com.bitwarden.desktop"
   run = ['layout floating']
 
 [[on-window-detected]]
