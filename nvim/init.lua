@@ -15,7 +15,7 @@ require("lazy").setup({
 	spec = {
 		{ import = "plugins" },
 	},
-	install = { colorscheme = { "my-theme" } },
+	install = { colorscheme = { "kanagawa" } },
 })
 
 require("config.scooter")

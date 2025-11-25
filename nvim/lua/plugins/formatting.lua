@@ -23,6 +23,7 @@ return {
 					json = { "biome", "prettierd", "prettier", sto_after_first = true },
 					jsonc = { "biome", "prettierd", "prettier", sto_after_first = true },
 					python = { "black", "isort" },
+					go = { "goimports", "gofumpt" },
 				},
 			})
 			vim.keymap.set("n", "<leader>cf", function(args)
@@ -33,7 +34,9 @@ return {
 	{
 		"mfussenegger/nvim-lint",
 		config = function()
-			require("lint").linters_by_ft = {}
+			require("lint").linters_by_ft = {
+				go = { "golangcilint" },
+			}
 
 			vim.api.nvim_create_autocmd({ "BufWritePost" }, {
 				callback = function()

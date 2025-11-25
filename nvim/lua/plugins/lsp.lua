@@ -53,7 +53,7 @@ return {
 			vim.lsp.config("cucumber_language_server", cucumber_ls_config)
 
 			vim.lsp.enable({
-        "bashls",
+				"bashls",
 				"lua_ls",
 				"pyright",
 				"vtsls",
@@ -67,26 +67,8 @@ return {
 				"cucumber_language_server",
 				"markdown_oxide",
 				"cspell_ls",
+				"gopls",
 			})
-		end,
-	},
-	{
-		"rachartier/tiny-inline-diagnostic.nvim",
-		event = "VeryLazy",
-		priority = 1000,
-		opts = {
-			preset = "simple",
-			options = {
-				show_source = {
-					enabled = true,
-					if_many = true,
-				},
-				multilines = true,
-			},
-		},
-		config = function(_, opts)
-			require("tiny-inline-diagnostic").setup(opts)
-			vim.diagnostic.config({ virtual_text = false }) -- Disable default virtual text
 		end,
 	},
 	-- TS

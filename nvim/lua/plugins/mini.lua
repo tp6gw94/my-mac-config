@@ -5,8 +5,6 @@ return {
 	dependencies = { "JoosepAlviste/nvim-ts-context-commentstring", "folke/trouble.nvim" },
 	lazy = false,
 	config = function()
-		vim.cmd.colorscheme("my-theme")
-
 		require("mini.starter").setup()
 
 		local hipatterns = require("mini.hipatterns")
@@ -15,7 +13,7 @@ return {
 				fixme = { pattern = "%f[%w]()FIXME()%f[%W]", group = "MiniHipatternsFixme" },
 				hack = { pattern = "%f[%w]()HACK()%f[%W]", group = "MiniHipatternsHack" },
 				todo = { pattern = "%f[%w]()TODO()%f[%W]", group = "MiniHipatternsTodo" },
-				warning = { pattern = "%f[%w]()WARNING()%f[%W]", group = "MiniHipatternsTodo" },
+				warning = { pattern = "%f[%w]()WARNING()%f[%W]", group = "MiniHipatternsWarning" },
 				note = { pattern = "%f[%w]()NOTE()%f[%W]", group = "MiniHipatternsNote" },
 				hex_color = hipatterns.gen_highlighter.hex_color(),
 			},

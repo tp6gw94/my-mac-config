@@ -6,6 +6,10 @@ return {
 	build = ":TSUpdate",
 	config = function()
 		require("nvim-treesitter.configs").setup({
+			auto_install = false,
+			ignore_install = {},
+			modules = {},
+			sync_install = false,
 			ensure_installed = {
 				"vue",
 				"tsx",
@@ -16,6 +20,10 @@ return {
 				"html",
 				"css",
 				"yaml",
+				"go",
+				"gomod",
+				"gowork",
+				"gosum",
 			},
 			highlight = { enable = true },
 		})
