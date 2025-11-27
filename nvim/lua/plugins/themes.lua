@@ -6,24 +6,40 @@ return {
 			require("kanagawa").setup({
 				theme = "lotus",
 				transparent = false,
+				colors = {
+					palette = {
+						fujiWhite = "#faf5d7",
+					},
+				},
 				overrides = function(colors)
 					local palette = colors.palette
 
 					return {
-						LineNr = {
-							bg = palette.lotusWhite3,
+						Normal = {
+							bg = palette.fujiWhite,
 						},
-						DiagnosticSignError = { bg = palette.lotusWhite3 },
-						DiagnosticSignWarn = { bg = palette.lotusWhite3 },
-						DiagnosticSignInfo = { bg = palette.lotusWhite3 },
-						DiagnosticSignHint = { bg = palette.lotusWhite3 },
+						LineNr = {
+							bg = palette.fujiWhite,
+						},
+						NormalFloat = {
+							bg = palette.fujiWhite,
+						},
+						FloatBorder = {
+							bg = "NONE",
+						},
+						SmartPickPathMatch = { fg = palette.waveRed, bold = true },
+						SmartPickBuffer = { fg = palette.waveRed, italic = true },
+						DiagnosticSignError = { bg = palette.fujiWhite },
+						DiagnosticSignWarn = { bg = palette.fujiWhite },
+						DiagnosticSignInfo = { bg = palette.fujiWhite },
+						DiagnosticSignHint = { bg = palette.fujiWhite },
 						-- popup menu
 						Pmenu = {
 							bg = "NONE",
 						},
 						PmenuSel = {
-							fg = palette.fujiWhite,
-							bg = palette.waveBlue1,
+							-- fg = palette.fujiWhite,
+							bg = palette.lotusWhite3,
 						},
 						BlinkCmpMenuBorder = {
 							bg = "NONE",
@@ -43,7 +59,7 @@ return {
 						},
 						MiniHipatternsWarning = {
 							bg = palette.waveRed,
-              fg = palette.lotusWhite3,
+							fg = palette.lotusWhite3,
 							bold = true,
 						},
 						MiniHipatternsNote = {
