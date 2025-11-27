@@ -208,7 +208,20 @@ tab = ['workspace-back-and-forth', 'mode main']
   run = ['layout floating']
 
 [[on-window-detected]]
+  if.app-id = "com.microsoft.autoupdate2"
+  run = ['layout floating', 'move-node-to-workspace 9']
+
+[[on-window-detected]]
+  if.app-id = "com.bitwarden.desktop"
+  run = ['layout floating']
+ 
+
+[[on-window-detected]]
   if.app-id = "com.apple.calculator"
+  run = ['layout floating']
+
+[[on-window-detected]]
+  if.app-id = "com.apple.AppStore"
   run = ['layout floating']
 
 [[on-window-detected]]
