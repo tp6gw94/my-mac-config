@@ -1,5 +1,3 @@
--- User commands configuration
-
 -- Copy relative path
 vim.api.nvim_create_user_command("CopyRelPath", function()
 	local path = vim.fn.expand("%:.")
