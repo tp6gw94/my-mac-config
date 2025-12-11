@@ -1,4 +1,4 @@
-local harpoon = require('harpoon')
+local harpoon = require("harpoon")
 -- stylua: ignore start
 vim.keymap.set("n", "1", function() harpoon:list():select(1) end)
 vim.keymap.set("n", "2", function() harpoon:list():select(2) end)

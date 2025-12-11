@@ -36,7 +36,13 @@ vim.api.nvim_create_autocmd("User", {
 		local file_path = event.data.from
 		local bufnr = vim.fn.bufnr(file_path)
 		if bufnr ~= -1 and vim.fn.buflisted(bufnr) == 1 then
-      Snacks.bufdelete.delete({buf = bufnr})
+			Snacks.bufdelete.delete({ buf = bufnr })
+
+			for i, v in ipairs(require("harpoon"):list():display()) do
+				if v == vim.fn.fnamemodify(file_path, ":.") then
+					require("harpoon"):list():remove_at(i)
+				end
+			end
 		end
 	end,
 })
