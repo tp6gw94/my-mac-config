@@ -1,6 +1,7 @@
 ---
 title: {{format-date now "%F"}}
-tags: [daily-notes]
+tags:
+  - daily-notes
 ---
 
 

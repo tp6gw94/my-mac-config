@@ -19,7 +19,7 @@ export SUDO_EDITOR="nvim"
 export BAT_THEME="base16-256"
 export FZF_DEFAULT_OPTS='--color=bg+:#ffffff,fg+:#000000,hl+:#0066cc'
 export CARGO_TARGET_DIR="$HOME/cargo-global-target"
-export ZK_NOTEBOOK_DIR="$(realpath ~/vaults/personal)"
+export ZK_NOTEBOOK_DIR="$(realpath ~/thoughts)"
 
 path=(/opt/homebrew/bin $path)
 path=($HOME/.local/bin $path)
