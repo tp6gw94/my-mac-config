@@ -138,6 +138,7 @@ vim.keymap.set("n", "[w", function () Snacks.words.jump(-vim.v.count1) end, { de
 -- stylua: ignore
 vim.keymap.set("n", "]w", function () Snacks.words.jump(vim.v.count1) end, { desc = "Next Word" })
 
+
 -- Notes
 nmap_leader("nnd", "<cmd>ZkNew {dir = 'daily'}<cr>", "New Daily Note")
 nmap_leader("nnn", "<cmd>ZkNew {dir = 'notes', title = vim.fn.input('Title: ')}<cr>", "New Note")
@@ -146,27 +147,28 @@ nmap_leader("nnw", "<cmd>ZkNew {dir = 'work', title = vim.fn.input('Title: ')}<c
 nmap_leader("no", "<Cmd>ZkNotes { sort = { 'modified' } }<CR>", "Open Note")
 nmap_leader("nt", "<Cmd>ZkTags<CR>", "Open Note Tags")
 
+
 -- Harpoon
 local harpoon = require("harpoon")
 -- stylua: ignore start
 nmap_leader("a", function() harpoon:list():add() end, "Add Harpoon")
 nmap_leader("<space>", function() harpoon.ui:toggle_quick_menu(harpoon:list()) end, "Harpoon Menu")
-nmap_leader("1", function() harpoon:list():select(1) end, harpoon:list():get(1).value)
-nmap_leader("2", function() harpoon:list():select(2) end, harpoon:list():get(2).value)
-nmap_leader("3", function() harpoon:list():select(3) end, harpoon:list():get(3).value)
-nmap_leader("4", function() harpoon:list():select(4) end, harpoon:list():get(4).value)
+nmap_leader("1", function() harpoon:list():select(1) end, (harpoon:list():get(1) or {}).value or 'none')
+nmap_leader("2", function() harpoon:list():select(2) end, (harpoon:list():get(2) or {}).value or 'none')
+nmap_leader("3", function() harpoon:list():select(3) end, (harpoon:list():get(3) or {}).value or 'none')
+nmap_leader("4", function() harpoon:list():select(4) end, (harpoon:list():get(4) or {}).value or 'none')
 -- stylua: ignore end
 harpoon:extend({
-  UI_CREATE = function(cx)
-    vim.keymap.set("n", "<C-v>", function()
-      harpoon.ui:select_menu_item({ vsplit = true })
-    end, { buffer = cx.bufnr })
+	UI_CREATE = function(cx)
+		vim.keymap.set("n", "<C-v>", function()
+			harpoon.ui:select_menu_item({ vsplit = true })
+		end, { buffer = cx.bufnr })
 
-    vim.keymap.set("n", "<C-s>", function()
-      harpoon.ui:select_menu_item({ split = true })
-    end, { buffer = cx.bufnr })
-  end,
+		vim.keymap.set("n", "<C-s>", function()
+			harpoon.ui:select_menu_item({ split = true })
+		end, { buffer = cx.bufnr })
+	end,
 })
-nmap_leader("ht", function ()
-  Snacks.debug(harpoon:list():display())
+nmap_leader("ht", function()
+	Snacks.debug(harpoon:list():display())
 end)

@@ -70,6 +70,7 @@ require("mini.comment").setup({
 
 require("mini.bracketed").setup({
 	file = { suffix = "" },
+	window = { suffix = "" },
 	oldfile = { suffix = "" },
 	quickfix = { suffix = "" },
 	undo = { suffix = "" },
