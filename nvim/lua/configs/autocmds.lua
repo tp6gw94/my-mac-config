@@ -1,7 +1,19 @@
 vim.api.nvim_create_autocmd("User", {
 	pattern = "MiniFilesActionRename",
 	callback = function(event)
-		Snacks.rename.on_rename_file(event.data.from, event.data.to)
+		local from, to = event.data.from, event.data.to
+		Snacks.rename.on_rename_file(from, to)
+
+		local harpoon = require("harpoon")
+		for i, v in ipairs(harpoon:list():display()) do
+			if v == vim.fn.fnamemodify(from, ":.") then
+				local item = harpoon:list():get(i)
+				harpoon:list():replace_at(i, {
+					value = vim.fn.fnamemodify(to, ":."),
+					context = item and item.context or { row = 1, col = 0 },
+				})
+			end
+		end
 	end,
 })
 
