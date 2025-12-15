@@ -1,36 +1,44 @@
 #!/usr/bin/env bash
 
 # This script refreshes the aerospace workspace layout in sketchybar
-# It only removes and re-adds separators, and reorders items efficiently
+# It groups workspaces by monitor and adds separators between different monitors
 
-# Get current workspace to monitor mapping
+# Get workspace to monitor mapping
 workspace_list=$(mktemp)
 aerospace list-workspaces --monitor all --format "%{workspace} %{monitor-name}" > "$workspace_list"
 
+# Get monitor list in order
+monitor_list=$(mktemp)
+aerospace list-monitors --format "%{monitor-name}" > "$monitor_list"
+
 # Remove all existing separators
-for sid in {1..9}; do
+for sid in {0..9}; do
     sketchybar --remove monitor_sep_$sid 2>/dev/null
 done
 
 # Check if we have multiple monitors
-monitor_count=$(aerospace list-monitors | wc -l | tr -d ' ')
+monitor_count=$(wc -l < "$monitor_list" | tr -d ' ')
 
 if [ "$monitor_count" -gt 1 ]; then
-    # Multi-monitor setup: re-add separators in the correct positions
-    prev_monitor=""
     order=""
+    first_monitor=true
+    first_item=true
 
-    while IFS=' ' read -r sid monitor_name; do
-        # Only handle workspaces 1-9
-        if [[ $sid -gt 9 ]]; then
+    # Iterate through monitors in order
+    while IFS= read -r monitor_name; do
+        # Find all workspaces (0-9) for this monitor and sort them
+        workspaces=$(grep -F "$monitor_name" "$workspace_list" | awk '{print $1}' | grep -E '^[0-9]$' | sort -n)
+
+        if [ -z "$workspaces" ]; then
             continue
         fi
 
-        # Add separator between different monitors
-        if [[ -n "$prev_monitor" && "$monitor_name" != "$prev_monitor" ]]; then
-            # Add separator before this workspace
-            sketchybar --add item "monitor_sep_${sid}" left \
-                --set "monitor_sep_${sid}" \
+        # Add separator before this monitor's workspaces (except for first monitor)
+        if [ "$first_monitor" = false ]; then
+            # Use the first workspace ID of this monitor for the separator name
+            first_ws=$(echo "$workspaces" | head -1)
+            sketchybar --add item "monitor_sep_${first_ws}" left \
+                --set "monitor_sep_${first_ws}" \
                 icon="│" \
                 label.drawing=off \
                 icon.color=0x80ffffff \
@@ -38,21 +46,29 @@ if [ "$monitor_count" -gt 1 ]; then
                 icon.padding_right=4 \
                 background.drawing=off
 
-            order="$order monitor_sep_${sid}"
+            order="${order} monitor_sep_${first_ws}"
         fi
 
-        order="$order space.$sid"
-        prev_monitor="$monitor_name"
-    done < "$workspace_list"
+        # Add all workspaces for this monitor
+        for ws in $workspaces; do
+            if [ "$first_item" = true ]; then
+                order="space.$ws"
+                first_item=false
+            else
+                order="${order} space.$ws"
+            fi
+        done
+
+        first_monitor=false
+    done < "$monitor_list"
 
     # Reorder all workspace items in one go
-    # This moves items efficiently without recreating them
     if [[ -n "$order" ]]; then
         sketchybar --reorder $order 2>/dev/null
     fi
 fi
 
-rm "$workspace_list"
+rm "$workspace_list" "$monitor_list"
 
 # Trigger a refresh of all workspace states
 sketchybar --trigger aerospace_workspace_change

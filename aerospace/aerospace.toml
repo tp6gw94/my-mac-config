@@ -135,6 +135,7 @@ alt-ctrl-cmd-6 = ['workspace 6']
 alt-ctrl-cmd-7 = ['workspace 7']
 alt-ctrl-cmd-8 = ['workspace 8']
 alt-ctrl-cmd-9 = ['workspace 9']
+alt-ctrl-cmd-0 = ['workspace 0']
 
 alt-ctrl-cmd-shift-1 = ['move-node-to-workspace 1 --focus-follows-window']
 alt-ctrl-cmd-shift-2 = ['move-node-to-workspace 2 --focus-follows-window']
@@ -145,6 +146,7 @@ alt-ctrl-cmd-shift-6 = ['move-node-to-workspace 6 --focus-follows-window']
 alt-ctrl-cmd-shift-7 = ['move-node-to-workspace 7 --focus-follows-window']
 alt-ctrl-cmd-shift-8 = ['move-node-to-workspace 8 --focus-follows-window']
 alt-ctrl-cmd-shift-9 = ['move-node-to-workspace 9 --focus-follows-window']
+alt-ctrl-cmd-shift-0 = ['move-node-to-workspace 0 --focus-follows-window']
 
 alt-ctrl-cmd-shift-tab = [
     'move-workspace-to-monitor --wrap-around next',
@@ -163,9 +165,10 @@ backspace = ['close-all-windows-but-current', 'mode main']
 #s = ['layout sticky tiling', 'mode main']
 
 # See: https://nikitabobko.github.io/AeroSpace/commands#layout
-t = ['layout tiles horizontal vertical', 'mode main']
-a = ['layout accordion horizontal vertical', 'mode main']
-z = ["exec-and-forget brew services restart sketchybar"]
+a = ['layout h_accordion tiles', 'mode main']
+s = ['layout v_tiles', 'mode main']
+v = ['layout h_tiles', 'mode main']
+z = ["exec-and-forget brew services restart sketchybar", 'mode main']
 
 alt-h = ['join-with left', 'mode main']
 alt-j = ['join-with down', 'mode main']
@@ -203,7 +206,12 @@ shift-right = [
 tab = ['workspace-back-and-forth', 'mode main']
 
 [[on-window-detected]]
-  if.workspace = '6'
+  if.workspace = '9'
+  check-further-callbacks = true
+  run = ['layout floating']
+
+[[on-window-detected]]
+  if.workspace = '0'
   check-further-callbacks = true
   run = ['layout floating']
 
@@ -214,7 +222,14 @@ tab = ['workspace-back-and-forth', 'mode main']
 [[on-window-detected]]
   if.app-id = "com.bitwarden.desktop"
   run = ['layout floating']
- 
+
+[[on-window-detected]]
+  if.app-id = "com.apple.script.id.MacYTDL"
+  run = ['layout floating']
+
+[[on-window-detected]]
+  if.app-name-regex-substring = "osascript"
+  run = ['layout floating']
 
 [[on-window-detected]]
   if.app-id = "com.apple.calculator"
@@ -281,13 +296,33 @@ tab = ['workspace-back-and-forth', 'mode main']
   run = ['move-node-to-workspace 5']
 
 [[on-window-detected]]
+  if.app-id = "org.videolan.vlc"
+  run = ['move-node-to-workspace 9']
+
+[[on-window-detected]]
+  if.app-id = "com.spotify.client"
+  run = ['move-node-to-workspace 9']
+
+[[on-window-detected]]
   if.app-id = "com.codeweavers.CrossOver"
-  run = ['move-node-to-workspace 6']
+  run = ['move-node-to-workspace 0']
+
+[[on-window-detected]]
+  if.app-id = "com.riotgames.RiotGames.RiotClient"
+  run = ['move-node-to-workspace 0']
+
+[[on-window-detected]]
+  if.app-id = "com.riotgames.LeagueofLegends.LeagueClient"
+  run = ['move-node-to-workspace 0']
+
+[[on-window-detected]]
+  if.app-id = "com.riotgames.LeagueofLegends.GameClient"
+  run = ['move-node-to-workspace 0']
 
 [[on-window-detected]]
   if.app-id = "com.valvesoftware.steam"
-  run = ['move-node-to-workspace 6']
+  run = ['move-node-to-workspace 0']
 
 [[on-window-detected]]
   if.app-id = "com.valvesoftware.steam.helper"
-  run = ['move-node-to-workspace 6']
+  run = ['move-node-to-workspace 0']
