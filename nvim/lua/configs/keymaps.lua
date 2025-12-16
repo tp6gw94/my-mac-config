@@ -138,7 +138,6 @@ vim.keymap.set("n", "[w", function () Snacks.words.jump(-vim.v.count1) end, { de
 -- stylua: ignore
 vim.keymap.set("n", "]w", function () Snacks.words.jump(vim.v.count1) end, { desc = "Next Word" })
 
-
 -- Notes
 nmap_leader("nnd", "<cmd>ZkNew {dir = 'daily'}<cr>", "New Daily Note")
 nmap_leader("nnn", "<cmd>ZkNew {dir = 'notes', title = vim.fn.input('Title: ')}<cr>", "New Note")
@@ -147,18 +146,37 @@ nmap_leader("nnw", "<cmd>ZkNew {dir = 'work', title = vim.fn.input('Title: ')}<c
 nmap_leader("no", "<Cmd>ZkNotes { sort = { 'modified' } }<CR>", "Open Note")
 nmap_leader("nt", "<Cmd>ZkTags<CR>", "Open Note Tags")
 
-
 -- Harpoon
 local harpoon = require("harpoon")
--- stylua: ignore start
-nmap_leader("a", function() harpoon:list():add() end, "Add Harpoon")
+local list = harpoon:list()
+local get_harpoon_item_name = function(idx)
+	return (list:get(idx) or {}).value or "none"
+end
+
+-- 動態更新 harpoon keymap descriptions
+local update_harpoon_descriptions = function()
+	local miniclue = require("mini.clue")
+	for i = 1, 6 do
+		local desc = (list:get(i) or {}).value or "none"
+		miniclue.set_mapping_desc("n", "<leader>" .. i, desc)
+	end
+end
+
+-- stylua: ignore
+nmap_leader("a", function() list:add() end, "Add Harpoon")
+for i = 1, 9 do
+  -- stylua: ignore
+	nmap_leader(tostring(i), function() list:select(i) end, get_harpoon_item_name(i))
+end
+-- stylua: ignore
 nmap_leader("<space>", function() harpoon.ui:toggle_quick_menu(harpoon:list()) end, "Harpoon Menu")
-nmap_leader("1", function() harpoon:list():select(1) end, (harpoon:list():get(1) or {}).value or 'none')
-nmap_leader("2", function() harpoon:list():select(2) end, (harpoon:list():get(2) or {}).value or 'none')
-nmap_leader("3", function() harpoon:list():select(3) end, (harpoon:list():get(3) or {}).value or 'none')
-nmap_leader("4", function() harpoon:list():select(4) end, (harpoon:list():get(4) or {}).value or 'none')
--- stylua: ignore end
+
+-- 監聽 harpoon list 變化事件並動態更新 mini.clue descriptions
 harpoon:extend({
+	ADD = update_harpoon_descriptions,
+	REMOVE = update_harpoon_descriptions,
+	REPLACE = update_harpoon_descriptions,
+	LIST_CHANGE = update_harpoon_descriptions,
 	UI_CREATE = function(cx)
 		vim.keymap.set("n", "<C-v>", function()
 			harpoon.ui:select_menu_item({ vsplit = true })
@@ -169,6 +187,3 @@ harpoon:extend({
 		end, { buffer = cx.bufnr })
 	end,
 })
-nmap_leader("ht", function()
-	Snacks.debug(harpoon:list():display())
-end)
