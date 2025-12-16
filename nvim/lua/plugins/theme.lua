@@ -3,7 +3,7 @@ require("kanagawa").setup({
 	transparent = false,
 	colors = {
 		palette = {
-			fujiWhite = "#faf5d7",
+			fujiWhite = "#FFFBEB",
 		},
 	},
 	overrides = function(colors)
