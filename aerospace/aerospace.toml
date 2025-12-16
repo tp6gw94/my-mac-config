@@ -9,12 +9,15 @@ after-login-command = []
 # You can use it to add commands that run after AeroSpace startup.
 # 'after-startup-command' is run after 'after-login-command'
 # Available commands : https://nikitabobko.github.io/AeroSpace/commands
-after-startup-command = ['exec-and-forget sketchybar']
+# after-startup-command = ['exec-and-forget sketchybar']
+after-startup-command = []
 
 # Notify Sketchybar about workspace change
-exec-on-workspace-change = ['/bin/bash', '-c',
-    'sketchybar --trigger aerospace_workspace_change AEROSPACE_FOCUSED_WORKSPACE=$AEROSPACE_FOCUSED_WORKSPACE AEROSPACE_PREV_WORKSPACE=$AEROSPACE_PREV_WORKSPACE'
-]
+# exec-on-workspace-change = ['/bin/bash', '-c',
+#     'sketchybar --trigger aerospace_workspace_change AEROSPACE_FOCUSED_WORKSPACE=$AEROSPACE_FOCUSED_WORKSPACE AEROSPACE_PREV_WORKSPACE=$AEROSPACE_PREV_WORKSPACE'
+# ]
+
+exec-on-workspace-change = []
 
 # Start AeroSpace at login
 start-at-login = true
@@ -66,7 +69,7 @@ preset = 'qwerty'
 inner.horizontal = 10
 inner.vertical = 10
 outer.left = 10
-outer.bottom = 30
+outer.bottom = 10
 outer.top = 10
 outer.right = 10
 
@@ -148,6 +151,9 @@ alt-ctrl-cmd-shift-8 = ['move-node-to-workspace 8 --focus-follows-window']
 alt-ctrl-cmd-shift-9 = ['move-node-to-workspace 9 --focus-follows-window']
 alt-ctrl-cmd-shift-0 = ['move-node-to-workspace 0 --focus-follows-window']
 
+alt-ctrl-cmd-v = ['layout h_tiles', 'mode main']
+alt-ctrl-cmd-s = ['layout v_tiles', 'mode main']
+
 alt-ctrl-cmd-shift-tab = [
     'move-workspace-to-monitor --wrap-around next',
     'exec-and-forget sketchybar --trigger aerospace_refresh_layout'
@@ -165,9 +171,7 @@ backspace = ['close-all-windows-but-current', 'mode main']
 #s = ['layout sticky tiling', 'mode main']
 
 # See: https://nikitabobko.github.io/AeroSpace/commands#layout
-a = ['layout h_accordion tiles', 'mode main']
-s = ['layout v_tiles', 'mode main']
-v = ['layout h_tiles', 'mode main']
+a = ['layout h_accordion h_tiles', 'mode main']
 z = ["exec-and-forget brew services restart sketchybar", 'mode main']
 
 alt-h = ['join-with left', 'mode main']
