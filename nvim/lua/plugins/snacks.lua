@@ -22,3 +22,4 @@ require("snacks").setup({
 })
 
 Snacks.indent.enable()
+vim.ui.select = Snacks.picker.select
