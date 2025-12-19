@@ -113,8 +113,8 @@ alt-ctrl-cmd-j = 'focus down --boundaries-action wrap-around-the-workspace'
 alt-ctrl-cmd-k = 'focus up --boundaries-action wrap-around-the-workspace'
 alt-ctrl-cmd-l = 'focus right --boundaries-action wrap-around-the-workspace'
 
-alt-ctrl-cmd-shift-rightSquareBracket = 'focus-monitor next --wrap-around'
-alt-ctrl-cmd-shift-leftSquareBracket = 'focus-monitor prev --wrap-around'
+alt-ctrl-cmd-rightSquareBracket = 'focus-monitor next --wrap-around'
+alt-ctrl-cmd-leftSquareBracket = 'focus-monitor prev --wrap-around'
 
 alt-ctrl-cmd-enter = 'fullscreen'
 alt-ctrl-cmd-f = [
@@ -129,6 +129,7 @@ alt-ctrl-cmd-equal = 'resize smart +50'
 # See: https://nikitabobko.github.io/AeroSpace/commands#mode
 cmd-ctrl-alt-a = 'mode service'
 
+alt-ctrl-cmd-backtick = ['workspace-back-and-forth']
 alt-ctrl-cmd-1 = ['workspace 1']
 alt-ctrl-cmd-2 = ['workspace 2']
 alt-ctrl-cmd-3 = ['workspace 3']
@@ -140,24 +141,10 @@ alt-ctrl-cmd-8 = ['workspace 8']
 alt-ctrl-cmd-9 = ['workspace 9']
 alt-ctrl-cmd-0 = ['workspace 0']
 
-alt-ctrl-cmd-shift-1 = ['move-node-to-workspace 1 --focus-follows-window']
-alt-ctrl-cmd-shift-2 = ['move-node-to-workspace 2 --focus-follows-window']
-alt-ctrl-cmd-shift-3 = ['move-node-to-workspace 3 --focus-follows-window']
-alt-ctrl-cmd-shift-4 = ['move-node-to-workspace 4 --focus-follows-window']
-alt-ctrl-cmd-shift-5 = ['move-node-to-workspace 5 --focus-follows-window']
-alt-ctrl-cmd-shift-6 = ['move-node-to-workspace 6 --focus-follows-window']
-alt-ctrl-cmd-shift-7 = ['move-node-to-workspace 7 --focus-follows-window']
-alt-ctrl-cmd-shift-8 = ['move-node-to-workspace 8 --focus-follows-window']
-alt-ctrl-cmd-shift-9 = ['move-node-to-workspace 9 --focus-follows-window']
-alt-ctrl-cmd-shift-0 = ['move-node-to-workspace 0 --focus-follows-window']
-
 alt-ctrl-cmd-v = ['layout h_tiles', 'mode main']
 alt-ctrl-cmd-s = ['layout v_tiles', 'mode main']
 
-alt-ctrl-cmd-shift-tab = [
-    'move-workspace-to-monitor --wrap-around next',
-    'exec-and-forget sketchybar --trigger aerospace_refresh_layout'
-]
+alt-ctrl-cmd-shift-tab = ['move-workspace-to-monitor --wrap-around next']
 
 # 'service' binding mode declaration.
 # See: https://nikitabobko.github.io/AeroSpace/guide#binding-modes
@@ -167,12 +154,23 @@ esc = ['reload-config', 'mode main']
 r = ['flatten-workspace-tree', 'mode main']                # reset layout
 backspace = ['close-all-windows-but-current', 'mode main']
 
+alt-ctrl-cmd-1 = ['move-node-to-workspace 1 --focus-follows-window']
+alt-ctrl-cmd-2 = ['move-node-to-workspace 2 --focus-follows-window']
+alt-ctrl-cmd-3 = ['move-node-to-workspace 3 --focus-follows-window']
+alt-ctrl-cmd-4 = ['move-node-to-workspace 4 --focus-follows-window']
+alt-ctrl-cmd-5 = ['move-node-to-workspace 5 --focus-follows-window']
+alt-ctrl-cmd-6 = ['move-node-to-workspace 6 --focus-follows-window']
+alt-ctrl-cmd-7 = ['move-node-to-workspace 7 --focus-follows-window']
+alt-ctrl-cmd-8 = ['move-node-to-workspace 8 --focus-follows-window']
+alt-ctrl-cmd-9 = ['move-node-to-workspace 9 --focus-follows-window']
+alt-ctrl-cmd-0 = ['move-node-to-workspace 0 --focus-follows-window']
+
 # sticky is not yet supported https://github.com/nikitabobko/AeroSpace/issues/2
 #s = ['layout sticky tiling', 'mode main']
 
 # See: https://nikitabobko.github.io/AeroSpace/commands#layout
 a = ['layout h_accordion h_tiles', 'mode main']
-z = ["exec-and-forget brew services restart sketchybar", 'mode main']
+# z = ["exec-and-forget brew services restart sketchybar", 'mode main']
 
 alt-h = ['join-with left', 'mode main']
 alt-j = ['join-with down', 'mode main']
@@ -186,26 +184,10 @@ k = ['move up']
 l = ['move right']
 
 
-shift-left = [
-	'move-workspace-to-monitor left --wrap-around',
-	'exec-and-forget sketchybar --trigger aerospace_refresh_layout',
-	'mode main',
-]
-shift-down = [
-	'move-workspace-to-monitor down --wrap-around',
-	'exec-and-forget sketchybar --trigger aerospace_refresh_layout',
-	'mode main',
-]
-shift-up = [
-	'move-workspace-to-monitor up --wrap-around',
-	'exec-and-forget sketchybar --trigger aerospace_refresh_layout',
-	'mode main',
-]
-shift-right = [
-	'move-workspace-to-monitor right --wrap-around',
-	'exec-and-forget sketchybar --trigger aerospace_refresh_layout',
-	'mode main',
-]
+shift-left = ['move-workspace-to-monitor left --wrap-around', 'mode main']
+shift-down = ['move-workspace-to-monitor down --wrap-around', 'mode main']
+shift-up = ['move-workspace-to-monitor up --wrap-around', 'mode main']
+shift-right = ['move-workspace-to-monitor right --wrap-around', 'mode main']
 
 tab = ['workspace-back-and-forth', 'mode main']
 
@@ -285,6 +267,10 @@ tab = ['workspace-back-and-forth', 'mode main']
 
 [[on-window-detected]]
   if.app-id = "com.goodsnooze.MacWhisper"
+  run = ['layout floating']
+
+[[on-window-detected]]
+  if.app-id = "ch.protonvpn.mac"
   run = ['layout floating']
 
 [[on-window-detected]]
