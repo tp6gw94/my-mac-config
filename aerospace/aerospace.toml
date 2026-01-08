@@ -78,7 +78,7 @@ outer.right = 10
 # 'main' binding mode must be always presented
 # Fallback value (if you omit the key): mode.main.binding = {}
 [mode.main.binding]
-cmd-h = []     # Disable "hide application"
+#cmd-h = []     # Disable "hide application"
 cmd-alt-h = [] # Disable "hide others"
 # All possible keys:
 # - Letters.        a, b, c, ..., z
@@ -113,10 +113,15 @@ alt-ctrl-cmd-j = 'focus down --boundaries-action wrap-around-the-workspace'
 alt-ctrl-cmd-k = 'focus up --boundaries-action wrap-around-the-workspace'
 alt-ctrl-cmd-l = 'focus right --boundaries-action wrap-around-the-workspace'
 
+alt-ctrl-cmd-shift-h = ['join-with left', 'mode main']
+alt-ctrl-cmd-shift-j = ['join-with down', 'mode main']
+alt-ctrl-cmd-shift-k = ['join-with up', 'mode main']
+alt-ctrl-cmd-shift-l = ['join-with right', 'mode main']
+
 alt-ctrl-cmd-rightSquareBracket = 'focus-monitor next --wrap-around'
 alt-ctrl-cmd-leftSquareBracket = 'focus-monitor prev --wrap-around'
 
-alt-ctrl-cmd-enter = 'fullscreen'
+# alt-ctrl-cmd-enter = 'fullscreen'
 alt-ctrl-cmd-f = [
 	'layout floating tiling',
 	'mode main',
@@ -141,8 +146,6 @@ alt-ctrl-cmd-8 = ['workspace 8']
 alt-ctrl-cmd-9 = ['workspace 9']
 alt-ctrl-cmd-0 = ['workspace 0']
 
-alt-ctrl-cmd-v = ['layout h_tiles', 'mode main']
-alt-ctrl-cmd-s = ['layout v_tiles', 'mode main']
 
 alt-ctrl-cmd-shift-tab = ['move-workspace-to-monitor --wrap-around next']
 
@@ -154,35 +157,33 @@ esc = ['reload-config', 'mode main']
 r = ['flatten-workspace-tree', 'mode main']                # reset layout
 backspace = ['close-all-windows-but-current', 'mode main']
 
-alt-ctrl-cmd-1 = ['move-node-to-workspace 1 --focus-follows-window']
-alt-ctrl-cmd-2 = ['move-node-to-workspace 2 --focus-follows-window']
-alt-ctrl-cmd-3 = ['move-node-to-workspace 3 --focus-follows-window']
-alt-ctrl-cmd-4 = ['move-node-to-workspace 4 --focus-follows-window']
-alt-ctrl-cmd-5 = ['move-node-to-workspace 5 --focus-follows-window']
-alt-ctrl-cmd-6 = ['move-node-to-workspace 6 --focus-follows-window']
-alt-ctrl-cmd-7 = ['move-node-to-workspace 7 --focus-follows-window']
-alt-ctrl-cmd-8 = ['move-node-to-workspace 8 --focus-follows-window']
-alt-ctrl-cmd-9 = ['move-node-to-workspace 9 --focus-follows-window']
-alt-ctrl-cmd-0 = ['move-node-to-workspace 0 --focus-follows-window']
+1 = ['move-node-to-workspace 1 --focus-follows-window', 'mode main']
+2 = ['move-node-to-workspace 2 --focus-follows-window', 'mode main']
+3 = ['move-node-to-workspace 3 --focus-follows-window', 'mode main']
+4 = ['move-node-to-workspace 4 --focus-follows-window', 'mode main']
+5 = ['move-node-to-workspace 5 --focus-follows-window', 'mode main']
+6 = ['move-node-to-workspace 6 --focus-follows-window', 'mode main']
+7 = ['move-node-to-workspace 7 --focus-follows-window', 'mode main']
+8 = ['move-node-to-workspace 8 --focus-follows-window', 'mode main']
+9 = ['move-node-to-workspace 9 --focus-follows-window', 'mode main']
+0 = ['move-node-to-workspace 0 --focus-follows-window', 'mode main']
 
 # sticky is not yet supported https://github.com/nikitabobko/AeroSpace/issues/2
 #s = ['layout sticky tiling', 'mode main']
 
 # See: https://nikitabobko.github.io/AeroSpace/commands#layout
-a = ['layout h_accordion h_tiles', 'mode main']
 # z = ["exec-and-forget brew services restart sketchybar", 'mode main']
 
-alt-h = ['join-with left', 'mode main']
-alt-j = ['join-with down', 'mode main']
-alt-k = ['join-with up', 'mode main']
-alt-l = ['join-with right', 'mode main']
-
 # See: https://nikitabobko.github.io/AeroSpace/commands#move
-h = ['move left']
-j = ['move down']
-k = ['move up']
-l = ['move right']
+h = ['move left', 'mode main']
+j = ['move down', 'mode main']
+k = ['move up', 'mode main']
+l = ['move right', 'mode main']
 
+a = ['layout accordion tiles', 'mode main']
+v = ['layout vertical', 'mode main']
+s = ['layout horizontal', 'mode main']
+z = ["fullscreen", 'mode main']
 
 shift-left = ['move-workspace-to-monitor left --wrap-around', 'mode main']
 shift-down = ['move-workspace-to-monitor down --wrap-around', 'mode main']
@@ -215,6 +216,10 @@ tab = ['workspace-back-and-forth', 'mode main']
 
 [[on-window-detected]]
   if.app-name-regex-substring = "osascript"
+  run = ['layout floating']
+
+[[on-window-detected]]
+  if.app-id = "com.TickTick.task.mac"
   run = ['layout floating']
 
 [[on-window-detected]]
