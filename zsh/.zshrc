@@ -21,6 +21,13 @@ export FZF_DEFAULT_OPTS='--color=bg+:#ffffff,fg+:#000000,hl+:#0066cc'
 export CARGO_TARGET_DIR="$HOME/cargo-global-target"
 export ZK_NOTEBOOK_DIR="$(realpath ~/thoughts)"
 
+local_env_file="$HOME/.config/zsh/.env.local"
+if [[ -f "$local_env_file" ]]; then
+    set -a
+    source "$local_env_file"
+    set +a
+fi
+
 path=(/opt/homebrew/bin $path)
 path=($HOME/.local/bin $path)
 

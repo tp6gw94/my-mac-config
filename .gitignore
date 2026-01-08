@@ -25,4 +25,7 @@
 !scooter/**
 !zk
 !zk/**
+!opencode
+!opencode/**
 zsh/.zsh_history
+*.local
