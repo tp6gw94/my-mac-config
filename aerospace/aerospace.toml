@@ -145,6 +145,7 @@ alt-ctrl-cmd-7 = ['workspace 7']
 alt-ctrl-cmd-8 = ['workspace 8']
 alt-ctrl-cmd-9 = ['workspace 9']
 alt-ctrl-cmd-0 = ['workspace 0']
+alt-ctrl-cmd-q = ['workspace q']
 
 
 alt-ctrl-cmd-shift-tab = ['move-workspace-to-monitor --wrap-around next']
@@ -297,6 +298,10 @@ tab = ['workspace-back-and-forth', 'mode main']
 [[on-window-detected]]
   if.app-id = "com.spotify.client"
   run = ['move-node-to-workspace 9']
+
+[[on-window-detected]]
+  if.app-id = "com.figma.Desktop"
+  run = ['move-node-to-workspace q']
 
 [[on-window-detected]]
   if.app-id = "com.codeweavers.CrossOver"
