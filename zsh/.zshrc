@@ -1,4 +1,11 @@
 
+local_env_file="$XDG_CONFIG_HOME/zsh/.zsh_secrets"
+if [[ -f "$local_env_file" ]]; then
+    set -a
+    source "$local_env_file"
+    set +a
+fi
+
 eval "$(/opt/homebrew/bin/brew shellenv)"
 eval "$(mise activate zsh)"
 eval "$(zoxide init zsh)"
@@ -12,6 +19,7 @@ alias ld="lazydocker"
 alias so="source ~/.config/zsh/.zshrc"
 alias n="nvim"
 alias svim="sudo -E nvim"
+alias oc="opencode"
 
 export EDITOR="nvim"
 export VISUAL="nvim"
@@ -20,13 +28,6 @@ export BAT_THEME="base16-256"
 export FZF_DEFAULT_OPTS='--color=bg+:#ffffff,fg+:#000000,hl+:#0066cc'
 export CARGO_TARGET_DIR="$HOME/cargo-global-target"
 export ZK_NOTEBOOK_DIR="$(realpath ~/thoughts)"
-
-local_env_file="$HOME/.config/zsh/.env.local"
-if [[ -f "$local_env_file" ]]; then
-    set -a
-    source "$local_env_file"
-    set +a
-fi
 
 path=(/opt/homebrew/bin $path)
 path=($HOME/.local/bin $path)
