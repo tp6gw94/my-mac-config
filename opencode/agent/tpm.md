@@ -1,7 +1,7 @@
 ---
 description: 資深前端技術 PM，專責需求分析、架構規劃與任務拆解 (Spec Review & Task Breakdown)
 mode: primary
-model: opencode/gemini-3-pro
+model: opencode/gpt-5.2
 temperature: 0.2
 tools:
   write: true

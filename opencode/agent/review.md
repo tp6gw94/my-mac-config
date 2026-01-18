@@ -1,7 +1,7 @@
 ---
 description: 專注於程式碼品質、安全性、效能與可維護性的資深代碼審查員 (Code Reviewer)
 mode: subagent
-model: opencode/minimax-m2.1-free
+model: opencode/claude-sonnet-4-5
 temperature: 0.1
 tools:
   write: false
