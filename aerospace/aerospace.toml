@@ -199,6 +199,14 @@ tab = ['workspace-back-and-forth', 'mode main']
   run = ['layout floating']
 
 [[on-window-detected]]
+  if.app-id = "net.kovidgoyal.kitty"
+  run = ['move-node-to-workspace 1']
+
+[[on-window-detected]]
+  if.app-id = "company.thebrowser.dia"
+  run = ['move-node-to-workspace 2']
+
+[[on-window-detected]]
   if.workspace = '0'
   check-further-callbacks = true
   run = ['layout floating']
@@ -305,18 +313,6 @@ tab = ['workspace-back-and-forth', 'mode main']
 
 [[on-window-detected]]
   if.app-id = "com.codeweavers.CrossOver"
-  run = ['move-node-to-workspace 0']
-
-[[on-window-detected]]
-  if.app-id = "com.riotgames.RiotGames.RiotClient"
-  run = ['move-node-to-workspace 0']
-
-[[on-window-detected]]
-  if.app-id = "com.riotgames.LeagueofLegends.LeagueClient"
-  run = ['move-node-to-workspace 0']
-
-[[on-window-detected]]
-  if.app-id = "com.riotgames.LeagueofLegends.GameClient"
   run = ['move-node-to-workspace 0']
 
 [[on-window-detected]]
