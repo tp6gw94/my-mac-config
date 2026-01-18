@@ -1,5 +1,5 @@
-require("configs/autocmds")
-require("configs/options")
+require("core.autocmds")
+require("core.options")
 
 vim.pack.add({
 	"https://github.com/nvim-treesitter/nvim-treesitter-textobjects",
@@ -7,7 +7,6 @@ vim.pack.add({
 
 	"https://github.com/nvim-mini/mini.pairs",
 	"https://github.com/nvim-mini/mini.surround",
-	"https://github.com/nvim-mini/mini.files",
 	"https://github.com/nvim-mini/mini.icons",
 	"https://github.com/nvim-mini/mini.ai",
 	"https://github.com/nvim-mini/mini.hipatterns",
@@ -50,8 +49,13 @@ vim.pack.add({
 	"https://github.com/zk-org/zk-nvim",
 
 	"https://github.com/nvim-lua/plenary.nvim",
-	{ src = "https://github.com/ThePrimeagen/harpoon", version = "harpoon2" },
+	"https://github.com/MagicDuck/grug-far.nvim",
+	"https://github.com/lewis6991/gitsigns.nvim",
+
+	"https://github.com/mistweaverco/kulala.nvim",
+	"https://github.com/mikavilpas/yazi.nvim",
 }, { confirm = false })
+
 
 require("plugins/treesitter")
 require("plugins/lsp")
@@ -62,6 +66,8 @@ require("plugins/editor")
 require("plugins/snacks")
 require("plugins/ui")
 require("plugins/notes")
+require("plugins/git")
+require("plugins/search")
+require("core.commands")
+require("core.keymaps")
 
-require("configs/commands")
-require("configs/keymaps")

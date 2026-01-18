@@ -1,3 +1,6 @@
+local utils = require("core.utils")
+local nmap_leader = utils.nmap_leader
+
 require("mini.icons").setup()
 require("mini.pairs").setup()
 require("mini.cursorword").setup()
@@ -5,7 +8,6 @@ require("mini.statusline").setup()
 require("img-clip").setup()
 require("render-markdown").setup()
 require("flash").setup()
-require("harpoon"):setup()
 
 require("mini.surround").setup({
 	mappings = {
@@ -14,16 +16,6 @@ require("mini.surround").setup({
 		find_left = "",
 		highlight = "",
 		replace = "mr",
-	},
-})
-
-require("mini.files").setup({
-	mappings = {
-		go_in_plus = "",
-		gi_out_plus = "",
-	},
-	windows = {
-		preview = true,
 	},
 })
 
@@ -113,3 +105,50 @@ miniclue.setup({
 		},
 	},
 })
+
+require("kulala").setup({
+	global_keymaps = true,
+	global_keymaps_prefix = "<leader>R",
+	kulala_keymaps_prefix = "",
+})
+
+require("yazi").setup({
+	keymaps = {
+		open_file_in_horizontal_split = "<C-s>",
+		grep_in_directory = false,
+	},
+})
+
+require("no-neck-pain").setup()
+
+nmap_leader("wn", "<cmd>NoNeckPain<cr>", "NoNeckPain")
+
+nmap_leader("e", "<CMD>Yazi<CR>", "Explore(current)")
+nmap_leader("E", "<CMD>Yazi cwd<CR>", "Explore(root)")
+
+nmap_leader("u", "<cmd>UndotreeToggle<cr>", "Undotree")
+
+vim.keymap.set("n", "<C-p>", "<cmd>PasteImage<cr>", { desc = "Paste image from system clipboard" })
+nmap_leader("p", "<cmd>PasteImage<cr>", "Paste Image")
+
+vim.keymap.set({ "n", "x", "o" }, "s", function()
+	require("flash").jump()
+end, { desc = "Flash" })
+vim.keymap.set({ "n", "x", "o" }, "S", function()
+	require("flash").jump({
+		search = { mode = "search", max_length = 0 },
+		label = { after = { 0, 0 } },
+		pattern = "^",
+	})
+end, { desc = "Flash Line" })
+vim.keymap.set({ "n", "x", "o" }, "<c-space>", function()
+		require("flash").treesitter({
+			labels = "",
+
+		label = { before = false, after = false },
+		actions = {
+			["<c-space>"] = "next",
+			["<BS>"] = "prev",
+		},
+	})
+end, { desc = "Treesitter incremental selection" })

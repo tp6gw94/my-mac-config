@@ -1,3 +1,6 @@
+local utils = require("core.utils")
+local nmap_leader = utils.nmap_leader
+
 require("ufo").setup({
 	provider_selector = function(bufnr, filetype, buftype)
 		return { "treesitter", "indent" }
@@ -40,4 +43,35 @@ require("trouble").setup({
 	},
 })
 
-require("no-neck-pain").setup()
+
+-- Trouble
+nmap_leader("xx", "<cmd>Trouble diagnostics toggle filter.buf=0<cr>", "Diagnostics Buffer (Trouble)")
+nmap_leader("xX", "<cmd>Trouble diagnostics toggle<cr>", "Diagnostics (Trouble)")
+nmap_leader("xl", "<cmd>Trouble lsp<cr>", "Trouble Lsp")
+vim.keymap.set("n", "[t", function()
+	require("trouble").prev()
+end, { desc = "Trouble Prev" })
+vim.keymap.set("n", "]t", function()
+	require("trouble").next()
+end, { desc = "Trouble Next" })
+
+-- Ufo
+vim.keymap.set("n", "zR", require("ufo").openAllFolds, { desc = "Open all folds" })
+vim.keymap.set("n", "zM", require("ufo").closeAllFolds, { desc = "Close all folds" })
+
+vim.api.nvim_create_autocmd("BufRead", {
+	callback = function(ev)
+		if vim.bo[ev.buf].buftype == "quickfix" then
+			vim.schedule(function()
+				vim.cmd([[cclose]])
+				vim.cmd([[Trouble qflist open]])
+			end)
+		end
+	end,
+})
+
+vim.api.nvim_create_autocmd("QuickFixCmdPost", {
+	callback = function()
+		vim.cmd([[Trouble qflist open]])
+	end,
+})
