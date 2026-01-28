@@ -28,6 +28,8 @@ export BAT_THEME="base16-256"
 export FZF_DEFAULT_OPTS='--color=bg+:#ffffff,fg+:#000000,hl+:#0066cc'
 export CARGO_TARGET_DIR="$HOME/cargo-global-target"
 export ZK_NOTEBOOK_DIR="$(realpath ~/thoughts)"
+export BUN_INSTALL="$HOME/.bun"
+export PATH="$BUN_INSTALL/bin:$PATH"
 
 path=(/opt/homebrew/bin $path)
 path=($HOME/.local/bin $path)
@@ -92,3 +94,6 @@ zinit light zsh-users/zsh-autosuggestions
 
 zinit ice wait"2"
 zinit light zsh-users/zsh-syntax-highlighting
+
+# bun completions
+[ -s "/Users/todd/.bun/_bun" ] && source "/Users/todd/.bun/_bun"
