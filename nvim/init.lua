@@ -56,7 +56,6 @@ vim.pack.add({
 	"https://github.com/mikavilpas/yazi.nvim",
 }, { confirm = false })
 
-
 require("plugins/treesitter")
 require("plugins/lsp")
 require("plugins/cmp")
@@ -70,4 +69,3 @@ require("plugins/git")
 require("plugins/search")
 require("core.commands")
 require("core.keymaps")
-

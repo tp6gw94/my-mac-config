@@ -22,12 +22,12 @@ require("kanagawa").setup({
 			FloatBorder = {
 				bg = "NONE",
 			},
-			SmartPickPathMatch = { fg = palette.waveRed, bold = true },
-			SmartPickBuffer = { fg = palette.waveRed, italic = true },
+
 			DiagnosticSignError = { bg = palette.fujiWhite },
 			DiagnosticSignWarn = { bg = palette.fujiWhite },
 			DiagnosticSignInfo = { bg = palette.fujiWhite },
 			DiagnosticSignHint = { bg = palette.fujiWhite },
+
 			-- popup menu
 			Pmenu = {
 				bg = "NONE",
@@ -65,8 +65,10 @@ require("kanagawa").setup({
 
 			FlashLabel = {
 				fg = palette.surimiOrange,
-        bold = true
+				bold = true,
 			},
+			RenderMarkdownCode = { bg = palette.lotusWhite3 },
+			RenderMarkdownCodeBorder = { bg = palette.lotusWhite3 },
 		}
 	end,
 })

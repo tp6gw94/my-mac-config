@@ -34,6 +34,16 @@ require("snacks").setup({
 	scroll = { enabled = false },
 })
 
+local lsp_layout = {
+	preset = "vertical",
+	layout = {
+		width = 0.8,
+		min_width = 100,
+		height = 0.85,
+		min_height = 25,
+	},
+}
+
 Snacks.indent.enable()
 
 -- File & Grep
@@ -63,16 +73,16 @@ end, { desc = "Find Word" })
 
 -- LSP picker
 vim.keymap.set("n", "gd", function()
-	Snacks.picker.lsp_definitions()
+	Snacks.picker.lsp_definitions({ layout = lsp_layout })
 end, { desc = "Goto Definitions" })
 vim.keymap.set("n", "gr", function()
-	Snacks.picker.lsp_references()
+	Snacks.picker.lsp_references({ layout = lsp_layout })
 end, { desc = "Goto References", nowait = true })
 vim.keymap.set("n", "gt", function()
-	Snacks.picker.lsp_type_definitions()
+	Snacks.picker.lsp_type_definitions({ layout = lsp_layout })
 end, { desc = "Goto Type Definition" })
 vim.keymap.set("n", "gD", function()
-	Snacks.picker.lsp_declarations()
+	Snacks.picker.lsp_declarations({ layout = lsp_layout })
 end, { desc = "Goto Declarations" })
 nmap_leader("cs", function()
 	Snacks.picker.lsp_symbols()

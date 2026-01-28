@@ -142,8 +142,8 @@ vim.keymap.set({ "n", "x", "o" }, "S", function()
 	})
 end, { desc = "Flash Line" })
 vim.keymap.set({ "n", "x", "o" }, "<c-space>", function()
-		require("flash").treesitter({
-			labels = "",
+	require("flash").treesitter({
+		labels = "",
 
 		label = { before = false, after = false },
 		actions = {
