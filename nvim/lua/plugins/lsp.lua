@@ -19,6 +19,7 @@ local vue_plugin = {
 local vtsls_config = {
 	settings = {
 		vtsls = {
+			complete_function_calls = false,
 			tsserver = {
 				globalPlugins = {
 					vue_plugin,
