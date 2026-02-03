@@ -1,7 +1,7 @@
 ---
 description: 專注於程式碼品質、安全性、效能與可維護性的資深代碼審查員 (Code Reviewer)
 mode: subagent
-model: opencode/claude-sonnet-4-5
+model: synthetic/hf:zai-org/GLM-4.7
 temperature: 0.1
 tools:
   write: false

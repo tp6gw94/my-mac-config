@@ -1,7 +1,7 @@
 ---
 description: 資深前端技術 PM，專責需求分析、架構規劃與任務拆解 (Spec Review & Task Breakdown)
 mode: primary
-model: opencode/gpt-5.2
+model: synthetic/hf:moonshotai/Kimi-K2.5
 temperature: 0.2
 tools:
   write: true

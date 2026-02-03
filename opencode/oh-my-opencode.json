@@ -2,60 +2,64 @@
   "$schema": "https://raw.githubusercontent.com/code-yeongyu/oh-my-opencode/master/assets/oh-my-opencode.schema.json",
   "agents": {
     "sisyphus": {
-      "model": "opencode/claude-sonnet-4-5"
+      "model": "synthetic/hf:moonshotai/Kimi-K2.5"
     },
     "oracle": {
-      "model": "opencode/gpt-5.2",
-      "variant": "high"
+      "model": "synthetic/hf:deepseek-ai/DeepSeek-R1-0528"
     },
     "librarian": {
-      "model": "opencode/big-pickle"
+      "model": "synthetic/hf:zai-org/GLM-4.7"
     },
     "explore": {
-      "model": "opencode/claude-haiku-4-5"
+      "model": "synthetic/hf:MiniMaxAI/MiniMax-M2.1"
     },
     "multimodal-looker": {
-      "model": "google/gemini-3-flash"
+      "model": "synthetic/hf:Qwen/Qwen3-VL-235B-A22B-Instruct"
     },
     "prometheus": {
-      "model": "opencode/claude-opus-4-5",
-      "variant": "max"
+      "model": "synthetic/hf:moonshotai/Kimi-K2.5"
     },
     "metis": {
-      "model": "opencode/claude-opus-4-5",
-      "variant": "max"
+      "model": "synthetic/hf:moonshotai/Kimi-K2.5"
     },
     "momus": {
-      "model": "opencode/gpt-5.2",
-      "variant": "medium"
+      "model": "synthetic/hf:deepseek-ai/DeepSeek-V3.2"
     },
     "atlas": {
-      "model": "opencode/claude-sonnet-4-5"
+      "model": "synthetic/hf:moonshotai/Kimi-K2.5"
     }
   },
   "categories": {
     "visual-engineering": {
-      "model": "google/gemini-3-pro"
+      "model": "synthetic/hf:Qwen/Qwen3-VL-235B-A22B-Instruct"
     },
     "ultrabrain": {
-      "model": "opencode/gpt-5.2-codex",
-      "variant": "xhigh"
+      "model": "synthetic/hf:Qwen/Qwen3-235B-A22B-Thinking-2507"
     },
     "artistry": {
-      "model": "google/gemini-3-pro",
-      "variant": "max"
+      "model": "synthetic/hf:moonshotai/Kimi-K2-Thinking"
     },
     "quick": {
-      "model": "opencode/claude-haiku-4-5"
+      "model": "synthetic/hf:deepseek-ai/DeepSeek-V3"
     },
     "unspecified-low": {
-      "model": "opencode/claude-sonnet-4-5"
+      "model": "synthetic/hf:meta-llama/Llama-3.3-70B-Instruct"
     },
     "unspecified-high": {
-      "model": "opencode/claude-sonnet-4-5"
+      "model": "synthetic/hf:moonshotai/Kimi-K2.5"
     },
     "writing": {
-      "model": "google/gemini-3-flash"
+      "model": "synthetic/hf:MiniMaxAI/MiniMax-M2.1"
+    }
+  },
+  "background_task": {
+    "defaultConcurrency": 5,
+    "providerConcurrency": {
+      "synthetic": 5
+    },
+    "modelConcurrency": {
+      "synthetic/hf:moonshotai/Kimi-K2.5": 3,
+      "synthetic/hf:deepseek-ai/DeepSeek-R1-0528": 2
     }
   }
 }
