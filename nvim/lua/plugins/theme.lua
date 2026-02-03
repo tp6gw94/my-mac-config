@@ -67,8 +67,8 @@ require("kanagawa").setup({
 				fg = palette.surimiOrange,
 				bold = true,
 			},
-			RenderMarkdownCode = { bg = palette.lotusWhite3 },
-			RenderMarkdownCodeBorder = { bg = palette.lotusWhite3 },
+			RenderMarkdownCode = { bg = "#F2E9DE" },
+			RenderMarkdownCodeBorder = { bg = "#F2E9DE" },
 		}
 	end,
 })
