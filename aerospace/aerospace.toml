@@ -146,6 +146,7 @@ alt-ctrl-cmd-8 = ['workspace 8']
 alt-ctrl-cmd-9 = ['workspace 9']
 alt-ctrl-cmd-0 = ['workspace 0']
 alt-ctrl-cmd-q = ['workspace q']
+alt-ctrl-cmd-w = ['workspace w']
 
 
 alt-ctrl-cmd-shift-tab = ['move-workspace-to-monitor --wrap-around next']
@@ -284,10 +285,6 @@ tab = ['workspace-back-and-forth', 'mode main']
   run = ['layout floating']
 
 [[on-window-detected]]
-  if.app-id = "ch.protonvpn.mac"
-  run = ['layout floating']
-
-[[on-window-detected]]
   if.app-id = "com.bitwarden.desktop"
   run = ['layout floating']
 
@@ -295,8 +292,9 @@ tab = ['workspace-back-and-forth', 'mode main']
   if.app-id = "com.microsoft.teams2"
   run = ['move-node-to-workspace 4']
 
+# silverbullet
 [[on-window-detected]]
-  if.app-id = "md.obsidian"
+  if.app-id = "com.apple.Safari.WebApp.28E2BCB8-F3C3-4232-A6F8-A509BA10A6EF"
   run = ['move-node-to-workspace 5']
 
 [[on-window-detected]]
@@ -310,6 +308,10 @@ tab = ['workspace-back-and-forth', 'mode main']
 [[on-window-detected]]
   if.app-id = "com.figma.Desktop"
   run = ['move-node-to-workspace q']
+
+[[on-window-detected]]
+  if.app-id = "dev.kiro.desktop"
+  run = ['move-node-to-workspace w']
 
 [[on-window-detected]]
   if.app-id = "com.codeweavers.CrossOver"
