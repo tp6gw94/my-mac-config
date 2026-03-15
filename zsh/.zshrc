@@ -9,7 +9,6 @@ fi
 eval "$(/opt/homebrew/bin/brew shellenv)"
 eval "$(mise activate zsh)"
 eval "$(zoxide init zsh)"
-eval "$(starship init zsh)"
 
 source ~/.config/zsh/functions/brew-auto-dump.sh
 
@@ -20,6 +19,7 @@ alias so="source ~/.config/zsh/.zshrc"
 alias n="nvim"
 alias svim="sudo -E nvim"
 alias oc="opencode"
+alias kc="kiro-cli"
 
 export EDITOR="nvim"
 export VISUAL="nvim"
@@ -33,6 +33,9 @@ export PATH="$BUN_INSTALL/bin:$PATH"
 
 path=(/opt/homebrew/bin $path)
 path=($HOME/.local/bin $path)
+
+ZVM_VI_SURROUND_BINDKEY=s-prefix
+ZVM_SYSTEM_CLIPBOARD_ENABLED=true
 
 function y() {
 	local tmp="$(mktemp -t "yazi-cwd.XXXXXX")" cwd
@@ -89,11 +92,15 @@ zinit light zsh-users/zsh-completions
 zinit light rupa/z
 zinit light zsh-users/zsh-history-substring-search
 
+zinit ice depth=1
+zinit light jeffreytse/zsh-vi-mode
+
 zinit ice wait"1"
 zinit light zsh-users/zsh-autosuggestions
 
 zinit ice wait"2"
 zinit light zsh-users/zsh-syntax-highlighting
 
+eval "$(starship init zsh)"
 # bun completions
 [ -s "/Users/todd/.bun/_bun" ] && source "/Users/todd/.bun/_bun"
