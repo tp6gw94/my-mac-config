@@ -45,29 +45,12 @@ function y() {
 	rm -f -- "$tmp"
 }
 
-function zj() {
-  local ZELLIJ_OUTPUT
-  ZELLIJ_OUTPUT=$(zellij list-sessions 2>/dev/null)
+function zvm_after_init() {
+  eval "$(starship init zsh)"
+}
 
-  local ALL_SESSIONS_LINES
-  ALL_SESSIONS_LINES=$(echo "$ZELLIJ_OUTPUT" | \
-    sed 's/\x1b\[[0-9;]*m//g' | \
-    grep -vE '^(NAME|STATUS)')
-
-  if [[ -n "$ALL_SESSIONS_LINES" ]]; then
-    local ALL_SESSIONS_NAMES
-    ALL_SESSIONS_NAMES=$(echo "$ALL_SESSIONS_LINES" | awk '{print $1}')
-
-    local SELECTED_SESSION
-    SELECTED_SESSION=$(echo "$ALL_SESSIONS_NAMES" | fzf --prompt="Attach to Zellij Session: ")
-
-    if [[ -n "$SELECTED_SESSION" ]]; then
-      zellij attach "$SELECTED_SESSION"
-    fi
-  else
-    echo "No sessions found. Starting a new one."
-    zellij attach -c
-  fi
+function zvm_config() {
+  ZVM_INIT_MODE=sourcing
 }
 
 if [[ ! -f $HOME/.local/share/zinit/zinit.git/zinit.zsh ]]; then
@@ -82,18 +65,12 @@ source "$HOME/.local/share/zinit/zinit.git/zinit.zsh"
 autoload -Uz _zinit
 (( ${+_comps} )) && _comps[zinit]=_zinit
 
-zinit light-mode for \
-    zdharma-continuum/zinit-annex-as-monitor \
-    zdharma-continuum/zinit-annex-bin-gem-node \
-    zdharma-continuum/zinit-annex-patch-dl \
-    zdharma-continuum/zinit-annex-rust
+zinit ice depth=1
+zinit light jeffreytse/zsh-vi-mode
 
 zinit light zsh-users/zsh-completions
 zinit light rupa/z
 zinit light zsh-users/zsh-history-substring-search
-
-zinit ice depth=1
-zinit light jeffreytse/zsh-vi-mode
 
 zinit ice wait"1"
 zinit light zsh-users/zsh-autosuggestions
@@ -101,6 +78,11 @@ zinit light zsh-users/zsh-autosuggestions
 zinit ice wait"2"
 zinit light zsh-users/zsh-syntax-highlighting
 
-eval "$(starship init zsh)"
+zinit light-mode for \
+    zdharma-continuum/zinit-annex-as-monitor \
+    zdharma-continuum/zinit-annex-bin-gem-node \
+    zdharma-continuum/zinit-annex-patch-dl \
+    zdharma-continuum/zinit-annex-rust
+
 # bun completions
 [ -s "/Users/todd/.bun/_bun" ] && source "/Users/todd/.bun/_bun"
