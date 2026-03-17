@@ -45,7 +45,7 @@ default-root-container-orientation = 'auto'
 # See https://nikitabobko.github.io/AeroSpace/commands#move-mouse
 # Fallback value (if you omit the key): on-focused-monitor-changed = []
 on-focused-monitor-changed = ['move-mouse monitor-lazy-center']
-on-focus-changed = ['move-mouse window-lazy-center']
+# on-focus-changed = ['move-mouse window-lazy-center']
 
 # You can effectively turn off macOS "Hide application" (cmd-h) feature by toggling this flag
 # Useful if you don't use this macOS feature, but accidentally hit cmd-h or cmd-alt-h key
@@ -72,6 +72,14 @@ outer.left = 10
 outer.bottom = 10
 outer.top = 10
 outer.right = 10
+
+[workspace-to-monitor-force-assignment]
+1 = ["BenQ GL2580"]
+2 = ["LS27A600U"]
+3 = ["Built-in Retina Display"]
+4 = ["Built-in Retina Display"]
+w = ["BenQ PD2500Q"]
+s = ["BenQ PD2500Q"]
 
 # 'main' binding mode declaration
 # See: https://nikitabobko.github.io/AeroSpace/guide#binding-modes
@@ -106,69 +114,82 @@ cmd-alt-h = [] # Disable "hide others"
 #     activate
 # end tell'
 # '''
+alt-enter = "exec-and-forget kitty --single-instance -d ~"
+alt-shift-enter = "exec-and-forget ~/.config/aerospace/kitty-finder.sh"
 
 # See: https://nikitabobko.github.io/AeroSpace/commands#focus
-alt-ctrl-cmd-h = 'focus left --boundaries-action wrap-around-the-workspace'
-alt-ctrl-cmd-j = 'focus down --boundaries-action wrap-around-the-workspace'
-alt-ctrl-cmd-k = 'focus up --boundaries-action wrap-around-the-workspace'
-alt-ctrl-cmd-l = 'focus right --boundaries-action wrap-around-the-workspace'
+alt-h = 'focus left --boundaries-action wrap-around-the-workspace'
+alt-j = 'focus down --boundaries-action wrap-around-the-workspace'
+alt-k = 'focus up --boundaries-action wrap-around-the-workspace'
+alt-l = 'focus right --boundaries-action wrap-around-the-workspace'
 
-alt-ctrl-cmd-shift-h = ['join-with left', 'mode main']
-alt-ctrl-cmd-shift-j = ['join-with down', 'mode main']
-alt-ctrl-cmd-shift-k = ['join-with up', 'mode main']
-alt-ctrl-cmd-shift-l = ['join-with right', 'mode main']
+alt-shift-h = ['join-with left', 'mode main']
+alt-shift-j = ['join-with down', 'mode main']
+alt-shift-k = ['join-with up', 'mode main']
+alt-shift-l = ['join-with right', 'mode main']
 
-alt-ctrl-cmd-rightSquareBracket = 'focus-monitor next --wrap-around'
-alt-ctrl-cmd-leftSquareBracket = 'focus-monitor prev --wrap-around'
+alt-ctrl-cmd-h = "focus-monitor --wrap-around left"
+alt-ctrl-cmd-j = "focus-monitor --wrap-around down"
+alt-ctrl-cmd-k = "focus-monitor --wrap-around up"
+alt-ctrl-cmd-l = "focus-monitor --wrap-around right"
 
-# alt-ctrl-cmd-enter = 'fullscreen'
-alt-ctrl-cmd-f = [
-	'layout floating tiling',
-	'mode main',
-] # Toggle between floating and tiling layout
+alt-n = 'focus-monitor --wrap-around next'
+alt-p = 'focus-monitor --wrap-around prev'
 
 # See: https://nikitabobko.github.io/AeroSpace/commands#resize
-alt-ctrl-cmd-minus = 'resize smart -50'
-alt-ctrl-cmd-equal = 'resize smart +50'
+alt-minus = 'resize smart -50'
+alt-equal = 'resize smart +50'
+
+alt-b = ['workspace-back-and-forth']
+alt-1 = ['workspace 1']
+alt-2 = ['workspace 2']
+alt-3 = ['workspace 3']
+alt-4 = ['workspace 4']
+alt-5 = ['workspace 5']
+alt-6 = ['workspace 6']
+alt-7 = ['workspace 7']
+alt-8 = ['workspace 8']
+alt-9 = ['workspace 9']
+alt-0 = ['workspace 0']
+alt-q = ['workspace q']
+alt-w = ['workspace w']
+alt-e = ['workspace e']
+alt-r = ['workspace r']
+alt-t = ['workspace t']
+alt-y = ['workspace y']
+alt-m = ['workspace m']
+alt-s = ['workspace s']
+
+alt-shift-tab = ['move-workspace-to-monitor --wrap-around next']
 
 # See: https://nikitabobko.github.io/AeroSpace/commands#mode
-cmd-ctrl-alt-a = 'mode service'
-
-alt-ctrl-cmd-backtick = ['workspace-back-and-forth']
-alt-ctrl-cmd-1 = ['workspace 1']
-alt-ctrl-cmd-2 = ['workspace 2']
-alt-ctrl-cmd-3 = ['workspace 3']
-alt-ctrl-cmd-4 = ['workspace 4']
-alt-ctrl-cmd-5 = ['workspace 5']
-alt-ctrl-cmd-6 = ['workspace 6']
-alt-ctrl-cmd-7 = ['workspace 7']
-alt-ctrl-cmd-8 = ['workspace 8']
-alt-ctrl-cmd-9 = ['workspace 9']
-alt-ctrl-cmd-0 = ['workspace 0']
-alt-ctrl-cmd-q = ['workspace q']
-alt-ctrl-cmd-w = ['workspace w']
-
-
-alt-ctrl-cmd-shift-tab = ['move-workspace-to-monitor --wrap-around next']
-
+alt-a = 'mode service'
 # 'service' binding mode declaration.
 # See: https://nikitabobko.github.io/AeroSpace/guide#binding-modes
 [mode.service.binding]
 esc = ['reload-config', 'mode main']
 
-r = ['flatten-workspace-tree', 'mode main']                # reset layout
 backspace = ['close-all-windows-but-current', 'mode main']
 
-1 = ['move-node-to-workspace 1 --focus-follows-window', 'mode main']
-2 = ['move-node-to-workspace 2 --focus-follows-window', 'mode main']
-3 = ['move-node-to-workspace 3 --focus-follows-window', 'mode main']
-4 = ['move-node-to-workspace 4 --focus-follows-window', 'mode main']
-5 = ['move-node-to-workspace 5 --focus-follows-window', 'mode main']
-6 = ['move-node-to-workspace 6 --focus-follows-window', 'mode main']
-7 = ['move-node-to-workspace 7 --focus-follows-window', 'mode main']
-8 = ['move-node-to-workspace 8 --focus-follows-window', 'mode main']
-9 = ['move-node-to-workspace 9 --focus-follows-window', 'mode main']
-0 = ['move-node-to-workspace 0 --focus-follows-window', 'mode main']
+shift-1 = ['move-node-to-workspace 1 --focus-follows-window', 'mode main']
+shift-2 = ['move-node-to-workspace 2 --focus-follows-window', 'mode main']
+shift-3 = ['move-node-to-workspace 3 --focus-follows-window', 'mode main']
+shift-4 = ['move-node-to-workspace 4 --focus-follows-window', 'mode main']
+shift-5 = ['move-node-to-workspace 5 --focus-follows-window', 'mode main']
+shift-6 = ['move-node-to-workspace 6 --focus-follows-window', 'mode main']
+shift-7 = ['move-node-to-workspace 7 --focus-follows-window', 'mode main']
+shift-8 = ['move-node-to-workspace 8 --focus-follows-window', 'mode main']
+shift-9 = ['move-node-to-workspace 9 --focus-follows-window', 'mode main']
+shift-0 = ['move-node-to-workspace 0 --focus-follows-window', 'mode main']
+shift-q = ['move-node-to-workspace q --focus-follows-window', 'mode main']
+shift-w = ['move-node-to-workspace w --focus-follows-window', 'mode main']
+shift-e = ['move-node-to-workspace e --focus-follows-window', 'mode main']
+shift-r = ['move-node-to-workspace r --focus-follows-window', 'mode main']
+shift-t = ['move-node-to-workspace t --focus-follows-window', 'mode main']
+shift-y = ['move-node-to-workspace y --focus-follows-window', 'mode main']
+shift-m = ['move-node-to-workspace m --focus-follows-window', 'mode main']
+shift-s = ['move-node-to-workspace s --focus-follows-window', 'mode main']
+
 
 # sticky is not yet supported https://github.com/nikitabobko/AeroSpace/issues/2
 #s = ['layout sticky tiling', 'mode main']
@@ -182,26 +203,25 @@ j = ['move down', 'mode main']
 k = ['move up', 'mode main']
 l = ['move right', 'mode main']
 
-a = ['layout accordion tiles', 'mode main']
 v = ['layout vertical', 'mode main']
 s = ['layout horizontal', 'mode main']
 z = ["fullscreen", 'mode main']
+a = ['layout accordion tiles', 'mode main']
+f5 = ['flatten-workspace-tree', 'mode main']                # reset layout
+f = [
+	'layout floating tiling',
+	'mode main',
+] # Toggle between floating and tiling layout
 
 shift-left = ['move-workspace-to-monitor left --wrap-around', 'mode main']
 shift-down = ['move-workspace-to-monitor down --wrap-around', 'mode main']
 shift-up = ['move-workspace-to-monitor up --wrap-around', 'mode main']
 shift-right = ['move-workspace-to-monitor right --wrap-around', 'mode main']
 
-tab = ['workspace-back-and-forth', 'mode main']
-
 [[on-window-detected]]
   if.workspace = '9'
   check-further-callbacks = true
   run = ['layout floating']
-
-[[on-window-detected]]
-  if.app-id = "net.kovidgoyal.kitty"
-  run = ['move-node-to-workspace 1']
 
 [[on-window-detected]]
   if.app-id = "company.thebrowser.dia"
@@ -292,10 +312,9 @@ tab = ['workspace-back-and-forth', 'mode main']
   if.app-id = "com.microsoft.teams2"
   run = ['move-node-to-workspace 4']
 
-# silverbullet
 [[on-window-detected]]
-  if.app-id = "com.apple.Safari.WebApp.28E2BCB8-F3C3-4232-A6F8-A509BA10A6EF"
-  run = ['move-node-to-workspace 5']
+  if.app-id = "com.google.chrome.for.testing"
+  run = ["layout floating"]
 
 [[on-window-detected]]
   if.app-id = "org.videolan.vlc"
@@ -307,11 +326,11 @@ tab = ['workspace-back-and-forth', 'mode main']
 
 [[on-window-detected]]
   if.app-id = "com.figma.Desktop"
-  run = ['move-node-to-workspace q']
+  run = ['move-node-to-workspace m']
 
 [[on-window-detected]]
-  if.app-id = "dev.kiro.desktop"
-  run = ['move-node-to-workspace w']
+  if.app-id = "com.apple.Safari"
+  run = ['move-node-to-workspace s']
 
 [[on-window-detected]]
   if.app-id = "com.codeweavers.CrossOver"
