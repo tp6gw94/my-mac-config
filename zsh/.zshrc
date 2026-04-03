@@ -1,4 +1,3 @@
-
 local_env_file="$XDG_CONFIG_HOME/zsh/.zsh_secrets"
 if [[ -f "$local_env_file" ]]; then
     set -a
@@ -20,6 +19,7 @@ alias n="nvim"
 alias svim="sudo -E nvim"
 alias oc="opencode"
 alias kc="kiro-cli"
+alias ppt="presenterm"
 
 export EDITOR="nvim"
 export VISUAL="nvim"
@@ -34,9 +34,6 @@ export PATH="$BUN_INSTALL/bin:$PATH"
 path=(/opt/homebrew/bin $path)
 path=($HOME/.local/bin $path)
 
-ZVM_VI_SURROUND_BINDKEY=s-prefix
-ZVM_SYSTEM_CLIPBOARD_ENABLED=true
-
 function y() {
 	local tmp="$(mktemp -t "yazi-cwd.XXXXXX")" cwd
 	yazi "$@" --cwd-file="$tmp"
@@ -50,6 +47,9 @@ function zvm_after_init() {
 }
 
 function zvm_config() {
+  ZVM_VI_SURROUND_BINDKEY=s-prefix
+  ZVM_SYSTEM_CLIPBOARD_ENABLED=true
+  ZVM_VI_INSERT_ESCAPE_BINDKEY=jk
   ZVM_INIT_MODE=sourcing
 }
 
