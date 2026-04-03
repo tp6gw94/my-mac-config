@@ -38,3 +38,5 @@ require("nvim-treesitter.configs").setup({
 
 	modules = {},
 })
+
+vim.treesitter.language.register("markdown", "mdx")

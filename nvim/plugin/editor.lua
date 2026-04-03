@@ -4,7 +4,32 @@ local nmap_leader = utils.nmap_leader
 require("mini.icons").setup()
 require("mini.pairs").setup()
 require("mini.cursorword").setup()
-require("mini.statusline").setup()
+require("mini.statusline").setup({
+	content = {
+		active = function()
+			local mode, mode_hl = MiniStatusline.section_mode({ trunc_width = 120 })
+			local git = MiniStatusline.section_git({ trunc_width = 75 })
+			local filename = MiniStatusline.section_filename({ trunc_width = 140 })
+			local fileinfo = MiniStatusline.section_fileinfo({ trunc_width = 120 })
+			local win_nr = string.format("    %d ", vim.fn.winnr())
+			return MiniStatusline.combine_groups({
+				{ hl = mode_hl, strings = { mode } },
+				{ hl = "MiniStatuslineDevinfo", strings = { git } },
+				"%<", -- Mark general truncate point
+				{ hl = "MiniStatuslineFilename", strings = { filename, win_nr } },
+				"%=", -- End left alignment
+				{ hl = "MiniStatuslineFileinfo", strings = { fileinfo } },
+			})
+		end,
+		inactive = function()
+			local filename = MiniStatusline.section_filename({ trunc_width = 140 })
+			local win_nr = string.format("    %d ", vim.fn.winnr())
+			return MiniStatusline.combine_groups({
+				{ hl = "MiniStatuslineFilename", strings = { filename, win_nr } },
+			})
+		end,
+	},
+})
 require("img-clip").setup()
 require("render-markdown").setup()
 require("flash").setup()
@@ -78,17 +103,17 @@ miniclue.setup({
 		{ mode = "v", keys = "<leader>" },
 		{ mode = "n", keys = "[" },
 		{ mode = "n", keys = "]" },
+		{ mode = "n", keys = "<Tab>" },
 	},
 	clues = {
 		{ mode = "n", keys = "<leader>b", desc = "Buffer" },
 		{ mode = "n", keys = "<leader>c", desc = "Code" },
 		{ mode = "n", keys = "<leader>f", desc = "Pick" },
 		{ mode = "n", keys = "<leader>g", desc = "Git" },
-		{ mode = "n", keys = "<leader>n", desc = "Note" },
+		{ mode = "n", keys = "<leader>R", desc = "Kulala" },
 		{ mode = "n", keys = "<leader>w", desc = "Window" },
 		{ mode = "n", keys = "<leader>x", desc = "Trouble" },
 		{ mode = "v", keys = "<leader>c", desc = "Code" },
-		{ mode = "v", keys = "<leader>n", desc = "Note" },
 
 		miniclue.gen_clues.builtin_completion(),
 		miniclue.gen_clues.g(),
@@ -111,20 +136,6 @@ require("kulala").setup({
 	global_keymaps_prefix = "<leader>R",
 	kulala_keymaps_prefix = "",
 })
-
-require("yazi").setup({
-	keymaps = {
-		open_file_in_horizontal_split = "<C-s>",
-		grep_in_directory = false,
-	},
-})
-
-require("no-neck-pain").setup()
-
-nmap_leader("wn", "<cmd>NoNeckPain<cr>", "NoNeckPain")
-
-nmap_leader("e", "<CMD>Yazi<CR>", "Explore(current)")
-nmap_leader("E", "<CMD>Yazi cwd<CR>", "Explore(root)")
 
 nmap_leader("u", "<cmd>UndotreeToggle<cr>", "Undotree")
 
@@ -152,3 +163,31 @@ vim.keymap.set({ "n", "x", "o" }, "<c-space>", function()
 		},
 	})
 end, { desc = "Treesitter incremental selection" })
+
+require("tabby").setup()
+nmap_leader("tn", "<cmd>$tabnew<cr>", "Tab new")
+nmap_leader("td", "<cmd>tabclose<cr>", "Tab close")
+nmap_leader("to", "<cmd>tabonly<cr>", "Tab only")
+nmap_leader("tr", function()
+	local tab_name = vim.fn.input("New tab name: ")
+	if tab_name == nil or tab_name == "" then
+		return
+	end
+	vim.cmd("Tabby rename_tab " .. tab_name)
+end, "Tab rename")
+nmap_leader("tj", "<cmd>Tabby jump_to_tab<cr>", "Tab jump")
+nmap_leader("t<Tab>", "<cmd>Tabby pick_window<cr>", "Tab pick")
+nmap_leader("tP", "<cmd>-tabmove", "Tab move previous")
+nmap_leader("tN", "<cmd>+tabmove", "Tab move next")
+nmap_leader("tn", "<cmd>tabn<cr>", "Tab Next")
+nmap_leader("tp", "<cmd>tabp<cr>", "Tab Prev")
+
+require("yazi").setup({
+  keymaps = {
+    open_file_in_horizontal_split = "<C-s>",
+    grep_in_directory = "<C-f>"
+  }
+})
+nmap_leader("e", "<cmd>Yazi<cr>", "Open yazi current file")
+nmap_leader("E", "<cmd>Yazi cwd<cr>", "Open yazi cwd")
+

@@ -8,11 +8,13 @@ gitsigns.setup({
 utils.nmap_leader("ghr", gitsigns.reset_hunk, "Git hunk reset")
 utils.nmap_leader("ghs", gitsigns.stage_hunk, "Git hunk stage")
 
-utils.nmap_leader("gg", function()
-	Snacks.lazygit()
-end, "Git Lazygit")
-
-utils.nmap_leader("gd", gitsigns.diffthis, "Git diff (buffer)")
-utils.nmap_leader("gD", function()
-	gitsigns.diffthis("~")
-end, "Git diff (~)")
+require('codediff').setup({
+  diff = {
+    compute_moves = false
+  },
+  explorer = {
+    view_mode = "tree",
+    flatten_dirs = true,
+  }
+})
+utils.nmap_leader("gd", "<cmd>CodeDiff<cr>", "Git diff")

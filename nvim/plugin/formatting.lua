@@ -28,7 +28,9 @@ require("lint").linters_by_ft = {
 }
 
 nmap_leader("cf", function()
-	require("conform").format()
+	require("conform").format({
+		lsp_format = "fallback",
+	})
 end, "Format")
 
 vim.api.nvim_create_autocmd({ "BufWritePost" }, {

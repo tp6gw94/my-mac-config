@@ -27,24 +27,29 @@ vim.keymap.set("c", "<C-j>", "<Down>", { noremap = true })
 vim.keymap.set("c", "<C-k>", "<Up>", { noremap = true })
 vim.keymap.set("c", "<C-l>", "<Right>", { noremap = true })
 
--- Window navigation
-vim.keymap.set("n", "<C-h>", "<C-w><C-h>", { desc = "Move focus to the left window" })
-vim.keymap.set("n", "<C-l>", "<C-w><C-l>", { desc = "Move focus to the right window" })
-vim.keymap.set("n", "<C-j>", "<C-w><C-j>", { desc = "Move focus to the lower window" })
-vim.keymap.set("n", "<C-k>", "<C-w><C-k>", { desc = "Move focus to the upper window" })
-
--- Window resizing
-vim.keymap.set("n", "<C-Up>", "<cmd>resize +2<cr>", { desc = "Increase Window Height" })
-vim.keymap.set("n", "<C-Down>", "<cmd>resize -2<cr>", { desc = "Decrease Window Height" })
-vim.keymap.set("n", "<C-Left>", "<cmd>vertical resize -2<cr>", { desc = "Decrease Window Width" })
-vim.keymap.set("n", "<C-Right>", "<cmd>vertical resize +2<cr>", { desc = "Increase Window Width" })
-
 -- Window splitting
 vim.keymap.set("n", "<C-s>", "<C-W>s", { desc = "Split Window Below", noremap = true })
 vim.keymap.set("n", "<C-v>", "<C-W>v", { desc = "Split Window Right", noremap = true })
 
 -- Window
 nmap_leader("wd", "<C-W>c", "Delete Window")
+nmap_leader("wp", function()
+	local wn = vim.fn.input("Enter win number: ")
+	if wn:match("%d") then
+		vim.cmd(wn .. "wincmd w")
+	end
+end, "Window Pick")
+
+-- resizing splits
+vim.keymap.set("n", "<C-left>", "<cmd>resize -2<cr>")
+vim.keymap.set("n", "<C-down>", "<cmd>resize +2<cr>")
+vim.keymap.set("n", "<C-up>", "<cmd>vertical resize -2<cr>")
+vim.keymap.set("n", "<C-right>", "<cmd>vertical resize +2<cr>")
+-- moving between splits
+vim.keymap.set("n", "<C-h>", "<C-w>h")
+vim.keymap.set("n", "<C-j>", "<C-j>j")
+vim.keymap.set("n", "<C-k>", "<C-k>k")
+vim.keymap.set("n", "<C-l>", "<C-l>l")
 
 -- Paths
 nmap_leader("cp", "<cmd>CopyRelPath<cr>", "Copy relative path")

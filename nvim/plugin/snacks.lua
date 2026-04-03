@@ -26,11 +26,23 @@ require("snacks").setup({
 		layout = {
 			preset = "vertical",
 		},
+		win = {
+			input = {
+				keys = {
+
+					["g."] = { "toggle_ignored", mode = { "i", "n" } },
+					["gh"] = { "toggle_hidden", mode = { "i", "n" } },
+				},
+			},
+		},
 	},
 	--
+	terminal = {
+		enabled = false,
+	},
+	explorer = { enabled = false },
 	gh = { enabled = false },
 	dashboard = { enabled = false },
-	explorer = { enabled = false },
 	scroll = { enabled = false },
 })
 
@@ -67,6 +79,10 @@ nmap_leader("<space>", function()
 		filter = { cwd = true },
 	})
 end, "Recent")
+nmap_leader("ft", function()
+	local terminals = Snacks.terminal.list()
+	Snacks.debug(terminals)
+end, "Find Terminal")
 vim.keymap.set({ "n", "v" }, "<leader>fw", function()
 	Snacks.picker.grep_word()
 end, { desc = "Find Word" })
@@ -102,7 +118,7 @@ nmap_leader("bo", function()
 end, "Delete(other)")
 nmap_leader("bd", function()
 	Snacks.bufdelete()
-end, "Delete(other)")
+end, "Delete")
 
 -- Rename
 nmap_leader("cR", function()
@@ -116,3 +132,7 @@ end, { desc = "Prev Word" })
 vim.keymap.set("n", "]w", function()
 	Snacks.words.jump(vim.v.count1)
 end, { desc = "Next Word" })
+
+nmap_leader("gg", function()
+	Snacks.lazygit()
+end, "Layzygit")

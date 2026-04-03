@@ -1,13 +1,4 @@
 vim.opt.wrap = true
-if require("zk.util").notebook_root(vim.fn.expand("%:p")) ~= nil then
-	local function map(...)
-		vim.api.nvim_buf_set_keymap(0, ...)
-	end
-	local opts = { noremap = true, silent = false }
-
-	map("n", "<CR>", "<Cmd>lua vim.lsp.buf.definition()<CR>", opts)
-	map("n", "<leader>nl", "<Cmd>ZkLinks<CR>", opts)
-end
 
 local lang_aliases = {
 	ts = "typescript",
@@ -17,6 +8,11 @@ local lang_aliases = {
 	py = "python",
 	sh = "bash",
 }
+
+local extension_map = {}
+for k, v in pairs(lang_aliases) do
+	extension_map[v] = k
+end
 
 local function create_codeblock_popup(lang, initial_lines, start_row, end_row)
 	lang = lang_aliases[lang] or lang or "text"
@@ -33,14 +29,6 @@ local function create_codeblock_popup(lang, initial_lines, start_row, end_row)
 	vim.bo[popup_buf].bufhidden = "hide"
 	vim.bo[popup_buf].swapfile = false
 
-	local extension_map = {
-		typescript = "ts",
-		javascript = "js",
-		typescriptreact = "tsx",
-		javascriptreact = "jsx",
-		python = "py",
-		bash = "sh",
-	}
 	local ext = extension_map[lang] or lang
 	local temp_name = string.format("codeblock_%s.%s", os.time(), ext)
 	vim.api.nvim_buf_set_name(popup_buf, temp_name)
@@ -194,3 +182,15 @@ end, {
 })
 
 vim.keymap.set("n", "<leader>mc", "<cmd>CodeBlock<cr>", { buffer = 0, desc = "Markdown: Create/Edit code block" })
+vim.keymap.set("i", "<C-k>", function()
+	local ok, result = pcall(vim.fn.systemlist, { "presenterm", "--list-comment-commands" })
+	if not ok then
+		return
+	end
+
+	vim.ui.select(result, {}, function(choice)
+		if choice then
+			vim.api.nvim_put({ choice }, "c", false, true)
+		end
+	end)
+end, { desc = "presenterm comment" })

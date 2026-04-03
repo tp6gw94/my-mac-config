@@ -45,9 +45,11 @@ vim.lsp.config("cucumber_language_server", cucumber_ls_config)
 
 vim.lsp.enable({
 	"bashls",
+  "yamlls",
 	"lua_ls",
 	"pyright",
 	"vtsls",
+  -- "tsgo",
 	"vue_ls",
 	"eslint",
 	"tailwindcss",
@@ -56,14 +58,14 @@ vim.lsp.enable({
 	"jsonls",
 	"harper_ls",
 	"cucumber_language_server",
-	"markdown_oxide",
+	"marksman",
 	"cspell_ls",
 	"gopls",
 	"cssmodules_ls",
+  "rust_analyzer"
 })
 
 require("nvim-ts-autotag").setup()
-require("ts-error-translator").setup()
 
 vim.api.nvim_create_autocmd("LspAttach", {
 	callback = function(ev)

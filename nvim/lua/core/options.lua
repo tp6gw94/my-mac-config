@@ -1,10 +1,12 @@
 -- references https://github.com/nvim-mini/MiniMax/blob/main/configs/nvim-0.11/plugin/10_options.lua
 local g = vim.g
-g.mapleader = ' '
-g.maplocalleader = ';'
+g.mapleader = " "
+g.maplocalleader = " "
 g.loaded_netrwPlugin = 1
 
 local o = vim.opt
+
+o.laststatus = 2
 
 o.number = true -- show line number
 o.relativenumber = true -- relative line number
@@ -35,7 +37,7 @@ o.ttimeoutlen = 10
 o.ignorecase = true
 o.smartcase = true
 o.incsearch = true
-o.spelloptions = 'camel'
+o.spelloptions = "camel"
 
 -- split behavior
 o.splitright = true
@@ -55,12 +57,14 @@ o.switchbuf = "usetab"
 o.shada = "'100,<50,s10,:1000,/100,@100,h" -- Limit ShaDa file (for startup)
 
 -- Enable all filetype plugins and syntax (if not enabled, for better startup)
-vim.cmd('filetype plugin indent on')
-if vim.fn.exists('syntax_on') ~= 1 then vim.cmd('syntax enable') end
+vim.cmd("filetype plugin indent on")
+if vim.fn.exists("syntax_on") ~= 1 then
+	vim.cmd("syntax enable")
+end
 
 o.list = true -- Show helpful text indicators
-o.listchars = 'trail:-,nbsp:+,tab:▏ '
-o.fillchars = 'eob: ,fold: ,foldopen:,foldsep: ,foldinner: ,foldclose:'
+o.listchars = "trail:-,nbsp:+,tab:▏ "
+o.fillchars = "eob: ,fold: ,foldopen:,foldsep: ,foldinner: ,foldclose:"
 o.ruler = false
 
 o.infercase = true -- Infer case in built-in completion
