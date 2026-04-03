@@ -1,0 +1,11 @@
+theme = GitHub Light Colorblind
+
+font-family = "Maple Mono NF CN"
+font-size = 14
+
+cursor-style-blink = true
+
+quick-terminal-position = center
+
+keybind = f5=reload_config
+keybind = global:cmd+option+space=toggle_quick_terminal
