@@ -27,6 +27,8 @@
 !zk/**
 !opencode
 !opencode/**
+!ghostty
+!ghostty/**
 zsh/.zsh_history
 zsh/.zsh_secrets
 *.local

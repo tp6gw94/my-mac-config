@@ -75,6 +75,7 @@ require("kanagawa").setup({
 -- vim.cmd("colorscheme kanagawa")
 
 require("github-theme").setup()
+-- vim.cmd("colorscheme github_light_tritanopia")
 
-vim.cmd("colorscheme github_light_tritanopia")
-
+require("rose-pine").setup()
+vim.cmd("colorscheme rose-pine-dawn")

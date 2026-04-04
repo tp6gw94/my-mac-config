@@ -1,26 +1,4 @@
-require("nvim-treesitter.configs").setup({
-	ensure_installed = {
-		"c",
-		"css",
-		"gitignore",
-		"go",
-		"gomod",
-		"gosum",
-		"gowork",
-		"html",
-		"javascript",
-		"lua",
-		"markdown",
-		"markdown_inline",
-		"query",
-		"tsx",
-		"typescript",
-		"vim",
-		"vimdoc",
-		"yaml",
-		"http",
-		"json",
-	},
+require("nvim-treesitter").setup({
 	-- Install parsers synchronously (only applied to `ensure_installed`)
 	sync_install = false,
 	auto_install = false,
@@ -40,3 +18,28 @@ require("nvim-treesitter.configs").setup({
 })
 
 vim.treesitter.language.register("markdown", "mdx")
+
+local ensure_installed = {
+	"c",
+	"css",
+	"gitignore",
+	"go",
+	"gomod",
+	"gosum",
+	"gowork",
+	"html",
+	"javascript",
+	"lua",
+	"markdown",
+	"markdown_inline",
+	"query",
+	"tsx",
+	"typescript",
+	"vim",
+	"vimdoc",
+	"yaml",
+	"http",
+	"json",
+}
+
+require("nvim-treesitter").install(ensure_installed)

@@ -3,7 +3,6 @@ local nmap_leader = utils.nmap_leader
 local vmap_leader = utils.vmap_leader
 
 -- General mappings
-vim.keymap.set("n", "<Esc>", "<cmd>nohl<cr>")
 vim.keymap.set("i", "jk", "<Esc>")
 vim.keymap.set("n", "U", "<C-r>", { noremap = true })
 

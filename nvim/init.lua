@@ -4,6 +4,9 @@ require("core.filetype")
 require("core.commands")
 require("core.keymaps")
 
+-- https://neovim.io/doc/user/plugins stander plugin
+vim.cmd.packadd("nohlsearch")
+
 local gh = function(repo)
 	return "https://github.com/" .. repo
 end
@@ -30,12 +33,14 @@ vim.api.nvim_create_autocmd("PackChanged", {
 vim.pack.add({
 	gh("projekt0n/github-nvim-theme"),
 	gh("scottmckendry/cyberdream.nvim"),
+	gh("rose-pine/neovim"),
+
 	gh("mistweaverco/kulala.nvim"),
 
 	gh("esmuellert/codediff.nvim"),
 
-	gh("nvim-treesitter/nvim-treesitter-textobjects"),
-	{ src = gh("nvim-treesitter/nvim-treesitter"), version = "main" },
+	-- { src = gh("nvim-treesitter/nvim-treesitter-textobjects"), version = "93d60a475f0b08a8eceb99255863977d3a25f310" },
+	{ src = gh("nvim-treesitter/nvim-treesitter"), version = "4916d6592ede8c07973490d9322f187e07dfefac" },
 
 	gh("nvim-mini/mini.pairs"),
 	gh("nvim-mini/mini.surround"),
@@ -81,7 +86,7 @@ vim.pack.add({
 	gh("MagicDuck/grug-far.nvim"),
 	gh("lewis6991/gitsigns.nvim"),
 
-  gh("mikavilpas/yazi.nvim")
+	gh("mikavilpas/yazi.nvim"),
 }, { confirm = false })
 
 -- dev use
