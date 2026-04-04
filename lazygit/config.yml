@@ -10,7 +10,8 @@ os:
 confirmOnQuit: false
 git:
   pagers:
-    - pager: delta --light -s --paging=never --diff-highlight
+    - externalDiffCommand: difft --color=always
+    - useExternalDiffGitConfig: true
 customCommands:
   - key: "w"
     prompts:
