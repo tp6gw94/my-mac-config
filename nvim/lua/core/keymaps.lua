@@ -46,9 +46,9 @@ vim.keymap.set("n", "<C-up>", "<cmd>vertical resize -2<cr>")
 vim.keymap.set("n", "<C-right>", "<cmd>vertical resize +2<cr>")
 -- moving between splits
 vim.keymap.set("n", "<C-h>", "<C-w>h")
-vim.keymap.set("n", "<C-j>", "<C-j>j")
-vim.keymap.set("n", "<C-k>", "<C-k>k")
-vim.keymap.set("n", "<C-l>", "<C-l>l")
+vim.keymap.set("n", "<C-j>", "<C-w>j")
+vim.keymap.set("n", "<C-k>", "<C-w>k")
+vim.keymap.set("n", "<C-l>", "<C-w>l")
 
 -- Paths
 nmap_leader("cp", "<cmd>CopyRelPath<cr>", "Copy relative path")
