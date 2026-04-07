@@ -45,11 +45,11 @@ vim.lsp.config("cucumber_language_server", cucumber_ls_config)
 
 vim.lsp.enable({
 	"bashls",
-  "yamlls",
+	"yamlls",
 	"lua_ls",
 	"pyright",
-	"vtsls",
-  -- "tsgo",
+	-- "vtsls",
+	"tsgo",
 	"vue_ls",
 	"eslint",
 	"tailwindcss",
@@ -62,7 +62,7 @@ vim.lsp.enable({
 	"cspell_ls",
 	"gopls",
 	"cssmodules_ls",
-  "rust_analyzer"
+	"rust_analyzer",
 })
 
 require("nvim-ts-autotag").setup()
@@ -80,5 +80,19 @@ vim.api.nvim_create_autocmd("LspAttach", {
 		vim.keymap.set("n", "K", vim.lsp.buf.hover, { desc = "Hover", buffer = buffer })
 		vim.keymap.set("i", "<C-s>", vim.lsp.buf.signature_help, { desc = "Signature Help", buffer = buffer })
 		vim.keymap.set("n", "<leader>br", vim.lsp.buf.references, { desc = "Buffer reference", buffer = buffer })
+	end,
+})
+
+vim.api.nvim_create_autocmd("LspProgress", {
+	callback = function(ev)
+		local value = ev.data.params.value
+		vim.api.nvim_echo({ { value.message or "done" } }, false, {
+			id = "lsp." .. ev.data.client_id,
+			kind = "progress",
+			source = "vim.lsp",
+			title = value.title,
+			status = value.kind ~= "end" and "running" or "success",
+			percent = value.percentage,
+		})
 	end,
 })
