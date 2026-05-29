@@ -1,0 +1,58 @@
+#!/usr/bin/env bash
+
+set -euo pipefail
+
+PLAN_DIR="$(pwd -P)/.plan"
+
+if [[ ! -d "${PLAN_DIR}" ]]; then
+  echo "錯誤：${PLAN_DIR} 不存在。" >&2
+  exit 1
+fi
+
+# bash 3.2 相容：避用 mapfile
+MD_FILES=()
+while IFS= read -r _line; do
+  MD_FILES+=("${_line}")
+done < <(find "${PLAN_DIR}" -type f -name '*.md' | sort)
+
+if (( ${#MD_FILES[@]} == 0 )); then
+  echo "錯誤：${PLAN_DIR} 下沒有任何 .md 檔。" >&2
+  exit 1
+fi
+
+# 將每行格式化為「相對路徑<TAB>絕對路徑」，fzf 只顯示第 1 欄。
+# 以函式封裝避免污染外層變數；於 pipeline 內展開，無需額外陣列。
+_emit_lines() {
+  local _abs _rel
+  for _abs in "${MD_FILES[@]}"; do
+    _rel="${_abs#${PLAN_DIR}/}"
+    printf '%s\t%s\n' "${_rel}" "${_abs}"
+  done
+}
+
+set +e
+SELECTED_LINE="$(_emit_lines \
+  | fzf --prompt='.plan> ' \
+        --delimiter=$'\t' \
+        --with-nth=1 \
+        --preview 'bat --color=always --style=plain {2} 2>/dev/null || cat {2}' \
+        --preview-window=right:40%)"
+FZF_RC=$?
+set -e
+
+if [[ ${FZF_RC} -eq 130 ]]; then
+  exit 0
+fi
+if [[ ${FZF_RC} -ne 0 || -z "${SELECTED_LINE}" ]]; then
+  exit "${FZF_RC}"
+fi
+
+# SELECTED_LINE 形如「相對路徑<TAB>絕對路徑」；取最後一個 TAB 之後內容＝絕對路徑
+SELECTED="${SELECTED_LINE##*$'\t'}"
+
+if [[ -z "${SELECTED}" ]]; then
+  echo "錯誤：無法從 fzf 選擇結果解析絕對路徑。" >&2
+  exit 1
+fi
+
+exec cmux markdown open "${SELECTED}" --focus true
