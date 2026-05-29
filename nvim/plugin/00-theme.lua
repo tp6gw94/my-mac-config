@@ -1,3 +1,24 @@
+require("github-theme").setup({
+	groups = {
+		all = {
+			Cursor = { bg = "#FFDC9F" },
+		},
+	},
+	options = {
+		dim_inactive = true,
+	},
+})
+vim.cmd("colorscheme github_light_colorblind")
+
+require("rose-pine").setup()
+-- vim.cmd("colorscheme rose-pine-dawn")
+
+-- vim.g.gruvbox_material_background = 'hard'
+-- vim.g.gruvbox_material_enable_italic = true
+-- vim.cmd.colorscheme("gruvbox-material")
+
+-- vim.cmd("colorscheme dayfox")
+
 require("kanagawa").setup({
 	theme = "lotus",
 	transparent = false,
@@ -73,9 +94,3 @@ require("kanagawa").setup({
 	end,
 })
 -- vim.cmd("colorscheme kanagawa")
-
-require("github-theme").setup()
--- vim.cmd("colorscheme github_light_tritanopia")
-
-require("rose-pine").setup()
-vim.cmd("colorscheme rose-pine-dawn")

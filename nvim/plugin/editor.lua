@@ -191,3 +191,17 @@ require("yazi").setup({
 nmap_leader("e", "<cmd>Yazi<cr>", "Open yazi current file")
 nmap_leader("E", "<cmd>Yazi cwd<cr>", "Open yazi cwd")
 
+
+-- <leader>fp: 開 cwd/.plan，不存在先建立
+local function open_plan_folder()
+  local plan_dir = vim.fn.getcwd() .. "/.plan"
+  if vim.fn.isdirectory(plan_dir) == 0 then
+    vim.fn.mkdir(plan_dir, "p")
+  end
+  require("yazi").yazi(nil, plan_dir)
+end
+
+vim.api.nvim_create_user_command("YaziPlan", open_plan_folder, {
+  desc = "Open yazi at cwd/.plan (mkdir if missing)",
+})
+nmap_leader("fp", open_plan_folder, "Open yazi at cwd/.plan")

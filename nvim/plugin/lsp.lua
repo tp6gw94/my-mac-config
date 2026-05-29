@@ -43,13 +43,15 @@ local cucumber_ls_config = {
 }
 vim.lsp.config("cucumber_language_server", cucumber_ls_config)
 
+
 vim.lsp.enable({
+  -- "markdown_oxide",
 	"bashls",
 	"yamlls",
 	"lua_ls",
 	"pyright",
-	-- "vtsls",
-	"tsgo",
+	"vtsls",
+	--	"tsgo",
 	"vue_ls",
 	"eslint",
 	"tailwindcss",
@@ -58,11 +60,12 @@ vim.lsp.enable({
 	"jsonls",
 	"harper_ls",
 	"cucumber_language_server",
-	"marksman",
+	-- "marksman",
 	"cspell_ls",
 	"gopls",
 	"cssmodules_ls",
 	"rust_analyzer",
+  "mdx_analyzer"
 })
 
 require("nvim-ts-autotag").setup()

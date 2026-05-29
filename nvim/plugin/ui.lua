@@ -43,7 +43,6 @@ require("trouble").setup({
 	},
 })
 
-
 -- Trouble
 nmap_leader("xx", "<cmd>Trouble diagnostics toggle filter.buf=0<cr>", "Diagnostics Buffer (Trouble)")
 nmap_leader("xX", "<cmd>Trouble diagnostics toggle<cr>", "Diagnostics (Trouble)")
@@ -54,6 +53,9 @@ end, { desc = "Trouble Prev" })
 vim.keymap.set("n", "]t", function()
 	require("trouble").next()
 end, { desc = "Trouble Next" })
+
+-- rainbow-delimiters
+require("rainbow-delimiters.setup").setup()
 
 -- Ufo
 vim.keymap.set("n", "zR", require("ufo").openAllFolds, { desc = "Open all folds" })

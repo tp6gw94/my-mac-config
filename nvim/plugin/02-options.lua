@@ -6,7 +6,10 @@ g.loaded_netrwPlugin = 1
 
 local o = vim.opt
 
+o.cursorline = true
+o.termguicolors = true
 o.laststatus = 2
+o.guicursor = "n-v-c-sm:block-Cursor,i-ci-ve:ver25-Cursor,r-cr-o:hor20-Cursor"
 
 o.number = true -- show line number
 o.relativenumber = true -- relative line number
@@ -68,3 +71,10 @@ o.fillchars = "eob: ,fold: ,foldopen:,foldsep: ,foldinner: ,foldclose:"
 o.ruler = false
 
 o.infercase = true -- Infer case in built-in completion
+
+
+vim.filetype.add({
+  extension = {
+    mdx = 'mdx'
+  }
+})

@@ -1,9 +1,3 @@
-require("core.autocmds")
-require("core.options")
-require("core.filetype")
-require("core.commands")
-require("core.keymaps")
-
 -- https://neovim.io/doc/user/plugins stander plugin
 vim.cmd.packadd("nohlsearch")
 
@@ -34,6 +28,7 @@ vim.pack.add({
 	gh("projekt0n/github-nvim-theme"),
 	gh("scottmckendry/cyberdream.nvim"),
 	gh("rose-pine/neovim"),
+	gh("edeneast/nightfox.nvim"),
 
 	gh("mistweaverco/kulala.nvim"),
 
@@ -52,6 +47,8 @@ vim.pack.add({
 	gh("nvim-mini/mini.statusline"),
 	gh("nvim-mini/mini.clue"),
 	gh("nvim-mini/mini.bracketed"),
+
+  gh("hiphish/rainbow-delimiters.nvim"),
 
 	gh("rafamadriz/friendly-snippets"),
 	{ src = gh("saghen/blink.cmp"), name = "blink.cmp", version = vim.version.range("^1") },
@@ -87,11 +84,5 @@ vim.pack.add({
 	gh("lewis6991/gitsigns.nvim"),
 
 	gh("mikavilpas/yazi.nvim"),
+	gh("obsidian-nvim/obsidian.nvim"),
 }, { confirm = false })
-
--- dev use
-vim.cmd.packadd("usememos.nvim")
-require("usememos").setup({
-	endpoint = "http://localhost:5230",
-	token = "memos_pat_aAeOkOvYVBnR5bffd5PysQRkwKdvP4e6",
-})
