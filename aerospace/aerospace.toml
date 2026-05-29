@@ -66,20 +66,20 @@ preset = 'qwerty'
 #                 See:
 #                 https://nikitabobko.github.io/AeroSpace/guide#assign-workspaces-to-monitors
 [gaps]
-inner.horizontal = 10
-inner.vertical = 10
-outer.left = 10
-outer.bottom = 10
-outer.top = 10
-outer.right = 10
+inner.horizontal = 12
+inner.vertical = 12
+outer.left = 12
+outer.bottom = 12
+outer.top = 12
+outer.right = 12
 
 [workspace-to-monitor-force-assignment]
-1 = ["BenQ GL2580"]
-2 = ["LS27A600U"]
+# 1 = ["BenQ PD2500Q"]
+# 2 = ["LS27A600U"]
 3 = ["Built-in Retina Display"]
 4 = ["Built-in Retina Display"]
-w = ["BenQ PD2500Q"]
-s = ["BenQ PD2500Q"]
+# w = ["BenQ GL2580"]
+# s = ["BenQ PD2500Q"]
 
 # 'main' binding mode declaration
 # See: https://nikitabobko.github.io/AeroSpace/guide#binding-modes
@@ -114,56 +114,50 @@ cmd-alt-h = [] # Disable "hide others"
 #     activate
 # end tell'
 # '''
-alt-enter = "exec-and-forget kitty --single-instance -d ~"
-alt-shift-enter = "exec-and-forget ~/.config/aerospace/kitty-finder.sh"
+
+# alt-enter = "exec-and-forget kitty --single-instance -d ~"
+# alt-shift-enter = "exec-and-forget ~/.config/aerospace/kitty-finder.sh"
+
+# alt-ctrl-cmd-n = "exec-and-forget ~/.config/aerospace/ghostty-quick-note.sh"
+
+alt-ctrl-cmd-shift-h = ['join-with left', 'mode main']
+alt-ctrl-cmd-shift-j = ['join-with down', 'mode main']
+alt-ctrl-cmd-shift-k = ['join-with up', 'mode main']
+alt-ctrl-cmd-shift-l = ['join-with right', 'mode main']
+
+alt-ctrl-cmd-left = "focus-monitor --wrap-around left"
+alt-ctrl-cmd-down = "focus-monitor --wrap-around down"
+alt-ctrl-cmd-up = "focus-monitor --wrap-around up"
+alt-ctrl-cmd-right = "focus-monitor --wrap-around right"
 
 # See: https://nikitabobko.github.io/AeroSpace/commands#focus
-alt-h = 'focus left --boundaries-action wrap-around-the-workspace'
-alt-j = 'focus down --boundaries-action wrap-around-the-workspace'
-alt-k = 'focus up --boundaries-action wrap-around-the-workspace'
-alt-l = 'focus right --boundaries-action wrap-around-the-workspace'
-
-alt-shift-h = ['join-with left', 'mode main']
-alt-shift-j = ['join-with down', 'mode main']
-alt-shift-k = ['join-with up', 'mode main']
-alt-shift-l = ['join-with right', 'mode main']
-
-alt-ctrl-cmd-h = "focus-monitor --wrap-around left"
-alt-ctrl-cmd-j = "focus-monitor --wrap-around down"
-alt-ctrl-cmd-k = "focus-monitor --wrap-around up"
-alt-ctrl-cmd-l = "focus-monitor --wrap-around right"
-
-alt-n = 'focus-monitor --wrap-around next'
-alt-p = 'focus-monitor --wrap-around prev'
+alt-ctrl-cmd-h = 'focus left --boundaries-action wrap-around-the-workspace'
+alt-ctrl-cmd-j = 'focus down --boundaries-action wrap-around-the-workspace'
+alt-ctrl-cmd-k = 'focus up --boundaries-action wrap-around-the-workspace'
+alt-ctrl-cmd-l = 'focus right --boundaries-action wrap-around-the-workspace'
 
 # See: https://nikitabobko.github.io/AeroSpace/commands#resize
-alt-minus = 'resize smart -50'
-alt-equal = 'resize smart +50'
+alt-ctrl-cmd-minus = 'resize smart -50'
+alt-ctrl-cmd-equal = 'resize smart +50'
 
-alt-b = ['workspace-back-and-forth']
-alt-1 = ['workspace 1']
-alt-2 = ['workspace 2']
-alt-3 = ['workspace 3']
-alt-4 = ['workspace 4']
-alt-5 = ['workspace 5']
-alt-6 = ['workspace 6']
-alt-7 = ['workspace 7']
-alt-8 = ['workspace 8']
-alt-9 = ['workspace 9']
-alt-0 = ['workspace 0']
-alt-q = ['workspace q']
-alt-w = ['workspace w']
-alt-e = ['workspace e']
-alt-r = ['workspace r']
-alt-t = ['workspace t']
-alt-y = ['workspace y']
-alt-m = ['workspace m']
-alt-s = ['workspace s']
+alt-ctrl-cmd-b = ['workspace-back-and-forth']
+alt-ctrl-cmd-1 = ['workspace 1']
+alt-ctrl-cmd-2 = ['workspace 2']
+alt-ctrl-cmd-3 = ['workspace 3']
+alt-ctrl-cmd-4 = ['workspace 4']
+alt-ctrl-cmd-5 = ['workspace 5']
+alt-ctrl-cmd-6 = ['workspace 6']
+alt-ctrl-cmd-7 = ['workspace 7']
+alt-ctrl-cmd-8 = ['workspace 8']
+alt-ctrl-cmd-9 = ['workspace 9']
+alt-ctrl-cmd-0 = ['workspace 0']
+alt-ctrl-cmd-f = ['workspace f']
+alt-ctrl-cmd-m = ['workspace memo']
 
-alt-shift-tab = ['move-workspace-to-monitor --wrap-around next']
+alt-ctrl-cmd-shift-tab = ['move-workspace-to-monitor --wrap-around next']
 
 # See: https://nikitabobko.github.io/AeroSpace/commands#mode
-alt-a = 'mode service'
+alt-ctrl-cmd-a = 'mode service'
 # 'service' binding mode declaration.
 # See: https://nikitabobko.github.io/AeroSpace/guide#binding-modes
 [mode.service.binding]
@@ -181,14 +175,8 @@ shift-7 = ['move-node-to-workspace 7 --focus-follows-window', 'mode main']
 shift-8 = ['move-node-to-workspace 8 --focus-follows-window', 'mode main']
 shift-9 = ['move-node-to-workspace 9 --focus-follows-window', 'mode main']
 shift-0 = ['move-node-to-workspace 0 --focus-follows-window', 'mode main']
-shift-q = ['move-node-to-workspace q --focus-follows-window', 'mode main']
-shift-w = ['move-node-to-workspace w --focus-follows-window', 'mode main']
-shift-e = ['move-node-to-workspace e --focus-follows-window', 'mode main']
-shift-r = ['move-node-to-workspace r --focus-follows-window', 'mode main']
-shift-t = ['move-node-to-workspace t --focus-follows-window', 'mode main']
-shift-y = ['move-node-to-workspace y --focus-follows-window', 'mode main']
-shift-m = ['move-node-to-workspace m --focus-follows-window', 'mode main']
-shift-s = ['move-node-to-workspace s --focus-follows-window', 'mode main']
+shift-f = ['move-node-to-workspace f --focus-follows-window', 'mode main']
+alt-ctrl-cmd-m = ['move-node-to-workspace memo --focus-follows-window', 'mode main']
 
 
 # sticky is not yet supported https://github.com/nikitabobko/AeroSpace/issues/2
@@ -198,10 +186,10 @@ shift-s = ['move-node-to-workspace s --focus-follows-window', 'mode main']
 # z = ["exec-and-forget brew services restart sketchybar", 'mode main']
 
 # See: https://nikitabobko.github.io/AeroSpace/commands#move
-h = ['move left', 'mode main']
-j = ['move down', 'mode main']
-k = ['move up', 'mode main']
-l = ['move right', 'mode main']
+shift-h = ['move left', 'mode main']
+shift-j = ['move down', 'mode main']
+shift-k = ['move up', 'mode main']
+shift-l = ['move right', 'mode main']
 
 v = ['layout vertical', 'mode main']
 s = ['layout horizontal', 'mode main']
@@ -289,6 +277,10 @@ shift-right = ['move-workspace-to-monitor right --wrap-around', 'mode main']
   run = ['layout floating']
 
 [[on-window-detected]]
+  if.app-id = "net.kovidgoyal.kitty-quick-access"
+  run = ['layout floating']
+
+[[on-window-detected]]
   if.app-id = "com.apple.Preview"
   run = ['layout floating']
 
@@ -325,8 +317,12 @@ shift-right = ['move-workspace-to-monitor right --wrap-around', 'mode main']
   run = ['move-node-to-workspace 9']
 
 [[on-window-detected]]
+  if.app-id = "com.hnc.Discord"
+  run = ['move-node-to-workspace 9']
+
+[[on-window-detected]]
   if.app-id = "com.figma.Desktop"
-  run = ['move-node-to-workspace m']
+  run = ['move-node-to-workspace f']
 
 [[on-window-detected]]
   if.app-id = "com.apple.Safari"
@@ -343,3 +339,7 @@ shift-right = ['move-workspace-to-monitor right --wrap-around', 'mode main']
 [[on-window-detected]]
   if.app-id = "com.valvesoftware.steam.helper"
   run = ['move-node-to-workspace 0']
+
+[[on-window-detected]]
+  if.app-id = "com.electron.trilium-notes"
+  run = ["move-node-to-workspace memo"]
