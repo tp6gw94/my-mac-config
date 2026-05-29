@@ -58,7 +58,11 @@ customCommands:
         title: "Create a new worktree from {{ .CheckedOutBranch.Name }} with what name?"
         key: "Name"
         initialValue: ""
-    command: "git worktree add ../{{ .Form.Name }} {{ .CheckedOutBranch.Name }} -b {{ .Form.Name }}"
+      - type: "input"
+        title: "Worktree folder path?"
+        key: "Path"
+        initialValue: '{{ runCommand "sh -c \"git worktree list --porcelain | sed -n ''1s/^worktree //p''\"" }}/.worktree/{{ runCommand (printf "basename %s" (.Form.Name | quote)) }}'
+    command: "git worktree add {{ .Form.Path | quote }} {{ .CheckedOutBranch.Name }} -b {{ .Form.Name | quote }}"
   # Create worktree from selected branch (when in branches view)
   - key: "N"
     context: "localBranches"
@@ -68,7 +72,22 @@ customCommands:
         title: "Create a new worktree from {{ .SelectedLocalBranch.Name }} with what name?"
         key: "Name"
         initialValue: ""
-    command: "git worktree add ../{{ .Form.Name }} {{ .SelectedLocalBranch.Name }} -b {{ .Form.Name }}"
+      - type: "input"
+        title: "Worktree folder path?"
+        key: "Path"
+        initialValue: '{{ runCommand "sh -c \"git worktree list --porcelain | sed -n ''1s/^worktree //p''\"" }}/.worktree/{{ runCommand (printf "basename %s" (.Form.Name | quote)) }}'
+    command: "git worktree add {{ .Form.Path | quote }} {{ .SelectedLocalBranch.Name | quote }} -b {{ .Form.Name | quote }}"
+  - key: "D"
+    context: "localBranches"
+    description: "Delete worktree and branch"
+    prompts:
+      - type: "confirm"
+        title: "Delete worktree + branch: {{ .SelectedLocalBranch.Name }}?"
+        body: "This will remove the worktree (if exists) and force-delete the branch."
+    command: >-
+      WT_PATH=$(git worktree list --porcelain | awk -v b="refs/heads/{{ .SelectedLocalBranch.Name }}" '/^worktree /{p=$0} /^branch /{if($2==b){print p}}' | sed 's/worktree //');
+      if [ -n "$WT_PATH" ]; then git worktree remove "$WT_PATH" --force; fi;
+      git branch -D {{ .SelectedLocalBranch.Name | quote }}
   - key: "N"
     context: "remoteBranches"
     description: "Create new worktree from selected remote branch"
@@ -77,4 +96,8 @@ customCommands:
         title: "Create a new worktree from {{ .SelectedRemoteBranch.RemoteName }}/{{ .SelectedRemoteBranch.Name }} with what name?"
         key: "Name"
         initialValue: "{{ .SelectedRemoteBranch.Name }}"
-    command: "git worktree add ../{{ .Form.Name }} {{ .SelectedRemoteBranch.RemoteName }}/{{ .SelectedRemoteBranch.Name }} -b {{ .Form.Name }}"
+      - type: "input"
+        title: "Worktree folder path?"
+        key: "Path"
+        initialValue: '{{ runCommand "sh -c \"git worktree list --porcelain | sed -n ''1s/^worktree //p''\"" }}/.worktree/{{ runCommand (printf "basename %s" (.Form.Name | quote)) }}'
+    command: "git worktree add {{ .Form.Path | quote }} {{ .SelectedRemoteBranch.RemoteName }}/{{ .SelectedRemoteBranch.Name | quote }} -b {{ .Form.Name | quote }}"
