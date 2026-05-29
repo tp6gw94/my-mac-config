@@ -20,6 +20,7 @@ alias svim="sudo -E nvim"
 alias oc="opencode"
 alias kc="kiro-cli"
 alias ppt="presenterm"
+alias md="glow"
 
 export EDITOR="nvim"
 export VISUAL="nvim"
@@ -33,6 +34,7 @@ export PATH="$BUN_INSTALL/bin:$PATH"
 
 path=(/opt/homebrew/bin $path)
 path=($HOME/.local/bin $path)
+path=($XDG_CONFIG_HOME/bin $path)
 
 function y() {
 	local tmp="$(mktemp -t "yazi-cwd.XXXXXX")" cwd
@@ -40,6 +42,28 @@ function y() {
 	IFS= read -r -d '' cwd < "$tmp"
 	[ -n "$cwd" ] && [ "$cwd" != "$PWD" ] && builtin cd -- "$cwd"
 	rm -f -- "$tmp"
+}
+
+function yw() {
+	local root="$(git worktree list --porcelain | head -1 | sed 's/^worktree //')"
+	if [[ -z "$root" ]]; then
+		echo "yw: not in a git repo" >&2
+		return 1
+	fi
+	if [[ ! -d "$root/.worktree" ]]; then
+		echo "yw: no .worktree/ in $root" >&2
+		return 1
+	fi
+	y "$root/.worktree"
+}
+
+function wm() {
+	local main="$(git worktree list --porcelain | head -1 | sed 's/^worktree //')"
+	if [[ -z "$main" ]]; then
+		echo "wm: not in a git repo" >&2
+		return 1
+	fi
+	builtin cd -- "$main"
 }
 
 function zvm_after_init() {
