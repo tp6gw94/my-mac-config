@@ -34,6 +34,7 @@ export PATH="$BUN_INSTALL/bin:$PATH"
 
 path=(/opt/homebrew/bin $path)
 path=($HOME/.local/bin $path)
+path=($HOME/.kiro/bin $path)
 path=($XDG_CONFIG_HOME/bin $path)
 
 function y() {
