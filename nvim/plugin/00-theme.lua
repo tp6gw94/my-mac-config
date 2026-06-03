@@ -1,7 +1,7 @@
 require("github-theme").setup({
 	groups = {
 		all = {
-			Cursor = { bg = "#FFDC9F" },
+			Cursor = { bg = "#FE7430" },
 		},
 	},
 	options = {
