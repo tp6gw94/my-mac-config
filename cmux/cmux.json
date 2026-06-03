@@ -1,0 +1,18 @@
+{
+  "$schema" : "https://raw.githubusercontent.com/manaflow-ai/cmux/main/web/data/cmux.schema.json",
+  "schemaVersion" : 1,
+  "shortcuts" : {
+    "bindings" : {
+      "openDiffViewer" : {
+        "first" : {
+          "command" : false,
+          "control" : false,
+          "key" : "d",
+          "keyCode" : 2,
+          "option" : true,
+          "shift" : true
+        }
+      }
+    }
+  }
+}
