@@ -31,6 +31,8 @@
 !ghostty/**
 !bin
 !bin/**
+!cmux
+!cmux/**
 zsh/.zsh_history
 zsh/.zsh_secrets
 *.local
