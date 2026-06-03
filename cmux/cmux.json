@@ -1,18 +1,26 @@
 {
   "$schema" : "https://raw.githubusercontent.com/manaflow-ai/cmux/main/web/data/cmux.schema.json",
   "schemaVersion" : 1,
-  "shortcuts" : {
-    "bindings" : {
-      "openDiffViewer" : {
-        "first" : {
-          "command" : false,
-          "control" : false,
-          "key" : "d",
-          "keyCode" : 2,
-          "option" : true,
-          "shift" : true
-        }
-      }
+  "shortcuts": {
+    "bindings": {
+      "newSurface": "cmd+t",
+      "toggleSidebar": "cmd+e",
+      "focusLeft": "cmd+h",
+      "focusRight": "cmd+l",
+      "focusUp": "cmd+k",
+      "focusDown": "cmd+j",
+      "newTab": "cmd+n",
+      "nextSidebarTab": "cmd+shift+j",
+      "prevSidebarTab": "cmd+shift+k",
+      "nextSurface": "cmd+shift+l",
+      "prevSurface": "cmd+shift+h",
+      "triggerFlash": "none",
+      "commandPalette": "cmd+p",
+      "jumpToUnread": ["ctrl+a", "u"],
+      "splitRight": ["ctrl+a", "v"],
+      "splitDown": ["ctrl+a", "s"],
+      "toggleSplitZoom": ["ctrl+a", "z"],
+      "openBrowser": ["ctrl+a", "b"]
     }
   }
 }
