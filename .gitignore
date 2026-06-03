@@ -33,6 +33,8 @@
 !bin/**
 !cmux
 !cmux/**
+!yazi
+!yazi/**
 zsh/.zsh_history
 zsh/.zsh_secrets
 *.local
