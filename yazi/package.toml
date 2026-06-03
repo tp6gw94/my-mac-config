@@ -3,5 +3,5 @@ deps = []
 
 [[flavor.deps]]
 use = "muratoffalex/kanagawa-lotus"
-rev = "4275a1a"
-hash = "e3c47ba547279aff64b6e46eefcf4479"
+rev = "00dcc74"
+hash = "8fe01c79d91d7154ce231334cc7275f2"
