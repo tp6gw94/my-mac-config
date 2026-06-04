@@ -4,7 +4,10 @@
   "shortcuts": {
     "bindings": {
       "newSurface": "cmd+t",
-      "toggleSidebar": "cmd+e",
+      "toggleSidebar": ["ctrl+a", "w"],
+      "focusRightSidebar": ["ctrl+a", "i"],
+      "openDiffViewer": ["ctrl+a", "d"],      
+      "toggleFileExplorer": ["ctrl+a", "e"],
       "focusLeft": "cmd+h",
       "focusRight": "cmd+l",
       "focusUp": "cmd+k",
