@@ -1,10 +1,10 @@
-require("obsidian").setup({
-	legacy_commands = false, -- this will be removed in 4.0.0
-	note_id_func = require("obsidian.builtin").title_id,
-	workspaces = {
-		{
-			name = "personal",
-			path = "~/Dropbox/Zettlr",
-		},
-	},
-})
+-- require("obsidian").setup({
+-- 	legacy_commands = false, -- this will be removed in 4.0.0
+-- 	note_id_func = require("obsidian.builtin").title_id,
+-- 	workspaces = {
+-- 		{
+-- 			name = "personal",
+-- 			path = "~/Dropbox/Zettlr",
+-- 		},
+-- 	},
+-- })

@@ -1,23 +1,3 @@
-require("nvim-treesitter").setup({
-	-- Install parsers synchronously (only applied to `ensure_installed`)
-	sync_install = false,
-	auto_install = false,
-
-	-- List of parsers to ignore installing (or "all")
-	ignore_install = {},
-
-	---- If you need to change the installation directory of the parsers (see -> Advanced Setup)
-	-- parser_install_dir = "/some/path/to/store/parsers", -- Remember to run vim.opt.runtimepath:append("/some/path/to/store/parsers")!
-
-	highlight = {
-		enable = true,
-		additional_vim_regex_highlighting = { "markdown" },
-	},
-
-	modules = {},
-})
-
-vim.treesitter.language.register("markdown", "mdx")
 
 local ensure_installed = {
 	"c",
@@ -42,4 +22,11 @@ local ensure_installed = {
 	"json",
 }
 
-require("nvim-treesitter").install(ensure_installed)
+require("tree-sitter-manager").setup({
+  -- Default Options
+  ensure_installed = ensure_installed, -- list of parsers to install at the start of a neovim session. If set to "all", install all parsers.
+  -- border = nil, -- border style for the window (e.g. "rounded", "single"), if nil, use the default border style defined by 'vim.o.winborder'. See :h 'winborder' for more info.
+  -- auto_install = false, -- if enabled, install missing parsers when editing a new file
+  -- highlight = true, -- treesitter highlighting is enabled by default
+  -- languages = {}, -- override or add new parser sources
+})

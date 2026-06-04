@@ -34,8 +34,7 @@ vim.pack.add({
 
 	gh("esmuellert/codediff.nvim"),
 
-	-- { src = gh("nvim-treesitter/nvim-treesitter-textobjects"), version = "93d60a475f0b08a8eceb99255863977d3a25f310" },
-	{ src = gh("nvim-treesitter/nvim-treesitter"), version = "4916d6592ede8c07973490d9322f187e07dfefac" },
+  gh("romus204/tree-sitter-manager.nvim"),
 
 	gh("nvim-mini/mini.pairs"),
 	gh("nvim-mini/mini.surround"),
@@ -84,5 +83,5 @@ vim.pack.add({
 	gh("lewis6991/gitsigns.nvim"),
 
 	gh("mikavilpas/yazi.nvim"),
-	gh("obsidian-nvim/obsidian.nvim"),
+	-- gh("obsidian-nvim/obsidian.nvim"),
 }, { confirm = false })

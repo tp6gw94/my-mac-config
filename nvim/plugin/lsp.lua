@@ -52,7 +52,7 @@ vim.lsp.enable({
 	"lua_ls",
 	"pyright",
 	"vtsls",
-	--	"tsgo",
+  "tsgo",
 	"vue_ls",
 	"eslint",
 	"tailwindcss",
