@@ -11,3 +11,5 @@ macos-option-as-alt = true
 
 keybind = f5=reload_config
 keybind = global:cmd+option+space=toggle_quick_terminal
+keybind = cmd+u=scroll_page_up
+keybind = cmd+shift+u=scroll_page_down
