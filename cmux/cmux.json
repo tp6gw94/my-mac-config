@@ -3,6 +3,7 @@
   "schemaVersion" : 1,
   "shortcuts": {
     "bindings": {
+      "toggleTerminalCopyMode": ["ctrl+a", "m"],
       "newSurface": "cmd+t",
       "toggleSidebar": ["ctrl+a", "w"],
       "focusRightSidebar": ["ctrl+a", "i"],
@@ -17,7 +18,7 @@
       "prevSidebarTab": "cmd+shift+k",
       "nextSurface": "cmd+shift+l",
       "prevSurface": "cmd+shift+h",
-      "triggerFlash": "none",
+      "triggerFlash": ["ctrl+a", "f"],
       "commandPalette": "cmd+p",
       "jumpToUnread": ["ctrl+a", "u"],
       "splitRight": ["ctrl+a", "v"],
