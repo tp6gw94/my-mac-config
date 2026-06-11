@@ -101,3 +101,8 @@ customCommands:
         key: "Path"
         initialValue: '{{ runCommand "sh -c \"git worktree list --porcelain | sed -n ''1s/^worktree //p''\"" }}/.worktree/{{ runCommand (printf "basename %s" (.Form.Name | quote)) }}'
     command: "git worktree add {{ .Form.Path | quote }} {{ .SelectedRemoteBranch.RemoteName }}/{{ .SelectedRemoteBranch.Name | quote }} -b {{ .Form.Name | quote }}"
+  - key: "O"
+    context: "worktrees"
+    description: "Open worktree in new cmux workspace"
+    command: "cmux select-workspace --workspace \"$(cmux new-workspace --name {{.SelectedWorktree.Name | quote}} --cwd {{.SelectedWorktree.Path | quote}} | sed 's/^OK //')\""
+    output: none 
