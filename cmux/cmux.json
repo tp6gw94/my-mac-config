@@ -7,27 +7,13 @@
   },
   "shortcuts": {
     "bindings": {
-      "toggleTerminalCopyMode": [
-        "ctrl+a",
-        "m"
-      ],
+      "clearScreenKeepScrollback": "none",
+      "toggleTerminalCopyMode": ["ctrl+a", "m"],
       "newSurface": "cmd+t",
-      "toggleSidebar": [
-        "ctrl+a",
-        "w"
-      ],
-      "focusRightSidebar": [
-        "ctrl+a",
-        "i"
-      ],
-      "openDiffViewer": [
-        "ctrl+a",
-        "d"
-      ],
-      "toggleFileExplorer": [
-        "ctrl+a",
-        "e"
-      ],
+      "toggleSidebar": ["ctrl+a", "w"],
+      "focusRightSidebar": ["ctrl+a", "i"],
+      "openDiffViewer": ["ctrl+a", "d"],
+      "toggleFileExplorer": ["ctrl+a", "e"],
       "focusLeft": "cmd+h",
       "focusRight": "cmd+l",
       "focusUp": "cmd+k",
@@ -37,31 +23,14 @@
       "prevSidebarTab": "cmd+shift+k",
       "nextSurface": "cmd+shift+l",
       "prevSurface": "cmd+shift+h",
-      "triggerFlash": [
-        "ctrl+a",
-        "f"
-      ],
+      "triggerFlash": ["ctrl+a", "f"],
       "commandPalette": "cmd+p",
-      "jumpToUnread": [
-        "ctrl+a",
-        "u"
-      ],
-      "splitRight": [
-        "ctrl+a",
-        "v"
-      ],
-      "splitDown": [
-        "ctrl+a",
-        "s"
-      ],
-      "toggleSplitZoom": [
-        "ctrl+a",
-        "z"
-      ],
-      "openBrowser": [
-        "ctrl+a",
-        "b"
-      ]
+      "jumpToUnread": ["ctrl+a", "u"],
+      "splitRight": ["ctrl+a", "v"],
+      "splitDown": ["ctrl+a", "s"],
+      "toggleSplitZoom": ["ctrl+a", "z"],
+      "openBrowser": ["ctrl+a", "b"]
     }
   }
 }
+
