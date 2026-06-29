@@ -75,6 +75,9 @@ vim.api.nvim_create_autocmd("LspAttach", {
 	callback = function(ev)
 		local buffer = ev.buf
 
+		-- ponytail: neovim 0.12 document_color assert on LSP restart (document_color.lua:225), upstream unfixed; mini.hipatterns covers hex colors anyway
+		vim.lsp.document_color.enable(false, { bufnr = ev.buf })
+
 		vim.keymap.set({ "n", "v" }, "<leader>ca", vim.lsp.buf.code_action, { desc = "Code Action", buffer = buffer })
 		vim.keymap.set("n", "<leader>cA", function()
 			vim.lsp.buf.code_action({ context = { only = { "source" }, diagnostics = {} } })
