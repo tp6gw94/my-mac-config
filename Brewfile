@@ -5,23 +5,21 @@ tap "dlvhdr/formulae"
 tap "docker/tap"
 tap "ejoffe/tap"
 tap "eugene1g/safehouse"
-tap "felixkratz/formulae"
+tap "felixkratz/formulae", "https://github.com/FelixKratz/homebrew-formulae"
 tap "kakoune-lsp/kakoune-lsp"
 tap "manaflow-ai/cmux"
 tap "nanobot-ai/tap"
 tap "nikitabobko/tap"
 # Static checker for GitHub Actions workflow files
 brew "actionlint"
+# Code searching, linting, rewriting
+brew "ast-grep"
 # Yet another cross-platform graphical process/system monitor
 brew "bottom"
 # Cross-platform make
 brew "cmake"
-# GNU File, Shell, and Text utilities
-brew "coreutils"
 # Diff that understands syntax
 brew "difftastic"
-# Pack, ship and run any application as a lightweight container
-brew "docker"
 # Simple, fast and user-friendly alternative to find
 brew "fd"
 # Play, record, convert, and stream many audio and video codecs
@@ -115,6 +113,8 @@ cask "nikitabobko/tap/aerospace"
 cask "claude"
 # Ghostty-based terminal with vertical tabs and notifications for AI coding agents
 cask "cmux"
+# GNU Emacs text editor with patches for macOS
+cask "d12frosted/emacs-plus/emacs-plus-app", trusted: true
 cask "font-0xproto-nerd-font"
 cask "font-3270-nerd-font"
 cask "font-adwaita-mono-nerd-font"
@@ -213,6 +213,7 @@ cask "thaw"
 cask "zettlr"
 go "cmd/go"
 go "cmd/gofmt"
+go "github.com/wailsapp/wails/v2/cmd/wails"
 cargo "kak-tree-sitter"
 cargo "ktsctl"
 uv "cli-agent-orchestrator"
