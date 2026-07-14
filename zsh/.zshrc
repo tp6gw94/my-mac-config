@@ -5,8 +5,6 @@ if [[ -f "$local_env_file" ]]; then
     set +a
 fi
 
-eval "$(/opt/homebrew/bin/brew shellenv)"
-eval "$(mise activate zsh)"
 eval "$(zoxide init zsh)"
 
 source ~/.config/zsh/functions/brew-auto-dump.sh
@@ -28,13 +26,6 @@ export SUDO_EDITOR="nvim"
 export BAT_THEME="base16-256"
 export FZF_DEFAULT_OPTS='--color=bg+:#ffffff,fg+:#000000,hl+:#0066cc'
 export CARGO_TARGET_DIR="$HOME/cargo-global-target"
-export BUN_INSTALL="$HOME/.bun"
-export PATH="$BUN_INSTALL/bin:$PATH"
-
-path=(/opt/homebrew/bin $path)
-path=($HOME/.local/bin $path)
-path=($HOME/.kiro/bin $path)
-path=($XDG_CONFIG_HOME/bin $path)
 
 function y() {
 	local tmp="$(mktemp -t "yazi-cwd.XXXXXX")" cwd
