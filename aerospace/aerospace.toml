@@ -301,10 +301,6 @@ shift-right = ['move-workspace-to-monitor right --wrap-around', 'mode main']
   run = ['layout floating']
 
 [[on-window-detected]]
-  if.app-id = "com.microsoft.teams2"
-  run = ['move-node-to-workspace 4']
-
-[[on-window-detected]]
   if.app-id = "com.google.chrome.for.testing"
   run = ["layout floating"]
 
@@ -343,3 +339,11 @@ shift-right = ['move-workspace-to-monitor right --wrap-around', 'mode main']
 [[on-window-detected]]
   if.app-id = "com.electron.trilium-notes"
   run = ["move-node-to-workspace memo"]
+
+[[on-window-detected]]
+  if.app-id = "com.apple.ScreenSharing"
+  run = ['layout floating']
+
+[[on-window-detected]]
+  if.app-id = "com.gizmolabs.openwhispr"
+  run = ["layout floating"]
