@@ -1,4 +1,5 @@
 tap "anomalyco/tap"
+tap "appergb/openless", "https://github.com/Open-Less/openless.git", trusted: { casks: ["openless"] }
 tap "aviator-co/tap"
 tap "d12frosted/emacs-plus"
 tap "dlvhdr/formulae"
