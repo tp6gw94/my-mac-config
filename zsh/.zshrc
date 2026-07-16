@@ -8,6 +8,7 @@ fi
 eval "$(zoxide init zsh)"
 
 source ~/.config/zsh/functions/brew-auto-dump.sh
+autoload -U compinit; compinit
 
 alias pn="pnpm"
 alias lg="lazygit"
@@ -101,3 +102,8 @@ zinit light-mode for \
 
 # bun completions
 [ -s "/Users/todd/.bun/_bun" ] && source "/Users/todd/.bun/_bun"
+# The following lines have been added by Docker Desktop to enable Docker CLI completions.
+fpath=(/Users/todd/.docker/completions $fpath)
+autoload -Uz compinit
+compinit
+# End of Docker CLI completions
