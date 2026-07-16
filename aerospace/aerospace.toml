@@ -76,8 +76,8 @@ outer.right = 12
 [workspace-to-monitor-force-assignment]
 # 1 = ["BenQ PD2500Q"]
 # 2 = ["LS27A600U"]
-3 = ["Built-in Retina Display"]
-4 = ["Built-in Retina Display"]
+# 3 = ["Built-in Retina Display"]
+# 4 = ["Built-in Retina Display"]
 # w = ["BenQ GL2580"]
 # s = ["BenQ PD2500Q"]
 
