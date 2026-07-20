@@ -35,6 +35,9 @@
 !cmux/**
 !yazi
 !yazi/**
+!emacs
+!emacs/init.el
+!emacs/config.org
 zsh/.zsh_history
 zsh/.zsh_secrets
 *.local

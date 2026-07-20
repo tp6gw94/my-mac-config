@@ -19,6 +19,8 @@ brew "ast-grep"
 brew "bottom"
 # Cross-platform make
 brew "cmake"
+# GNU File, Shell, and Text utilities
+brew "coreutils"
 # Diff that understands syntax
 brew "difftastic"
 # Simple, fast and user-friendly alternative to find
@@ -33,20 +35,20 @@ brew "gcc"
 brew "gh"
 # Syntax-highlighting pager for git and diff output
 brew "git-delta"
-# High-level command-line interface for Git
-brew "git-town"
 # Render markdown on the CLI
 brew "glow"
-# Open source programming language to build simple/reliable/efficient software
-brew "go"
 # Tools and libraries to manipulate images in many formats
 brew "imagemagick-full"
 # Lightweight and flexible command-line JSON processor
 brew "jq"
+# Selection-based modal text editor
+brew "kakoune"
 # Lazier way to manage everything docker
 brew "lazydocker"
 # Simple terminal UI for git commands
 brew "lazygit"
+# C99 library which implements a VT220 or xterm terminal emulator
+brew "libvterm"
 # Utility for directing compilation
 brew "make"
 # Polyglot runtime manager (asdf rust clone)
@@ -83,8 +85,6 @@ brew "resterm"
 brew "resvg"
 # CLI proxy to minimize LLM token consumption
 brew "rtk"
-# Safe, concurrent, practical language
-brew "rust"
 # Interactive find and replace in the terminal
 brew "scooter"
 # 7-Zip is a file archiver with a high compression ratio
@@ -105,11 +105,9 @@ brew "weasyprint"
 brew "yazi"
 # Shell extension to navigate your filesystem faster
 brew "zoxide"
-brew "aviator-co/tap/av", trusted: true
 # macOS sandbox wrapper for coding agents
 brew "eugene1g/safehouse/agent-safehouse", trusted: true
-# AeroSpace is an i3-like tiling window manager for macOS
-cask "nikitabobko/tap/aerospace"
+cask "aerospace"
 # Anthropic's official Claude AI desktop app
 cask "claude"
 # Ghostty-based terminal with vertical tabs and notifications for AI coding agents
@@ -217,9 +215,8 @@ go "cmd/gofmt"
 go "github.com/wailsapp/wails/v2/cmd/wails"
 cargo "kak-tree-sitter"
 cargo "ktsctl"
-uv "cli-agent-orchestrator"
+uv "cli-agent-orchestrator", source: "git+https://github.com/awslabs/cli-agent-orchestrator.git@main"
 uv "zmk"
-npm "@earendil-works/pi-coding-agent"
-npm "@playwright/cli"
-npm "agent-browser"
+npm "@companion-ai/alpha-hub"
+npm "@typescript/native-preview"
 npm "corepack"

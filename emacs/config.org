@@ -1,0 +1,1127 @@
+#+title: Emacs Config
+#+property: header-args:emacs-lisp :tangle yes :results silent
+
+* TOC :TOC:
+- [[#elpaca][Elpaca]]
+- [[#defaults][Defaults]]
+- [[#windows][Windows]]
+- [[#packages][Packages]]
+  - [[#modus-themes][modus-themes]]
+  - [[#doom-themes][doom-themes]]
+  - [[#treesit-auto][treesit-auto]]
+  - [[#exec-path-from-shell][exec-path-from-shell]]
+  - [[#org-modern][org-modern]]
+  - [[#toc-org][toc-org]]
+  - [[#org][org]]
+  - [[#org-download][org-download]]
+  - [[#org-roam][org-roam]]
+  - [[#el-easydraw][el-easydraw]]
+  - [[#ob-mermaid][ob-mermaid]]
+  - [[#magit][magit]]
+- [[#editing][Editing]]
+  - [[#evil][evil]]
+  - [[#dirvish][dirvish]]
+  - [[#ghostel][ghostel]]
+- [[#completion][Completion]]
+  - [[#vertico][vertico]]
+  - [[#orderless][orderless]]
+  - [[#corfu][corfu]]
+  - [[#which-key][which-key]]
+  - [[#consult][consult]]
+  - [[#embark][embark]]
+- [[#format][Format]]
+  - [[#apheleia][apheleia]]
+- [[#lint][Lint]]
+  - [[#flycheck][flycheck]]
+- [[#lsp][LSP]]
+  - [[#yasnippet][yasnippet]]
+  - [[#lsp-mode][lsp-mode]]
+  - [[#lsp-biome][lsp-biome]]
+  - [[#lsp-ui][lsp-ui]]
+
+* Elpaca
+
+#+begin_src emacs-lisp
+;; -*- lexical-binding: t; -*-
+(defvar elpaca-installer-version 0.12)
+(defvar elpaca-directory (expand-file-name "elpaca/" user-emacs-directory))
+(defvar elpaca-builds-directory (expand-file-name "builds/" elpaca-directory))
+(defvar elpaca-sources-directory (expand-file-name "sources/" elpaca-directory))
+(defvar elpaca-order '(elpaca :repo "https://github.com/progfolio/elpaca.git"
+                              :ref nil :depth 1 :inherit ignore
+                              :files (:defaults "elpaca-test.el" (:exclude "extensions"))
+                              :build (:not elpaca-activate)))
+(let* ((repo  (expand-file-name "elpaca/" elpaca-sources-directory))
+       (build (expand-file-name "elpaca/" elpaca-builds-directory))
+       (order (cdr elpaca-order))
+       (default-directory repo))
+  (add-to-list 'load-path (if (file-exists-p build) build repo))
+  (unless (file-exists-p repo)
+    (make-directory repo t)
+    (when (<= emacs-major-version 28) (require 'subr-x))
+    (condition-case-unless-debug err
+        (if-let* ((buffer (pop-to-buffer-same-window "*elpaca-bootstrap*"))
+                  ((zerop (apply #'call-process `("git" nil ,buffer t "clone"
+                                                  ,@(when-let* ((depth (plist-get order :depth)))
+                                                      (list (format "--depth=%d" depth) "--no-single-branch"))
+                                                  ,(plist-get order :repo) ,repo))))
+                  ((zerop (call-process "git" nil buffer t "checkout"
+                                        (or (plist-get order :ref) "--"))))
+                  (emacs (concat invocation-directory invocation-name))
+                  ((zerop (call-process emacs nil buffer nil "-Q" "-L" "." "--batch"
+                                        "--eval" "(byte-recompile-directory \".\" 0 'force)")))
+                  ((require 'elpaca))
+                  ((elpaca-generate-autoloads "elpaca" repo)))
+            (progn (message "%s" (buffer-string)) (kill-buffer buffer))
+          (error "%s" (with-current-buffer buffer (buffer-string))))
+      ((error) (warn "%s" err) (delete-directory repo 'recursive))))
+  (unless (require 'elpaca-autoloads nil t)
+    (require 'elpaca)
+    (elpaca-generate-autoloads "elpaca" repo)
+    (let ((load-source-file-function nil)) (load "./elpaca-autoloads"))))
+(add-hook 'after-init-hook #'elpaca-process-queues)
+(elpaca `(,@elpaca-order))
+
+(elpaca elpaca-use-package
+  (elpaca-use-package-mode))
+#+end_src
+
+* Defaults
+
+#+begin_src emacs-lisp
+(setq auto-save-default nil)
+(setq make-backup-files nil)
+(setq delete-by-moving-to-trash t)
+(setq ring-bell-function #'ignore)
+(setq use-short-answers t) ; yes/no → y/n
+(set-face-attribute 'default nil :family "Maple Mono NF CN" :height 140)
+;; .project root (avoid parent ~/.config git)
+(setq project-vc-extra-root-markers '(".project"))
+(defun my/mode-line-path ()
+  "File path relative to project root; else abbreviated path / buffer name."
+  (if-let ((file (buffer-file-name)))
+      (if-let ((proj (project-current)))
+          (file-relative-name file (project-root proj))
+        (abbreviate-file-name file))
+    (buffer-name)))
+
+(setq-default mode-line-format
+              '(evil-mode-line-tag
+                " %* "
+                (:eval (my/mode-line-path))
+                " %l:%C %m"
+                mode-line-misc-info))
+(global-display-line-numbers-mode 1)
+(global-auto-revert-mode 1)
+(setq global-auto-revert-non-file-buffers t
+      auto-revert-verbose nil)
+
+(defun my/reload-config ()
+  "Re-tangle/eval `config.org'."
+  (interactive)
+  (org-babel-load-file (expand-file-name "config.org" user-emacs-directory))
+  (message "config reloaded"))
+(global-set-key (kbd "<f5>") #'my/reload-config)
+#+end_src
+
+* Windows
+
+#+begin_src emacs-lisp
+(tab-bar-mode 1)
+(global-tab-line-mode 1)
+(winner-mode 1)
+(require 'server)
+(unless (server-running-p) (server-start))
+
+(setq tab-bar-show 1
+      tab-bar-close-button-show nil
+      tab-bar-new-button-show nil
+      tab-bar-new-tab-choice "*scratch*"
+      tab-bar-separator "  │  "
+      tab-bar-auto-width nil
+      tab-bar-tab-hints t
+      tab-line-close-button-show nil
+      tab-line-new-button-show nil
+      tab-line-separator "  │  "
+      tab-line-tab-name-truncated-max 28)
+(defun my/tab-bar-tab-name-format (tab i)
+  "Name-sized workspace tab with horizontal padding."
+  (concat "  " (tab-bar-tab-name-format-default tab i) "  "))
+(setq tab-bar-tab-name-format-function #'my/tab-bar-tab-name-format)
+
+(defun my/tab-bar-clean-new-tab (&optional _tab)
+  "Drop inherited window buffer history so tab-line only shows the new buffer."
+  (set-window-prev-buffers nil nil)
+  (set-window-next-buffers nil nil))
+(add-hook 'tab-bar-tab-post-open-functions #'my/tab-bar-clean-new-tab)
+
+(global-set-key (kbd "s-t") #'tab-bar-new-tab)
+(global-set-key (kbd "s-x") #'tab-bar-close-tab)
+(global-set-key (kbd "s-r") #'tab-bar-rename-tab)
+(global-set-key (kbd "s-p") #'tab-bar-switch-to-prev-tab)
+(global-set-key (kbd "s-n") #'tab-bar-switch-to-next-tab)
+(global-set-key (kbd "s-h") #'windmove-left)
+(global-set-key (kbd "s-j") #'windmove-down)
+(global-set-key (kbd "s-k") #'windmove-up)
+(global-set-key (kbd "s-l") #'windmove-right)
+(defun my/tab-line-select (n)
+  "Select Nth (1-based) tab-line buffer in selected window."
+  (interactive "p")
+  (if-let ((buf (nth (1- n) (funcall tab-line-tabs-function))))
+      (switch-to-buffer buf)
+    (message "no tab %d" n)))
+
+(dolist (n (number-sequence 1 9))
+  (let ((i n))
+    (global-set-key (kbd (format "M-%d" i))
+                    (lambda () (interactive) (my/tab-line-select i)))
+    (global-set-key (kbd (format "s-%d" i))
+                    (lambda () (interactive) (tab-bar-select-tab i)))))
+
+(defun my/tab-line-keep-p (buffer)
+  "Keep file buffers + shells; hide most *special* buffers."
+  (let ((name (buffer-name buffer)))
+    (and (not (string-prefix-p " " name))
+         (or (not (string-prefix-p "*" name))
+             (with-current-buffer buffer
+               (derived-mode-p 'ghostel-mode 'eshell-mode 'shell-mode
+                               'term-mode 'comint-mode))))))
+
+(defun my/tab-line-tabs ()
+  "Window buffer tabs without special *buffers* (keep current).\nOrder is stable across focus changes (fixed-window-buffers)."
+  (let ((cur (current-buffer)))
+    (seq-filter (lambda (b) (or (eq b cur) (my/tab-line-keep-p b)))
+                (tab-line-tabs-fixed-window-buffers))))
+(setq tab-line-tabs-function #'my/tab-line-tabs)
+
+(defun my/style-tabs (&rest _)
+  "Flat workspace tab-bar + buffer tab-line; re-run after theme load."
+  (let* ((bg (face-background 'default nil t))
+         (bg-alt (or (face-background 'mode-line-inactive nil t) bg))
+         (fg (face-foreground 'default nil t))
+         (fg-alt (or (face-foreground 'shadow nil t) fg))
+         (accent (or (face-foreground 'font-lock-keyword-face nil t) fg)))
+    (set-face-attribute 'tab-bar nil
+                        :background bg-alt :foreground fg-alt :inherit 'unspecified
+                        :box (list :line-width 4 :color bg-alt))
+    (set-face-attribute 'tab-bar-tab nil
+                        :background bg :foreground accent :weight 'bold
+                        :box (list :line-width 4 :color bg)
+                        :overline accent :underline nil)
+    (set-face-attribute 'tab-bar-tab-inactive nil
+                        :background bg-alt :foreground fg-alt :weight 'normal
+                        :box (list :line-width 4 :color bg-alt)
+                        :overline bg-alt :underline nil)
+    (set-face-attribute 'tab-line nil
+                        :background bg-alt :foreground fg-alt :height 0.95
+                        :box (list :line-width 3 :color bg-alt))
+    (set-face-attribute 'tab-line-tab nil
+                        :background bg-alt :foreground fg-alt :weight 'normal
+                        :box (list :line-width 3 :color bg-alt)
+                        :overline nil :underline nil)
+    (set-face-attribute 'tab-line-tab-current nil
+                        :background bg :foreground accent :weight 'semi-bold
+                        :box (list :line-width 3 :color bg)
+                        :overline accent :underline nil)
+    (set-face-attribute 'tab-line-tab-inactive nil
+                        :background bg-alt :foreground fg-alt
+                        :box (list :line-width 3 :color bg-alt))
+    (set-face-attribute 'tab-line-highlight nil
+                        :background bg :foreground fg))
+  (force-mode-line-update t))
+(when (boundp 'enable-theme-functions)
+  (add-hook 'enable-theme-functions #'my/style-tabs))
+
+(defvar my/zoom-config nil)
+(defun my/zoom-toggle ()
+  "Zoom current window; call again to restore prior layout."
+  (interactive)
+  (if (and (one-window-p) my/zoom-config)
+      (progn (set-window-configuration my/zoom-config)
+             (setq my/zoom-config nil))
+    (setq my/zoom-config (current-window-configuration))
+    (delete-other-windows)))
+
+(defvar my/agent-notifs nil
+  "Alist entries: (BUFFER TIME MESSAGE UNREAD).")
+
+(defun my/agent-refresh-ui ()
+  "Reorder tab-bar (unread first) + redraw mode-line."
+  (my/tab-bar-sort-unread-first)
+  (force-mode-line-update t)
+  (when (fboundp 'tab-bar--update-tab-bar-lines)
+    (tab-bar--update-tab-bar-lines)))
+
+(use-package alert
+  :ensure t
+  :commands alert
+  :config
+  (when (eq system-type 'darwin)
+    (alert-define-style
+     'my/osascript
+     :title "macOS notification"
+     :notifier
+     (lambda (info)
+       (call-process
+        "osascript" nil nil nil
+        "-e" (format "display notification %S with title %S"
+                     (or (plist-get info :message) "")
+                     (or (plist-get info :title) "Emacs")))))
+    (setq alert-default-style 'my/osascript)))
+
+(defun my/agent-notify (message &optional buffer silent)
+  "Record agent MESSAGE for BUFFER (default current). Unread, newest first.
+If SILENT, skip alert/echo (caller shows notify, e.g. ghostel-default-notify)."
+  (interactive "sNotify: ")
+  (let* ((buf (or buffer (current-buffer)))
+         (name (buffer-name buf)))
+    (setq my/agent-notifs
+          (cons (list buf (float-time) message t)
+                (seq-remove (lambda (n) (eq (car n) buf)) my/agent-notifs)))
+    (my/agent-refresh-ui)
+    (unless silent
+      (alert message :title (format "Emacs · %s" name))
+      (message "● notify [%s]: %s" name message))))
+
+(defun my/agent-notif-mode-line ()
+  "Mode-line segment: unread agent notif count."
+  (let ((n (seq-count (lambda (x) (nth 3 x)) (my/agent-notifs-sorted))))
+    (when (> n 0)
+      (propertize (format " ●%d" n) 'face 'warning))))
+(add-to-list 'mode-line-misc-info '(:eval (my/agent-notif-mode-line)) t)
+
+(defun my/agent-notifs-sorted ()
+  "Live notifs: unread first, then newest."
+  (sort (seq-filter (lambda (n) (buffer-live-p (car n))) my/agent-notifs)
+        (lambda (a b)
+          (let ((ua (nth 3 a)) (ub (nth 3 b)))
+            (if (eq ua ub)
+                (> (nth 1 a) (nth 1 b))
+              (and ua (not ub)))))))
+
+(defun my/agent-mark-buffers-read (buffers)
+  "Mark agent notifs for BUFFERS as read; refresh UI if anything changed."
+  (let ((changed nil))
+    (dolist (n my/agent-notifs)
+      (when (and (nth 3 n) (memq (car n) buffers))
+        (setf (nth 3 n) nil)
+        (setq changed t)))
+    (when changed (my/agent-refresh-ui))))
+
+(defun my/agent-mark-buffer-read (&optional buffer)
+  "Mark agent notif for BUFFER (default current) as read."
+  (my/agent-mark-buffers-read (list (or buffer (current-buffer)))))
+
+(defun my/agent-on-show (&optional _frame)
+  "Clear unread when selecting / showing a buffer."
+  (my/agent-mark-buffer-read (window-buffer (selected-window))))
+
+(defun my/agent-on-tab-select (_from to)
+  "Clear unread for all buffers visible in selected workspace tab."
+  (when-let ((bufs (my/tab-buffers to)))
+    (my/agent-mark-buffers-read bufs)))
+
+(add-hook 'window-selection-change-functions #'my/agent-on-show)
+(add-hook 'window-buffer-change-functions #'my/agent-on-show)
+(add-hook 'tab-bar-tab-post-select-functions #'my/agent-on-tab-select)
+
+(defun my/agent-jump-unread ()
+  "Jump to newest unread agent notification."
+  (interactive)
+  (if-let ((n (seq-find (lambda (x) (nth 3 x)) (my/agent-notifs-sorted))))
+      (progn
+        (my/agent-mark-buffer-read (car n))
+        (pop-to-buffer (car n)))
+    (message "no unread")))
+
+(defun my/agent-list-notifs ()
+  "Pick a notification (unread sorted first) and jump."
+  (interactive)
+  (let* ((items (my/agent-notifs-sorted))
+         (cands (mapcar (lambda (n)
+                          (cons (format "%s%s  %s"
+                                        (if (nth 3 n) "● " "  ")
+                                        (buffer-name (car n))
+                                        (nth 2 n))
+                                n))
+                        items)))
+    (if (null cands)
+        (message "no notifications")
+      (let* ((pick (completing-read "notif: " cands nil t))
+             (n (cdr (assoc pick cands))))
+        (my/agent-mark-buffer-read (car n))
+        (pop-to-buffer (car n))))))
+
+(defun my/tab-line-name (buffer &optional buffers)
+  "tab-line label: N name; unread → ● N name. Index is per-window."
+  (let* ((tabs (or buffers (funcall tab-line-tabs-function)))
+         (idx (seq-position tabs buffer))
+         (num (if idx (format "%d " (1+ idx)) ""))
+         (name (buffer-name buffer))
+         (unread (seq-find (lambda (n) (and (eq (car n) buffer) (nth 3 n)))
+                           my/agent-notifs)))
+    (if unread
+        (concat (propertize "● " 'face 'warning) num name)
+      (concat num name))))
+(setq tab-line-tab-name-function #'my/tab-line-name)
+
+(defun my/tab-buffers (tab)
+  "Live buffers shown in TAB's window layout.
+Inactive tabs store names in `ws'; normalize to buffer objects."
+  (delq nil
+        (mapcar (lambda (b)
+                  (cond ((bufferp b) (and (buffer-live-p b) b))
+                        ((stringp b) (get-buffer b))))
+                (if (eq (car tab) 'current-tab)
+                    (mapcar #'window-buffer (window-list-1 nil 'nomini t))
+                  (when-let ((ws (alist-get 'ws tab)))
+                    (window-state-buffers ws))))))
+
+(defun my/tab-has-unread-p (tab)
+  "Non-nil if TAB shows a buffer with unread agent notif."
+  (when-let ((bufs (my/tab-buffers tab)))
+    (seq-some (lambda (n) (and (nth 3 n) (memq (car n) bufs)))
+              my/agent-notifs)))
+
+(defun my/tab-bar-sort-unread-first ()
+  "Stable-sort workspace tabs: unread notif tabs first."
+  (let* ((tabs (funcall tab-bar-tabs-function))
+         (sorted (sort (copy-sequence tabs)
+                       (lambda (a b)
+                         (and (my/tab-has-unread-p a)
+                              (not (my/tab-has-unread-p b)))))))
+    (unless (equal tabs sorted)
+      (tab-bar-tabs-set sorted))))
+
+(defun my/tab-bar-name-format (tab i)
+  "tab-bar label; ● if any buffer in TAB has unread agent notif."
+  (let ((base (tab-bar-tab-name-format-default tab i)))
+    (if (my/tab-has-unread-p tab)
+        (concat (propertize "● " 'face 'warning) base)
+      base)))
+(setq tab-bar-tab-name-format-function #'my/tab-bar-name-format)
+
+#+end_src
+
+* Packages
+
+** modus-themes
+
+#+begin_src emacs-lisp
+(use-package modus-themes
+  :ensure t)
+#+end_src
+
+** doom-themes
+
+#+begin_src emacs-lisp
+(use-package doom-themes
+  :ensure t
+  :config
+  (setq doom-themes-enable-bold t
+        doom-themes-enable-italic t)
+  (load-theme 'doom-oksolar-light :no-confirm)
+  (doom-themes-visual-bell-config)
+  (doom-themes-org-config)
+  (when (fboundp 'my/style-tabs) (my/style-tabs)))
+#+end_src
+
+** treesit-auto
+
+#+begin_src emacs-lisp
+(use-package treesit-auto
+  :ensure t
+  :custom
+  (treesit-auto-install 'prompt)
+  :config
+  (setq treesit-font-lock-level 4)
+  (treesit-auto-add-to-auto-mode-alist 'all)
+  (global-treesit-auto-mode 1))
+#+end_src
+
+** exec-path-from-shell
+#+begin_src emacs-lisp
+(use-package exec-path-from-shell
+  :ensure t
+  :if (memq window-system '(mac ns x pgtk))
+  :config
+  (setq exec-path-from-shell-arguments '("-l"))  ; no -i: PATH in .zprofile
+  (add-to-list 'exec-path-from-shell-variables "ICLOUD")
+  (exec-path-from-shell-initialize))
+#+end_src
+
+** org-modern
+#+begin_src emacs-lisp
+(use-package org-modern
+  :ensure t
+  :hook (org-mode . org-modern-mode))
+#+end_src
+
+** toc-org
+#+begin_src emacs-lisp
+(use-package toc-org
+  :ensure t
+  :hook (org-mode . toc-org-mode))
+#+end_src
+
+** org
+#+begin_src emacs-lisp
+(use-package org
+  :ensure nil
+  :config
+  (setq org-directory
+        (expand-file-name
+         "orgfile"
+         (or (getenv "ICLOUD")
+             (expand-file-name
+              "Library/Mobile Documents/com~apple~CloudDocs"
+              (getenv "HOME"))))
+        org-default-notes-file (expand-file-name "inbox.org" org-directory)
+        org-startup-with-inline-images t
+        org-todo-keywords
+        '((sequence "TODO(t)" "NEXT(n)" "WAITING(w)" "|" "DONE(d)" "CANCELLED(c)"))
+        org-log-done 'time
+        org-capture-templates
+        `(("t" "Todo" entry
+           (file+headline ,org-default-notes-file "Tasks")
+           "* TODO %?\n%U\n%a")
+          ("n" "Note" entry
+           (file+headline ,org-default-notes-file "Notes")
+           "* %?\n%U\n%a")))
+  (make-directory org-directory t)
+  ;; General normal RET → follow link/footnote (org only)
+  (with-eval-after-load 'general
+    (general-def 'normal org-mode-map "RET" 'org-open-at-point)))
+#+end_src
+
+** org-download
+#+begin_src emacs-lisp
+(use-package org-download
+  :ensure t
+  :after org
+  :bind (:map org-mode-map
+         ("C-c y" . org-download-clipboard)
+         ("s-v" . my/org-yank))
+  :config
+  (setq org-download-method 'directory
+        org-download-image-dir (expand-file-name "images" org-directory)
+        org-download-heading-lvl nil
+        org-download-timestamp "%Y%m%d-%H%M%S_")
+  (make-directory org-download-image-dir t)
+  (defun my/org-yank (&optional arg)
+    "Clipboard image → org-download; else normal yank."
+    (interactive "*P")
+    (if (and (display-graphic-p)
+             (executable-find "pngpaste")
+             (zerop (call-process "pngpaste" nil nil nil "/dev/null")))
+        (org-download-clipboard)
+      (yank arg))))
+#+end_src
+
+** org-roam
+#+begin_src emacs-lisp
+(use-package org-roam
+  :ensure t
+  :after org
+  :custom
+  (org-roam-directory (expand-file-name "roam" org-directory))
+  (org-roam-completion-everywhere t)
+  (org-roam-db-location
+   (expand-file-name "org-roam.db" org-roam-directory))
+  (org-roam-capture-templates
+   '(("d" "default" plain "%?"
+      :target (file+head "%<%Y%m%d%H%M%S>-${slug}.org"
+                        "#+title: ${title}\n")
+      :unnarrowed t)))
+  :config
+  (require 'org-roam-dailies)
+  (setq org-roam-dailies-directory "daily/")
+  (setq org-roam-dailies-capture-templates
+        '(("d" "default" entry "* %?"
+           :target (file+head "%<%Y-%m-%d>.org"
+                             "#+title: %<%Y-%m-%d>\n"))))
+  (make-directory org-roam-directory t)
+  (make-directory (expand-file-name org-roam-dailies-directory
+                                    org-roam-directory)
+                  t)
+  (org-roam-db-autosync-mode))
+
+(use-package org-roam-ui
+  :ensure t
+  :after org-roam
+  :custom
+  (org-roam-ui-sync-theme t)
+  (org-roam-ui-follow t)
+  (org-roam-ui-update-on-save t)
+  (org-roam-ui-open-on-start nil))
+#+end_src
+
+** el-easydraw
+#+begin_src emacs-lisp
+(use-package edraw-org
+  ;; repo has no el-easydraw.el; name package after main feature + ship all .el
+  :ensure (edraw :host github :repo "misohena/el-easydraw"
+                 :files ("*.el" "msg/*.el"))
+  :after org
+  :config
+  (edraw-org-setup-default)
+  (with-eval-after-load 'ox
+    (require 'edraw-org)
+    (edraw-org-setup-exporter))
+  (autoload 'edraw-mode "edraw-mode")
+  (add-to-list 'auto-mode-alist '("\\.edraw\\.svg\\'" . edraw-mode)))
+#+end_src
+
+** ob-mermaid
+#+begin_src emacs-lisp
+(use-package ob-mermaid
+  :ensure t
+  :after org
+  :config
+  (setq ob-mermaid-cli-path (or (executable-find "mmdc") "mmdc"))
+  (org-babel-do-load-languages
+   'org-babel-load-languages
+   (cl-union org-babel-load-languages '((mermaid . t)) :test #'equal)))
+#+end_src
+
+** magit
+#+begin_src emacs-lisp
+(use-package transient
+  :ensure t
+  :demand t)
+#+end_src
+
+#+begin_src emacs-lisp
+(use-package magit
+  :ensure t
+  :after transient
+  :bind ("C-x g" . magit-status))
+#+end_src
+
+* Editing
+
+** evil
+
+#+begin_src emacs-lisp
+(use-package evil
+  :ensure t
+  :init
+  (setq evil-want-keybinding nil
+        evil-want-integration t
+        evil-want-C-u-scroll t)
+  (evil-mode 1))
+
+(use-package evil-collection
+  :ensure t
+  :after evil
+  :config
+  (evil-collection-init))
+
+(use-package evil-surround
+  :ensure t
+  :after evil
+  :config
+  (global-evil-surround-mode 1))
+
+(use-package evil-escape
+  :ensure t
+  :after evil
+  :config
+  (setq evil-escape-key-sequence "jk")
+  (add-to-list 'evil-escape-inhibit-functions
+               (lambda () (derived-mode-p 'magit-mode)))
+  (evil-escape-mode 1))
+
+(use-package general
+  :ensure t
+  :after evil
+  :config
+  (defun my/kill-other-buffers ()
+    "Kill other buffers; keep current and *special* buffers."
+    (interactive)
+    (dolist (buf (buffer-list))
+      (unless (or (eq buf (current-buffer))
+                  (string-match-p "\\`\\*.*\\*\\'" (buffer-name buf)))
+        (kill-buffer buf)))
+    (message "killed other buffers"))
+  (defun my/open-config ()
+    "Open Emacs config.org."
+    (interactive)
+    (find-file (expand-file-name "config.org" user-emacs-directory)))
+  (defun my/consult-fd-all (&optional dir initial)
+    "`consult-fd' with fd -u; stay in `default-directory' (no parent project).
+
+Needed because ~/.config/.gitignore is `*' and ignores emacs/ unless -u."
+    (interactive "P")
+    (require 'consult)
+    (let ((consult-project-function #'ignore)
+          (consult-fd-args
+           (concat (or (executable-find "fd")
+                       (executable-find "fdfind")
+                       "fd")
+                   " --color=never -u --type f")))
+      (consult-fd (if dir dir default-directory) initial)))
+  (defun my/ghostel-other-window ()
+    "Open a new ghostel buffer in another window."
+    (interactive)
+    (let ((buf (save-window-excursion (ghostel '(4)))))
+      (switch-to-buffer-other-window buf)))
+
+  (general-create-definer my/leader-def
+    :states '(normal motion)
+    :keymaps 'override
+    :prefix "SPC")
+  (my/leader-def
+    "w" '(:ignore t :which-key "window")
+    "t" '(:ignore t :which-key "terminal")
+    "b" '(:ignore t :which-key "buffer")
+    "f" '(:ignore t :which-key "find")
+    "p" '(:ignore t :which-key "project")
+    "c" '(:ignore t :which-key "code")
+    "n" '(:ignore t :which-key "notify")
+    "r" '(:ignore t :which-key "roam")
+    "w h" 'windmove-left
+    "w l" 'windmove-right
+    "w k" 'windmove-up
+    "w j" 'windmove-down
+    "w s" 'split-window-below
+    "w v" 'split-window-right
+    "w d" 'delete-window
+    "w o" 'delete-other-windows
+    "w z" 'my/zoom-toggle
+    "w 0" 'balance-windows
+    "w u" 'winner-undo
+    "w U" 'winner-redo
+    "t t" 'ghostel
+    "t n" (lambda () (interactive) (ghostel '(4)))
+    "t o" 'my/ghostel-other-window
+    "e" 'dirvish-dwim
+    "b b" 'consult-buffer
+    "b d" 'kill-current-buffer
+    "b o" 'my/kill-other-buffers
+    "b r" 'rename-buffer
+    "f f" 'consult-fd
+    "f h" 'my/consult-fd-all
+    "f l" 'consult-line
+    "f g" 'consult-ripgrep
+    "f t" 'tab-bar-select-tab-by-name
+    "p p" 'project-switch-project
+    "p f" 'consult-fd
+    "p b" 'consult-project-buffer
+    "p g" 'consult-ripgrep
+    "p l" 'consult-line-multi
+    "p i" 'consult-imenu-multi
+    "p d" 'project-find-dir
+    "p D" 'project-dired
+    "p k" 'project-kill-buffers
+    "p c" 'project-compile
+    "p v" 'magit-status
+    "c a" 'lsp-execute-code-action
+    "c R" 'lsp-workspace-restart
+    "c h" 'lsp-ui-doc-focus-frame
+    "c d" 'my/flycheck-display-error-on-line
+    "c ." 'lsp-describe-thing-at-point
+    "c f" 'apheleia-format-buffer
+    "s" 'save-buffer
+    "S" 'write-file
+    "," 'my/open-config
+    "n n" 'my/agent-jump-unread
+    "n l" 'my/agent-list-notifs
+    "n m" 'my/agent-notify
+    "r c" 'org-capture
+    "r f" 'org-roam-node-find
+    "r i" 'org-roam-node-insert
+    "r n" 'org-roam-capture
+    "r l" 'org-roam-buffer-toggle
+    "r g" 'org-roam-graph
+    "r j" 'org-roam-dailies-capture-today
+    "r d" 'org-roam-dailies-goto-today
+    "r y" 'org-roam-dailies-goto-yesterday
+    "r t" 'org-roam-dailies-goto-tomorrow
+    "r u" 'org-roam-ui-open))
+#+end_src
+
+** dirvish
+
+#+begin_src emacs-lisp
+(use-package dirvish
+  :ensure t
+  :init
+  (dirvish-override-dired-mode)
+  :bind (:map dirvish-mode-map
+              ("/" . dirvish-narrow)
+              ("a" . my/dired-create)
+              ("r" . dired-do-rename))
+  :custom
+  (dirvish-attributes '(file-size nlink))
+  :config
+  ;; macOS ls lacks GNU long opts → gls
+  (if-let ((gls (executable-find "gls")))
+      (setq insert-directory-program gls
+            dired-listing-switches
+            "-l --almost-all --human-readable --group-directories-first --no-group")
+    (setq dired-listing-switches "-alh"))
+  (defun my/dired-create (path)
+    "Create file or dir; parents as needed. Trailing / → directory."
+    (interactive (list (read-file-name "New (end / = dir): " (dired-current-directory))))
+    (let ((path (expand-file-name path)))
+      (if (directory-name-p path)
+          (make-directory path t)
+        (make-empty-file path t))
+      (revert-buffer)
+      (dired-goto-file (directory-file-name path))))
+  (defun my/project-dirvish ()
+    "Open dirvish at project root."
+    (interactive)
+    (dirvish (project-root (project-current t))))
+  (defun my/project-ghostel ()
+    "New ghostel at project root."
+    (interactive)
+    (let ((default-directory (project-root (project-current t))))
+      (ghostel '(4))))
+  (setq project-switch-commands
+        '((project-find-file "Find file")
+          (project-find-regexp "Find regexp")
+          (project-find-dir "Find directory")
+          (my/project-dirvish "Dirvish" "e")
+          (my/project-ghostel "Ghostel" "t")
+          (magit-project-status "Magit" "m")
+          (project-compile "Compile")
+          (project-switch-to-buffer "Buffer"))))
+#+end_src
+
+** ghostel
+Native module auto-downloads. =C-c w hjkl= window; evil-ghostel for states.
+
+#+begin_src emacs-lisp
+(use-package ghostel
+  :ensure t
+  :bind ("C-c C-t" . ghostel)
+  :config
+  ;; native OSC notify UI + silent unread for tab ●
+  (setq ghostel-notification-function
+        (lambda (title body)
+          (ghostel-default-notify title body)
+          (my/agent-notify
+           (if (or (null title) (string-empty-p title))
+               body
+             (concat title ": " body))
+           (current-buffer)
+           t)))
+  (define-key ghostel-semi-char-mode-map (kbd "C-c w h") #'windmove-left)
+  (define-key ghostel-semi-char-mode-map (kbd "C-c w l") #'windmove-right)
+  (define-key ghostel-semi-char-mode-map (kbd "C-c w k") #'windmove-up)
+  (define-key ghostel-semi-char-mode-map (kbd "C-c w j") #'windmove-down)
+  (define-key ghostel-semi-char-mode-map (kbd "s-h") #'windmove-left)
+  (define-key ghostel-semi-char-mode-map (kbd "s-j") #'windmove-down)
+  (define-key ghostel-semi-char-mode-map (kbd "s-k") #'windmove-up)
+  (define-key ghostel-semi-char-mode-map (kbd "s-l") #'windmove-right)
+  (define-key ghostel-semi-char-mode-map (kbd "C-c w s") #'split-window-below)
+  (define-key ghostel-semi-char-mode-map (kbd "C-c w v") #'split-window-right)
+  (define-key ghostel-semi-char-mode-map (kbd "C-c w d") #'delete-window)
+  (define-key ghostel-semi-char-mode-map (kbd "C-c w o") #'delete-other-windows)
+  (define-key ghostel-semi-char-mode-map (kbd "C-c w z") #'my/zoom-toggle)
+  (define-key ghostel-semi-char-mode-map (kbd "C-c w 0") #'balance-windows)
+  ;; meow/vterm muscle memory: leave terminal input → evil normal (SPC leader)
+  (define-key ghostel-semi-char-mode-map (kbd "C-x C-x") #'evil-force-normal-state)
+  (add-hook 'ghostel-mode-hook
+            (lambda ()
+              (setq-local global-hl-line-mode nil)
+              (setq-local kill-buffer-query-functions nil)
+              ;; after global-display-line-numbers-mode (runs post mode-hook)
+              (add-hook 'after-change-major-mode-hook
+                        (lambda () (display-line-numbers-mode -1))
+                        90 t)
+              (when-let ((p (get-buffer-process (current-buffer))))
+                (set-process-query-on-exit-flag p nil)))))
+
+(use-package evil-ghostel
+  :ensure t
+  :after (ghostel evil)
+  :hook (ghostel-mode . evil-ghostel-mode)
+  :custom
+  ;; ESC → PTY (vim/less/fzf…). Leave insert with C-x C-x.
+  (evil-ghostel-escape 'terminal)
+  :config
+  (evil-define-key 'insert evil-ghostel-mode-map
+    (kbd "C-x C-x") #'evil-force-normal-state))
+#+end_src
+
+* Completion
+
+** vertico
+#+begin_src emacs-lisp
+(use-package vertico
+  :ensure t
+  :init
+  (vertico-mode))
+
+(use-package savehist
+  :ensure nil
+  :init
+  (savehist-mode))
+
+(use-package emacs
+  :ensure nil
+  :custom
+  (enable-recursive-minibuffers t)
+  (read-extended-command-predicate #'command-completion-default-include-p)
+  (minibuffer-prompt-properties
+   '(read-only t cursor-intangible t face minibuffer-prompt))
+  (tab-always-indent 'complete)
+  (text-mode-ispell-word-completion nil))
+#+end_src
+
+** orderless
+
+#+begin_src emacs-lisp
+(use-package orderless
+  :ensure t
+  :custom
+  (completion-styles '(orderless basic))
+  (completion-category-defaults nil)
+  (completion-category-overrides '((file (styles partial-completion)))))
+#+end_src
+
+** corfu
+
+#+begin_src emacs-lisp
+(use-package corfu
+  :ensure t
+  :custom
+  (corfu-auto t)
+  (corfu-auto-delay 0.15)
+  (corfu-auto-prefix 1)
+  (corfu-popupinfo-delay '(0.5 . 0.2))
+  :bind (("C-." . completion-at-point)
+         :map corfu-map
+         ("C-n" . corfu-next)
+         ("C-p" . corfu-previous)
+         ("C-y" . corfu-insert)
+         ("M-d" . corfu-popupinfo-toggle))
+  :init
+  (global-corfu-mode)
+  (corfu-popupinfo-mode 1))
+#+end_src
+
+** which-key
+#+begin_src emacs-lisp
+(use-package which-key
+  :ensure t
+  :init
+  (which-key-mode)
+  :config
+  (setq which-key-idle-delay 0.4))
+#+end_src
+
+** consult
+
+#+begin_src emacs-lisp
+(use-package consult
+  :ensure t
+  :bind (([remap switch-to-buffer] . consult-buffer)
+         ([remap switch-to-buffer-other-window] . consult-buffer-other-window)
+         ([remap switch-to-buffer-other-frame] . consult-buffer-other-frame)
+         ([remap project-switch-to-buffer] . consult-project-buffer)
+         ([remap bookmark-jump] . consult-bookmark)
+         ([remap recentf-open-files] . consult-recent-file)
+         ([remap yank-pop] . consult-yank-pop)
+         ([remap goto-line] . consult-goto-line)
+         ([remap imenu] . consult-imenu)
+         ([remap project-find-file] . consult-fd)
+         ([remap project-find-regexp] . consult-ripgrep)
+         ([remap project-search] . consult-ripgrep)
+         ([remap load-theme] . consult-theme)
+         ("M-s l" . consult-line)
+         ("M-s L" . consult-line-multi)
+         ("M-s r" . consult-ripgrep)
+         ("M-s d" . consult-fd)
+         ("M-s g" . consult-grep)
+         ("M-g i" . consult-imenu)
+         ("M-g I" . consult-imenu-multi)
+         :map isearch-mode-map
+         ("M-s l" . consult-line)
+         :map minibuffer-local-map
+         ("M-s" . consult-history)
+         ("M-r" . consult-history))
+  :init
+  (setq xref-show-xrefs-function #'consult-xref
+        xref-show-definitions-function #'consult-xref)
+  :config
+  (setq consult-narrow-key "<")
+  (setq consult-buffer-filter
+        (append consult-buffer-filter '("\\`\\*")))
+  (consult-customize
+   consult-theme :preview-key '(:debounce 0.2 any)
+   consult-ripgrep consult-git-grep consult-grep
+   consult-bookmark consult-recent-file consult-xref
+   :preview-key '(:debounce 0.4 any)))
+#+end_src
+
+** embark
+Actions on targets. =C-;= act (not =C-.= — corfu uses that).
+consult-ripgrep → =C-;= → =E= export → edit with wgrep if installed.
+
+#+begin_src emacs-lisp
+(use-package embark
+  :ensure t
+  :bind (("C-;" . embark-act)
+         ("C-:" . embark-dwim)
+         ("C-h B" . embark-bindings))
+  :init
+  (setq prefix-help-command #'embark-prefix-help-command))
+
+(use-package embark-consult
+  :ensure t
+  :after (embark consult)
+  :hook (embark-collect-mode . consult-preview-at-point-mode))
+
+(use-package wgrep
+  :ensure t
+  :custom
+  (wgrep-auto-save-buffer t)   ; C-c C-c 後直接存檔
+  (wgrep-change-readonly-file t))
+#+end_src
+
+* Format
+
+** apheleia
+
+#+begin_src emacs-lisp
+(use-package apheleia
+  :ensure t
+  :config
+  (dolist (mode '(js-mode js-ts-mode js-jsx-mode
+                  typescript-mode typescript-ts-mode tsx-ts-mode
+                  json-mode json-ts-mode js-json-mode))
+    (setf (alist-get mode apheleia-mode-alist) 'biome))
+  (apheleia-global-mode 1))
+#+end_src
+
+* Lint
+
+** flycheck
+#+begin_src emacs-lisp
+(use-package flycheck
+  :ensure t
+  :init
+  (setq lsp-diagnostics-provider :flycheck)
+  :hook ((prog-mode text-mode) . flycheck-mode)
+  :config
+  (flycheck-define-checker codespell
+    "Spell-check identifiers/comments with codespell."
+    :command ("codespell" "--check-filenames" source-inplace)
+    :error-patterns
+    ((warning line-start (file-name) ":" line ": " (message) line-end))
+    :modes (prog-mode text-mode conf-mode))
+  (add-to-list 'flycheck-checkers 'codespell t)
+  (with-eval-after-load 'lsp-diagnostics
+    (lsp-diagnostics-lsp-checker-if-needed)
+    (flycheck-add-next-checker 'lsp '(warning . codespell)))
+  (defun my/flycheck-display-error-on-line ()
+    "Show current-line flycheck errors in a buffer (copy with y / kill)."
+    (interactive)
+    (if-let ((errs (flycheck-overlay-errors-in
+                    (line-beginning-position)
+                    (min (1+ (line-end-position)) (point-max)))))
+        (with-help-window "*Flycheck line*"
+          (dolist (e errs)
+            (princ (flycheck-error-format-message-and-id e))
+            (terpri)))
+      (message "No errors on this line"))))
+#+end_src
+
+* LSP
+
+** yasnippet
+#+begin_src emacs-lisp
+(use-package yasnippet
+  :ensure t
+  :config
+  (yas-global-mode 1))
+
+(use-package yasnippet-snippets
+  :ensure t
+  :after yasnippet)
+#+end_src
+
+** lsp-mode
+#+begin_src emacs-lisp
+(use-package lsp-mode
+  :ensure t
+  :commands (lsp lsp-deferred)
+  :init
+  (setq lsp-keymap-prefix "C-c l")
+  (setq read-process-output-max (* 1024 1024))
+  (dolist (mode '(python-mode python-ts-mode
+                  js-mode js-ts-mode typescript-mode typescript-ts-mode tsx-ts-mode
+                  go-mode go-ts-mode rust-mode rust-ts-mode
+                  c-mode c-ts-mode c++-mode c++-ts-mode
+                  java-mode java-ts-mode
+                  json-mode json-ts-mode yaml-mode yaml-ts-mode
+                  css-mode css-ts-mode bash-ts-mode sh-mode))
+    (add-hook (intern (format "%s-hook" mode)) #'lsp-deferred))
+  :hook (lsp-mode . lsp-enable-which-key-integration)
+  :custom
+  ;; :none = CAPF/corfu; :capf still expects company
+  (lsp-completion-provider :none)
+  (lsp-completion-enable t)
+  (lsp-enable-snippet t)
+  (lsp-headerline-breadcrumb-enable t)
+  (lsp-enable-suggest-server-download t)
+  (lsp-idle-delay 0.5)
+  (lsp-enable-file-watchers nil)
+  (lsp-diagnostics-provider :flycheck)
+  (lsp-restart 'ignore)
+  (lsp-disabled-clients '(ts-ls jsts-ls flow-ls deno-ls eslint))
+  (lsp-eslint-enable nil)
+  :config
+  ;; tsgo rejects null optional/empty params (lsp-mode#5081)
+  (define-advice lsp--client-capabilities (:filter-return (c) my/lsp-tsgo-caps)
+    (when-let ((td (alist-get 'textDocument c)))
+      (setf (alist-get 'inlineCompletion td)
+            '((dynamicRegistration . :json-false))))
+    c)
+  (define-advice lsp--make-notification (:filter-return (m) my/lsp-tsgo-params)
+    (if (plist-get m :params) m
+      (cl-loop for (k v) on m by #'cddr
+               unless (eq k :params)
+               nconc (list k v)))))
+#+end_src
+
+** lsp-biome
+
+#+begin_src emacs-lisp
+(use-package lsp-biome
+  :ensure (:host github :repo "cxa/lsp-biome")
+  :after lsp-mode)
+#+end_src
+
+** lsp-ui
+
+#+begin_src emacs-lisp
+(use-package lsp-ui
+  :ensure t
+  :after lsp-mode
+  :custom
+  (lsp-ui-doc-enable t)
+  (lsp-ui-doc-position 'at-point)
+  (lsp-ui-doc-delay 0.5)
+  (lsp-ui-doc-show-with-cursor t)
+  (lsp-ui-doc-show-with-mouse t)
+  (lsp-ui-sideline-enable t)
+  (lsp-ui-sideline-show-hover nil)
+  (lsp-ui-sideline-show-diagnostics t)
+  (lsp-ui-sideline-show-code-actions t)
+  (lsp-ui-peek-enable t)
+  :bind (:map lsp-ui-mode-map
+         ("C-c h" . lsp-ui-doc-focus-frame))
+  ;; C-c d left free for leader → my/flycheck-display-error-on-line
+  :config
+  ;; only remap references; definitions stay xref
+  (define-key lsp-ui-mode-map [remap xref-find-definitions] nil)
+  (define-key lsp-ui-mode-map [remap xref-find-references]
+              #'lsp-ui-peek-find-references)
+  (with-eval-after-load 'lsp-ui-doc
+    (define-key lsp-ui-doc-frame-mode-map (kbd "C-g") #'lsp-ui-doc-unfocus-frame)))
+#+end_src
