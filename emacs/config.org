@@ -13,11 +13,13 @@
   - [[#org-modern][org-modern]]
   - [[#toc-org][toc-org]]
   - [[#org][org]]
+  - [[#org-re-reveal][org-re-reveal]]
   - [[#org-download][org-download]]
   - [[#org-roam][org-roam]]
   - [[#el-easydraw][el-easydraw]]
   - [[#ob-mermaid][ob-mermaid]]
   - [[#magit][magit]]
+  - [[#reader][reader]]
 - [[#editing][Editing]]
   - [[#evil][evil]]
   - [[#dirvish][dirvish]]
@@ -93,7 +95,7 @@
 (setq make-backup-files nil)
 (setq delete-by-moving-to-trash t)
 (setq ring-bell-function #'ignore)
-(setq use-short-answers t) ; yes/no → y/n
+(setq use-short-answers t)
 (set-face-attribute 'default nil :family "Maple Mono NF CN" :height 140)
 ;; .project root (avoid parent ~/.config git)
 (setq project-vc-extra-root-markers '(".project"))
@@ -112,6 +114,11 @@
                 " %l:%C %m"
                 mode-line-misc-info))
 (global-display-line-numbers-mode 1)
+;; reload re-runs global mode → would re-enable in every buffer
+(define-advice display-line-numbers--turn-on (:around (fn) my/skip-ghostel)
+  (if (derived-mode-p 'ghostel-mode)
+      (display-line-numbers-mode -1)
+    (funcall fn)))
 (global-auto-revert-mode 1)
 (setq global-auto-revert-non-file-buffers t
       auto-revert-verbose nil)
@@ -136,7 +143,7 @@
 (setq tab-bar-show 1
       tab-bar-close-button-show nil
       tab-bar-new-button-show nil
-      tab-bar-new-tab-choice "*scratch*"
+      tab-bar-new-tab-choice #'my/tab-bar-new-ghostel
       tab-bar-separator "  │  "
       tab-bar-auto-width nil
       tab-bar-tab-hints t
@@ -149,17 +156,26 @@
   (concat "  " (tab-bar-tab-name-format-default tab i) "  "))
 (setq tab-bar-tab-name-format-function #'my/tab-bar-tab-name-format)
 
+(defun my/tab-bar-new-ghostel ()
+  "Buffer for a new workspace tab: fresh ghostel."
+  (save-window-excursion (ghostel '(4))))
+
 (defun my/tab-bar-clean-new-tab (&optional _tab)
   "Drop inherited window buffer history so tab-line only shows the new buffer."
   (set-window-prev-buffers nil nil)
   (set-window-next-buffers nil nil))
 (add-hook 'tab-bar-tab-post-open-functions #'my/tab-bar-clean-new-tab)
 
-(global-set-key (kbd "s-t") #'tab-bar-new-tab)
-(global-set-key (kbd "s-x") #'tab-bar-close-tab)
-(global-set-key (kbd "s-r") #'tab-bar-rename-tab)
-(global-set-key (kbd "s-p") #'tab-bar-switch-to-prev-tab)
-(global-set-key (kbd "s-n") #'tab-bar-switch-to-next-tab)
+(global-set-key (kbd "s-n") #'tab-bar-new-tab)
+(global-set-key (kbd "s-w") #'kill-current-buffer)
+(global-set-key (kbd "s-W") #'tab-bar-close-tab)
+(global-set-key (kbd "s-t") (lambda () (interactive) (ghostel '(4))))
+(global-set-key (kbd "s-r") #'rename-buffer)
+(global-set-key (kbd "s-R") #'tab-bar-rename-tab)
+(global-set-key (kbd "s-J") #'tab-bar-switch-to-next-tab)
+(global-set-key (kbd "s-K") #'tab-bar-switch-to-prev-tab)
+(global-set-key (kbd "s-L") #'tab-line-switch-to-next-tab)
+(global-set-key (kbd "s-H") #'tab-line-switch-to-prev-tab)
 (global-set-key (kbd "s-h") #'windmove-left)
 (global-set-key (kbd "s-j") #'windmove-down)
 (global-set-key (kbd "s-k") #'windmove-up)
@@ -173,7 +189,8 @@
 
 (dolist (n (number-sequence 1 9))
   (let ((i n))
-    (global-set-key (kbd (format "M-%d" i))
+    (global-unset-key (kbd (format "M-%d" i)))
+    (global-set-key (kbd (format "C-%d" i))
                     (lambda () (interactive) (my/tab-line-select i)))
     (global-set-key (kbd (format "s-%d" i))
                     (lambda () (interactive) (tab-bar-select-tab i)))))
@@ -447,14 +464,28 @@ Inactive tabs store names in `ws'; normalize to buffer objects."
   :config
   (setq exec-path-from-shell-arguments '("-l"))  ; no -i: PATH in .zprofile
   (add-to-list 'exec-path-from-shell-variables "ICLOUD")
-  (exec-path-from-shell-initialize))
+  (exec-path-from-shell-initialize)
+  ;; MacTeX paths.d sometimes missing from GUI Emacs
+  (let ((texbin "/Library/TeX/texbin"))
+    (when (file-directory-p texbin)
+      (add-to-list 'exec-path texbin)
+      (setenv "PATH" (concat texbin path-separator (getenv "PATH"))))))
 #+end_src
 
 ** org-modern
 #+begin_src emacs-lisp
 (use-package org-modern
   :ensure t
-  :hook (org-mode . org-modern-mode))
+  :hook (org-mode . org-modern-mode)
+  :config
+  (defun my/org-modern-evil-insert ()
+    (when (bound-and-true-p org-modern-mode) (org-modern-mode -1)))
+  (defun my/org-modern-evil-normal ()
+    (when (and (derived-mode-p 'org-mode)
+               (not (bound-and-true-p org-modern-mode)))
+      (org-modern-mode 1)))
+  (add-hook 'evil-insert-state-entry-hook #'my/org-modern-evil-insert)
+  (add-hook 'evil-insert-state-exit-hook #'my/org-modern-evil-normal))
 #+end_src
 
 ** toc-org
@@ -481,17 +512,65 @@ Inactive tabs store names in `ws'; normalize to buffer objects."
         org-todo-keywords
         '((sequence "TODO(t)" "NEXT(n)" "WAITING(w)" "|" "DONE(d)" "CANCELLED(c)"))
         org-log-done 'time
+        org-attach-id-dir (expand-file-name "attach" org-directory)
+        org-attach-method 'cp
+        org-attach-store-link-p 'attached
+        org-attach-auto-tag "attach"
+        org-file-apps '((auto-mode . emacs)
+                        (directory . emacs)
+                        ("\\.mm\\'" . default)
+                        ("\\.x?html?\\'" . default)
+                        ("\\.pdf\\'" . emacs))
         org-capture-templates
         `(("t" "Todo" entry
            (file+headline ,org-default-notes-file "Tasks")
            "* TODO %?\n%U\n%a")
           ("n" "Note" entry
            (file+headline ,org-default-notes-file "Notes")
-           "* %?\n%U\n%a")))
+           "* %?\n%U\n%a"))
+        org-preview-latex-default-process 'dvisvgm
+        org-startup-with-latex-preview t)
+  ;; String colors only — 'auto/'default call face-attribute and blow up
+  ;; when face-at-point is nil (startup) or a face list.
+  (defun my/org-latex-preview-colors (&rest _)
+    (let* ((fg (or (face-foreground 'default nil t) "Black"))
+           (opts (copy-tree org-format-latex-options)))
+      (setq org-format-latex-options
+            (org-combine-plists opts `(:scale 1.5 :foreground ,fg
+                                             :background "Transparent")))))
+  (my/org-latex-preview-colors)
+  (when (boundp 'enable-theme-functions)
+    (add-hook 'enable-theme-functions #'my/org-latex-preview-colors))
   (make-directory org-directory t)
-  ;; General normal RET → follow link/footnote (org only)
+  (make-directory org-attach-id-dir t)
+  (defun my/org-open-at-point-system ()
+    "Open link at point with the system app (evil-safe C-u C-u)."
+    (interactive)
+    (org-open-at-point '(16)))
   (with-eval-after-load 'general
-    (general-def 'normal org-mode-map "RET" 'org-open-at-point)))
+    (general-def 'normal org-mode-map
+      "RET" 'org-open-at-point
+      "g x" 'my/org-open-at-point-system)))
+#+end_src
+
+** org-fragtog
+Auto latex preview when point leaves fragment.
+
+#+begin_src emacs-lisp
+(use-package org-fragtog
+  :ensure t
+  :hook (org-mode . org-fragtog-mode))
+#+end_src
+
+** org-re-reveal
+#+begin_src emacs-lisp
+(use-package org-re-reveal
+  :ensure t
+  :after org
+  :config
+  ;; CDN; set local path if offline export needed
+  (setq org-re-reveal-root "https://cdn.jsdelivr.net/npm/reveal.js@5"
+        org-re-reveal-revealjs-version "4")) ; 4 = reveal.js 4.x/5.x
 #+end_src
 
 ** org-download
@@ -513,7 +592,7 @@ Inactive tabs store names in `ws'; normalize to buffer objects."
     (interactive "*P")
     (if (and (display-graphic-p)
              (executable-find "pngpaste")
-             (zerop (call-process "pngpaste" nil nil nil "/dev/null")))
+             (zerop (call-process "pngpaste" nil nil nil "-"))) ; /dev/null fails: pngpaste can't write there
         (org-download-clipboard)
       (yank arg))))
 #+end_src
@@ -598,6 +677,38 @@ Inactive tabs store names in `ws'; normalize to buffer objects."
   :bind ("C-x g" . magit-status))
 #+end_src
 
+** reader
+#+begin_src emacs-lisp
+;; elpaca 0.2 dropped :pre-build; drive make + local patch via :build instead.
+;; Drop outline declares when upstream adds them.
+(defun my/reader-pre-build (e)
+  (let* ((dir (elpaca<-source-dir e))
+         (file (expand-file-name "reader.el" dir))
+         (default-directory dir))
+    (with-temp-buffer
+      (insert-file-contents file)
+      (goto-char (point-min))
+      (unless (search-forward "(declare-function reader-outline-show" nil t)
+        (goto-char (point-min))
+        (when (re-search-forward "\"Q\"[ \t]+#'reader-close-doc)" nil t)
+          (insert "\n\n(declare-function reader-outline-show \"reader-outline\")"
+                  "\n(declare-function reader--outline-imenu-create-index \"reader-outline\")"
+                  "\n(declare-function reader--outline-imenu-goto \"reader-outline\")")
+          (write-region (point-min) (point-max) file nil 'silent))))
+    (unless (zerop (call-process "make" nil nil nil "all"))
+      (error "reader: make all failed")))
+  (elpaca-continue e))
+
+(use-package reader
+  :ensure
+  (reader :host codeberg :repo "MonadicSheep/emacs-reader"
+          :files ("*.el" "render-core.dylib")
+          :build (:before elpaca-build-link my/reader-pre-build))
+  :config
+  (with-eval-after-load 'evil
+    (evil-set-initial-state 'reader-mode 'emacs)))
+#+end_src
+
 * Editing
 
 ** evil
@@ -629,7 +740,7 @@ Inactive tabs store names in `ws'; normalize to buffer objects."
   :config
   (setq evil-escape-key-sequence "jk")
   (add-to-list 'evil-escape-inhibit-functions
-               (lambda () (derived-mode-p 'magit-mode)))
+               (lambda () (derived-mode-p 'magit-mode 'ghostel-mode)))
   (evil-escape-mode 1))
 
 (use-package general
@@ -667,8 +778,34 @@ Needed because ~/.config/.gitignore is `*' and ignores emacs/ unless -u."
     (let ((buf (save-window-excursion (ghostel '(4)))))
       (switch-to-buffer-other-window buf)))
 
+  (defun my/copy-file-path (&optional absolute)
+    "Copy buffer file path. Rel to project unless ABSOLUTE.
+Visual: GitHub #L17 / #L17-L20."
+    (interactive)
+    (let* ((file (or (buffer-file-name) (user-error "buffer not visiting a file")))
+           (path (cond (absolute (expand-file-name file))
+                       ((project-current)
+                        (file-relative-name file (project-root (project-current))))
+                       (t (abbreviate-file-name file))))
+           (text
+            (if (not (evil-visual-state-p))
+                path
+              (let* ((b (line-number-at-pos (region-beginning)))
+                     (e (line-number-at-pos
+                         (if (and (> (region-end) (region-beginning))
+                                  (= (region-end)
+                                     (save-excursion
+                                       (goto-char (region-end))
+                                       (line-beginning-position))))
+                             (1- (region-end))
+                           (region-end)))))
+                (if (= b e)
+                    (format "%s#L%d" path b)
+                  (format "%s#L%d-L%d" path b e))))))
+      (kill-new text)
+      (message "%s" text)))
   (general-create-definer my/leader-def
-    :states '(normal motion)
+    :states '(normal motion visual)
     :keymaps 'override
     :prefix "SPC")
   (my/leader-def
@@ -722,6 +859,8 @@ Needed because ~/.config/.gitignore is `*' and ignores emacs/ unless -u."
     "c d" 'my/flycheck-display-error-on-line
     "c ." 'lsp-describe-thing-at-point
     "c f" 'apheleia-format-buffer
+    "c p" 'my/copy-file-path
+    "c P" (lambda () (interactive) (my/copy-file-path t))
     "s" 'save-buffer
     "S" 'write-file
     "," 'my/open-config
@@ -755,6 +894,7 @@ Needed because ~/.config/.gitignore is `*' and ignores emacs/ unless -u."
   :custom
   (dirvish-attributes '(file-size nlink))
   :config
+  (evil-set-initial-state 'dired-mode 'emacs)
   ;; macOS ls lacks GNU long opts → gls
   (if-let ((gls (executable-find "gls")))
       (setq insert-directory-program gls
@@ -798,7 +938,6 @@ Native module auto-downloads. =C-c w hjkl= window; evil-ghostel for states.
   :ensure t
   :bind ("C-c C-t" . ghostel)
   :config
-  ;; native OSC notify UI + silent unread for tab ●
   (setq ghostel-notification-function
         (lambda (title body)
           (ghostel-default-notify title body)
@@ -828,10 +967,6 @@ Native module auto-downloads. =C-c w hjkl= window; evil-ghostel for states.
             (lambda ()
               (setq-local global-hl-line-mode nil)
               (setq-local kill-buffer-query-functions nil)
-              ;; after global-display-line-numbers-mode (runs post mode-hook)
-              (add-hook 'after-change-major-mode-hook
-                        (lambda () (display-line-numbers-mode -1))
-                        90 t)
               (when-let ((p (get-buffer-process (current-buffer))))
                 (set-process-query-on-exit-flag p nil)))))
 
@@ -979,7 +1114,7 @@ consult-ripgrep → =C-;= → =E= export → edit with wgrep if installed.
 (use-package wgrep
   :ensure t
   :custom
-  (wgrep-auto-save-buffer t)   ; C-c C-c 後直接存檔
+  (wgrep-auto-save-buffer t)
   (wgrep-change-readonly-file t))
 #+end_src
 
@@ -1116,7 +1251,6 @@ consult-ripgrep → =C-;= → =E= export → edit with wgrep if installed.
   (lsp-ui-peek-enable t)
   :bind (:map lsp-ui-mode-map
          ("C-c h" . lsp-ui-doc-focus-frame))
-  ;; C-c d left free for leader → my/flycheck-display-error-on-line
   :config
   ;; only remap references; definitions stay xref
   (define-key lsp-ui-mode-map [remap xref-find-definitions] nil)
