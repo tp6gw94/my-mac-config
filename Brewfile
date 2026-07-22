@@ -1,7 +1,5 @@
 tap "anomalyco/tap"
-tap "appergb/openless", "https://github.com/Open-Less/openless.git", trusted: { casks: ["openless"] }
-tap "aviator-co/tap"
-tap "d12frosted/emacs-plus"
+tap "d12frosted/emacs-plus", trusted: { casks: ["emacs-plus-app@master"] }
 tap "dlvhdr/formulae"
 tap "docker/tap"
 tap "ejoffe/tap"
@@ -194,6 +192,8 @@ cask "ghostty"
 cask "hyperkey"
 # GPU-based terminal emulator
 cask "kitty"
+# Full TeX Live distribution with GUI applications
+cask "mactex"
 # Input method for Bopomofo (Phonetic Symbols of Mandarin Chinese)
 cask "mcbopomofo"
 # Reverse proxy, secure introspectable tunnels to localhost
@@ -217,6 +217,3 @@ cargo "kak-tree-sitter"
 cargo "ktsctl"
 uv "cli-agent-orchestrator", source: "git+https://github.com/awslabs/cli-agent-orchestrator.git@main"
 uv "zmk"
-npm "@companion-ai/alpha-hub"
-npm "@typescript/native-preview"
-npm "corepack"
