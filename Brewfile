@@ -1,10 +1,12 @@
 tap "anomalyco/tap"
-tap "d12frosted/emacs-plus", trusted: { casks: ["emacs-plus-app@master"] }
+tap "appergb/openless", "https://github.com/Open-Less/openless.git", trusted: { casks: ["openless"] }
+tap "aviator-co/tap"
+tap "d12frosted/emacs-plus"
 tap "dlvhdr/formulae"
 tap "docker/tap"
 tap "ejoffe/tap"
 tap "eugene1g/safehouse"
-tap "felixkratz/formulae", "https://github.com/FelixKratz/homebrew-formulae"
+tap "felixkratz/formulae"
 tap "kakoune-lsp/kakoune-lsp"
 tap "manaflow-ai/cmux"
 tap "nanobot-ai/tap"
@@ -21,6 +23,8 @@ brew "cmake"
 brew "coreutils"
 # Diff that understands syntax
 brew "difftastic"
+# Pack, ship and run any application as a lightweight container
+brew "docker"
 # Simple, fast and user-friendly alternative to find
 brew "fd"
 # Play, record, convert, and stream many audio and video codecs
@@ -33,20 +37,22 @@ brew "gcc"
 brew "gh"
 # Syntax-highlighting pager for git and diff output
 brew "git-delta"
+# High-level command-line interface for Git
+brew "git-town"
 # Render markdown on the CLI
 brew "glow"
+# Open source programming language to build simple/reliable/efficient software
+brew "go"
+# Review-first terminal diff viewer for agent-authored changesets
+brew "hunk"
 # Tools and libraries to manipulate images in many formats
 brew "imagemagick-full"
 # Lightweight and flexible command-line JSON processor
 brew "jq"
-# Selection-based modal text editor
-brew "kakoune"
 # Lazier way to manage everything docker
 brew "lazydocker"
 # Simple terminal UI for git commands
 brew "lazygit"
-# C99 library which implements a VT220 or xterm terminal emulator
-brew "libvterm"
 # Utility for directing compilation
 brew "make"
 # Polyglot runtime manager (asdf rust clone)
@@ -83,6 +89,8 @@ brew "resterm"
 brew "resvg"
 # CLI proxy to minimize LLM token consumption
 brew "rtk"
+# Safe, concurrent, practical language
+brew "rust"
 # Interactive find and replace in the terminal
 brew "scooter"
 # 7-Zip is a file archiver with a high compression ratio
@@ -103,6 +111,7 @@ brew "weasyprint"
 brew "yazi"
 # Shell extension to navigate your filesystem faster
 brew "zoxide"
+brew "aviator-co/tap/av", trusted: true
 # macOS sandbox wrapper for coding agents
 brew "eugene1g/safehouse/agent-safehouse", trusted: true
 cask "aerospace"
@@ -110,8 +119,6 @@ cask "aerospace"
 cask "claude"
 # Ghostty-based terminal with vertical tabs and notifications for AI coding agents
 cask "cmux"
-# GNU Emacs text editor with patches for macOS
-cask "d12frosted/emacs-plus/emacs-plus-app", trusted: true
 cask "font-0xproto-nerd-font"
 cask "font-3270-nerd-font"
 cask "font-adwaita-mono-nerd-font"
@@ -192,8 +199,6 @@ cask "ghostty"
 cask "hyperkey"
 # GPU-based terminal emulator
 cask "kitty"
-# Full TeX Live distribution with GUI applications
-cask "mactex"
 # Input method for Bopomofo (Phonetic Symbols of Mandarin Chinese)
 cask "mcbopomofo"
 # Reverse proxy, secure introspectable tunnels to localhost
@@ -212,8 +217,12 @@ cask "thaw"
 cask "zettlr"
 go "cmd/go"
 go "cmd/gofmt"
-go "github.com/wailsapp/wails/v2/cmd/wails"
+go "github.com/projectdiscovery/nuclei/v3/cmd/nuclei"
 cargo "kak-tree-sitter"
 cargo "ktsctl"
-uv "cli-agent-orchestrator", source: "git+https://github.com/awslabs/cli-agent-orchestrator.git@main"
+uv "cli-agent-orchestrator"
 uv "zmk"
+npm "@earendil-works/pi-coding-agent"
+npm "@playwright/cli"
+npm "agent-browser"
+npm "corepack"
