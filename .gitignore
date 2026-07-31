@@ -41,3 +41,4 @@
 zsh/.zsh_history
 zsh/.zsh_secrets
 *.local
+.zcompdump
