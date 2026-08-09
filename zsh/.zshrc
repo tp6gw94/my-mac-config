@@ -6,8 +6,9 @@ if [[ -f "$local_env_file" ]]; then
 fi
 
 eval "$(zoxide init zsh)"
+eval "$(mise activate zsh)"
 
-source ~/.config/zsh/functions/brew-auto-dump.sh
+source $XDG_CONFIG_HOME/zsh/functions/brew-auto-dump.sh
 autoload -U compinit; compinit
 
 alias pn="pnpm"
@@ -27,6 +28,16 @@ export SUDO_EDITOR="nvim"
 export BAT_THEME="base16-256"
 export FZF_DEFAULT_OPTS='--color=bg+:#ffffff,fg+:#000000,hl+:#0066cc'
 export CARGO_TARGET_DIR="$HOME/cargo-global-target"
+export BUN_INSTALL="$HOME/.bun"
+export ICLOUD="$HOME/Library/Mobile Documents/com~apple~CloudDocs"
+export BEORG="$HOME/Library/Mobile Documents/iCloud~com~appsonthemove~beorg"
+
+path=($BUN_INSTALL/bin $path)
+path=($HOME/.local/bin $path)
+path=($HOME/.kiro/bin $path)
+path=($HOME/.pi/bin $path)
+path=($HOME/.config/agent-safehouse $path)
+path=($XDG_CONFIG_HOME/bin $path)
 
 function y() {
 	local tmp="$(mktemp -t "yazi-cwd.XXXXXX")" cwd
