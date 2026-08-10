@@ -291,103 +291,6 @@ include =-= word
 (use-package evil-nerd-commenter
   :ensure t)
 #+end_src
-** Keybinding
-#+begin_src emacs-lisp
-(use-package general
-  :ensure t
-  :config
-  (general-evil-setup)
-  ;; setup global leader
-  (general-create-definer my-leader-def
-    :states '(normal visual)
-    :keymaps 'override
-    :prefix "SPC")
-  ;; setup mode leader
-  (general-create-definer my-loacl-leader-def
-    :state '(normal visual)
-    :prefix ",")
-
-  ;; j k escape
-  (general-imap "j"
-    (general-key-dispatch 'self-insert-command
-      :timeout 0.25
-      "k" 'evil-normal-state))
-
-  ;; window
-  (general-def
-    "s-h" 'evil-window-left
-    "s-j" 'evil-window-down
-    "s-k" 'evil-window-up
-    "s-l" 'evil-window-right)
-
-  (my-leader-def
-    "w" '(:ignore t :which-key "Window")
-    "w v" '("Window Vsplit" . evil-window-vsplit)
-    "w s" '("Window Split" . evil-window-split)
-    "w d" '("Window Delete" . evil-window-delete)
-    "w z" '("Window Zoom" . delete-other-windows)
-    "w u" '("Window Undo" . winner-undo))
-
-  (general-def 'motion
-    "K" (lambda ()
-	  (interactive)
-	  (if (lsp-ui-doc--frame-visible-p)
-	      (lsp-ui-doc-focus-frame)
-	    (lsp-ui-doc-glance)))
-    "g d" '("Find Definitions" . lsp-ui-peek-find-definitions)
-    "g r" '("Find References" . lsp-ui-peek-find-references))
-
-  (general-def 'normal org-mode-map
-    "RET" 'org-open-at-point)
-
-  ;; Code
-  (my-leader-def
-    "c" '(:ignore t :which-key "Code")
-    "c r" '("Rename" . lsp-rename)
-    "c a" '("Code Action" . lsp-execute-code-action))
-
-  ;; Terminal
-  (my-leader-def
-    "t" '(:ignore t :which-key "Terminal")
-    "t n" '("New Terminal" . (lambda ()
-			       (interactive)
-			       (let ((current-prefix-arg '(4)));;C-u
-				 (call-interactively #'ghostel-project))))
-    "t b" '("Terminal Buffers" . ghostel-list-buffers))
-
-  ;; Note
-  (my-leader-def
-    "n" '(:ignore t :which-key "Note")
-    "n d" '(:ignore t :which-key "Denote")
-    "n d n" '("Denote New" . denote)
-    "n d g" '("Denote Grep" . denote-grep)
-    "n d d" '("Denote Dired" . denote-dired)
-    "n d l" '("Denote Add Link" . denote-link)
-    "n d L" '("Denote Add Links" . denote-add-links)
-    "n d b" '("Denote Backlinks" . denote-backlinks)
-    "n d c" '("Denote Create Link & Trigger Grep" . denote-query-contents-link)
-    "n d f" '("Denote Create Link & Trigger Dired" . denote-query-filenames-link)
-    "n d r" '("Denote Rename File" . denote-rename-file)
-    "n d R" '("Denote Sync Filename" . denote-rename-file-using-front-matter)
-    "n c" '("Capture" . org-capture)
-    "n a" '("Agenda" . org-agenda))
-
-  (general-def dire-mode-map
-    "C-c C-d C-i" '("Denote Mark as Links" . denote-dired-link-marked-notes)
-    "C-c C-d C-r" '("Denote Rename Files" . denote-dired-rename-files)
-    "C-c C-d C-k" '("Denote Rename Fiels with Keyword" . dentoe-dired-rename-marked-files-with-keywords)
-    "C-c C-d C-R" '("Denote Sync Files From Front Matter" . denote-dired-rename-marked-files-using-front-matter))
-
-  ;; buffer
-  (my-leader-def
-    "b" '(:ignore t :which-key "Buffer")
-    "b r" '("Buffer Rename" . rename-buffer)
-    "b d" '("Buffer Delete" . persp-kill-buffer*)
-    "b b" '("Buffers" . persp-switch-to-buffer*))
-  )
-
-#+end_src
-
 * Org
 ** Style
 #+begin_src emacs-lisp
@@ -485,12 +388,29 @@ include =-= word
 
 #+begin_src emacs-lisp
 (use-package ghostel
-  :ensure t)
+  :ensure t
+  :custom
+  (mouse-drag-copy-region 'non-empty))
 
 (use-package evil-ghostel
   :ensure t
   :after (ghostel evil)
+  :custom
+  (evil-ghostel-escape 'terminal)
   :hook (ghostel-mode . evil-ghostel-mode))
+#+end_src
+
+#+begin_src emacs-lisp
+(defun my/ghostel-list-buffers ()
+  (interactive)
+  (let ((current-buffers (persp-current-buffers)))
+    (pop-to-buffer
+     (ghostel--read-buffer
+      "Ghostel buffer: "
+      (cl-remove-if-not
+       (lambda (buffer) (memq buffer current-buffers))
+       (ghostel--all-buffers)))
+     (append display-buffer--same-window-action '((category . comint))))))
 #+end_src
 
 * TreeSitter
@@ -647,9 +567,17 @@ include =-= word
 		      (propertize " *" 'face 'warning)
 		    "")))
 	     (category . perspective))
-	 (complete-with-action action (persp-names) str pred)))
-     nil t nil nil
-     (persp-current-name))))
+	 (complete-with-action action
+			       (let ((last (and (persp-last) (persp-name (persp-last)))))
+				 (if last
+				     (cons last (delete last (persp-names)))
+				   (persp-names)))
+			       str pred)))
+     nil nil nil nil
+     (let ((last (persp-last)))
+       (if last
+	   (persp-name last)
+	 (persp-current-name))))))
   (persp-switch name))
 
 (with-eval-after-load 'perspective
@@ -672,4 +600,101 @@ include =-= word
 (use-package magit
   :ensure t
   :bind ("C-x g" . magit-status))
+#+end_src
+
+* Keybinding
+#+begin_src emacs-lisp
+(use-package general
+  :ensure t
+  :config
+  (general-evil-setup)
+  ;; setup global leader
+  (general-create-definer my-leader-def
+    :states '(normal visual)
+    :keymaps 'override
+    :prefix "SPC")
+  ;; setup mode leader
+  (general-create-definer my-loacl-leader-def
+    :state '(normal visual)
+    :prefix ",")
+
+  ;; j k escape
+  (general-imap "j"
+    (general-key-dispatch 'self-insert-command
+      :timeout 0.25
+      "k" 'evil-normal-state))
+
+  ;; window
+  (general-def
+    "s-h" 'evil-window-left
+    "s-j" 'evil-window-down
+    "s-k" 'evil-window-up
+    "s-l" 'evil-window-right)
+
+  (my-leader-def
+    "w" '(:ignore t :which-key "Window")
+    "w v" '("Window Vsplit" . evil-window-vsplit)
+    "w s" '("Window Split" . evil-window-split)
+    "w d" '("Window Delete" . evil-window-delete)
+    "w z" '("Window Zoom" . delete-other-windows)
+    "w u" '("Window Undo" . winner-undo))
+
+  (general-def 'motion
+    "K" (lambda ()
+	  (interactive)
+	  (if (lsp-ui-doc--frame-visible-p)
+	      (lsp-ui-doc-focus-frame)
+	    (lsp-ui-doc-glance)))
+    "g d" '("Find Definitions" . lsp-ui-peek-find-definitions)
+    "g r" '("Find References" . lsp-ui-peek-find-references))
+
+  (general-def 'normal org-mode-map
+    "RET" 'org-open-at-point)
+
+  ;; Code
+  (my-leader-def
+    "c" '(:ignore t :which-key "Code")
+    "c r" '("Rename" . lsp-rename)
+    "c a" '("Code Action" . lsp-execute-code-action))
+
+  ;; Terminal
+  (my-leader-def
+    "t" '(:ignore t :which-key "Terminal")
+    "t n" '("New Terminal" . (lambda ()
+			       (interactive)
+			       (let ((current-prefix-arg '(4)));;C-u
+				 (call-interactively #'ghostel-project))))
+    "t b" '("Terminal Buffers" . my/ghostel-list-buffers))
+
+  ;; Note
+  (my-leader-def
+    "n" '(:ignore t :which-key "Note")
+    "n d" '(:ignore t :which-key "Denote")
+    "n d n" '("Denote New" . denote)
+    "n d g" '("Denote Grep" . denote-grep)
+    "n d d" '("Denote Dired" . denote-dired)
+    "n d l" '("Denote Add Link" . denote-link)
+    "n d L" '("Denote Add Links" . denote-add-links)
+    "n d b" '("Denote Backlinks" . denote-backlinks)
+    "n d c" '("Denote Create Link & Trigger Grep" . denote-query-contents-link)
+    "n d f" '("Denote Create Link & Trigger Dired" . denote-query-filenames-link)
+    "n d r" '("Denote Rename File" . denote-rename-file)
+    "n d R" '("Denote Sync Filename" . denote-rename-file-using-front-matter)
+    "n c" '("Capture" . org-capture)
+    "n a" '("Agenda" . org-agenda))
+
+  (general-def dire-mode-map
+    "C-c C-d C-i" '("Denote Mark as Links" . denote-dired-link-marked-notes)
+    "C-c C-d C-r" '("Denote Rename Files" . denote-dired-rename-files)
+    "C-c C-d C-k" '("Denote Rename Fiels with Keyword" . dentoe-dired-rename-marked-files-with-keywords)
+    "C-c C-d C-R" '("Denote Sync Files From Front Matter" . denote-dired-rename-marked-files-using-front-matter))
+
+  ;; buffer
+  (my-leader-def
+    "b" '(:ignore t :which-key "Buffer")
+    "b r" '("Buffer Rename" . rename-buffer)
+    "b d" '("Buffer Delete" . persp-kill-buffer*)
+    "b b" '("Buffers" . persp-switch-to-buffer*))
+  )
+
 #+end_src
