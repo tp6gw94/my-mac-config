@@ -439,10 +439,30 @@ include =-= word
 * LSP
 
 #+begin_src emacs-lisp
+(defun my/lsp-tsgo-client-capabilities (original &rest args)
+  (let* ((capabilities (apply original args))
+         (text-document (alist-get 'textDocument capabilities)))
+    (setf (alist-get 'inlineCompletion text-document) (make-hash-table))
+    capabilities))
+
+(defun my/lsp-omit-null-params (message)
+  (if (null (plist-get message :params))
+      (cl-loop for (key value) on message by #'cddr
+               unless (eq key :params)
+               append (list key value))
+    message))
+
+(setq lsp-keymap-prefix nil)
+(setq lsp-disabled-clients '(ts-ls jsts-ls))
+(with-eval-after-load 'lsp-mode
+  (require 'lsp-lens)
+  (unless (advice-member-p #'my/lsp-tsgo-client-capabilities 'lsp--client-capabilities)
+    (advice-add 'lsp--client-capabilities :around #'my/lsp-tsgo-client-capabilities))
+  (unless (advice-member-p #'my/lsp-omit-null-params 'lsp--make-notification)
+    (advice-add 'lsp--make-notification :filter-return #'my/lsp-omit-null-params)))
+
 (use-package lsp-mode
   :ensure t
-  :init
-  (setq lsp-keymap-prefix nil)
   :hook (
   	 (prog-mode . lsp) ;; use prog-mode enable all lsp
 	 (lsp-mode . lsp-enable-which-key-integration))
@@ -607,6 +627,11 @@ include =-= word
   :bind ("C-x g" . magit-status))
 #+end_src
 
+* Search
+#+begin_src emacs-lisp
+(use-package consult
+  :ensure t)
+#+end_src
 * Keybinding
 #+begin_src emacs-lisp
 (use-package general
@@ -700,6 +725,20 @@ include =-= word
     "b r" '("Buffer Rename" . rename-buffer)
     "b d" '("Buffer Delete" . persp-kill-buffer*)
     "b b" '("Buffers" . persp-switch-to-buffer*))
-  )
+
+  (general-def
+    "s-w" 'kill-current-buffer
+    "s-r" 'rename-buffer
+    "s-b" 'persp-switch-to-buffer*)
+
+  ;; find
+  (my-leader-def
+    "f" '(:ignore t :which-key "Find")
+    "f l" '("Find Line" . consult-line)
+    "f g" '("Find Grep" . consult-ripgrep)
+    "f f" '("Find File" . consult-fd) ;; gitignore
+    "f F" '("Find All File" . consult-find)
+    )
+ )
 
 #+end_src
