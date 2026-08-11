@@ -629,8 +629,16 @@ include =-= word
 
 * Search
 #+begin_src emacs-lisp
+(defun my/consult-persp-buffer-list ()
+     (copy-sequence (persp-current-buffers*)))
+
 (use-package consult
-  :ensure t)
+  :ensure t
+  :after perspective
+  :custom
+  (consult-buffer-list-function #'my/consult-persp-buffer-list)
+  :bind
+  (("C-x b" . consult-buffer)))
 #+end_src
 * Keybinding
 #+begin_src emacs-lisp
@@ -724,12 +732,12 @@ include =-= word
     "b" '(:ignore t :which-key "Buffer")
     "b r" '("Buffer Rename" . rename-buffer)
     "b d" '("Buffer Delete" . persp-kill-buffer*)
-    "b b" '("Buffers" . persp-switch-to-buffer*))
+    "b b" '("Buffers" . consult-buffer))
 
   (general-def
     "s-w" 'kill-current-buffer
     "s-r" 'rename-buffer
-    "s-b" 'persp-switch-to-buffer*)
+    "s-b" 'consult-buffer)
 
   ;; find
   (my-leader-def
