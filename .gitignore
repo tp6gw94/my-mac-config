@@ -38,6 +38,8 @@
 !emacs
 !emacs/init.el
 !emacs/config.org
+!hunk
+!hunk/**
 zsh/.zsh_history
 zsh/.zsh_secrets
 *.local

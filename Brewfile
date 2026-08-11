@@ -114,11 +114,14 @@ brew "zoxide"
 brew "aviator-co/tap/av", trusted: true
 # macOS sandbox wrapper for coding agents
 brew "eugene1g/safehouse/agent-safehouse", trusted: true
-cask "aerospace"
+# AeroSpace is an i3-like tiling window manager for macOS
+cask "nikitabobko/tap/aerospace", trusted: true
 # Anthropic's official Claude AI desktop app
 cask "claude"
 # Ghostty-based terminal with vertical tabs and notifications for AI coding agents
 cask "cmux"
+# GNU Emacs text editor with patches for macOS
+cask "d12frosted/emacs-plus/emacs-plus-app", trusted: true
 cask "font-0xproto-nerd-font"
 cask "font-3270-nerd-font"
 cask "font-adwaita-mono-nerd-font"
@@ -223,6 +226,7 @@ go "github.com/projectdiscovery/nuclei/v3/cmd/nuclei"
 cargo "kak-tree-sitter"
 cargo "ktsctl"
 uv "cli-agent-orchestrator"
+uv "posting"
 uv "zmk"
 npm "@alibaba-group/open-code-review"
 npm "@earendil-works/pi-coding-agent"
