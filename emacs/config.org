@@ -294,6 +294,12 @@ include =-= word
 (use-package evil-nerd-commenter
   :ensure t)
 #+end_src
+** Select
+#+begin_src emacs-lisp
+(use-package expand-region
+  :ensure t
+  :bind ("C-=" . er/expand-region))
+#+end_src
 * Org
 ** Style
 #+begin_src emacs-lisp
@@ -408,14 +414,21 @@ include =-= word
 #+begin_src emacs-lisp
 (defun my/ghostel-list-buffers ()
   (interactive)
-  (let ((current-buffers (persp-current-buffers)))
-    (pop-to-buffer
-     (ghostel--read-buffer
-      "Ghostel buffer: "
-      (cl-remove-if-not
-       (lambda (buffer) (memq buffer current-buffers))
-       (ghostel--all-buffers)))
-     (append display-buffer--same-window-action '((category . comint))))))
+  (consult-buffer
+   `((:name "Ghostel buffer"
+	    :narrow ?g
+	    :category buffer
+	    :face consult-buffer
+	    :history buffer-name-history
+	    :state ,#'consult--buffer-state
+	    :items ,(lambda ()
+		      (consult--buffer-query
+		       :sort 'visibility
+		       :as #'consult--buffer-pair
+		       :buffer-list
+		       (cl-intersection (persp-current-buffers*)
+					(ghostel--all-buffers)
+					:test #'eq)))))))
 #+end_src
 
 * TreeSitter
@@ -437,7 +450,6 @@ include =-= word
 #+end_src
 
 * LSP
-
 #+begin_src emacs-lisp
 (defun my/lsp-tsgo-client-capabilities (original &rest args)
   (let* ((capabilities (apply original args))
@@ -464,9 +476,9 @@ include =-= word
 (use-package lsp-mode
   :ensure t
   :hook (
-  	 (prog-mode . lsp) ;; use prog-mode enable all lsp
+  	 (prog-mode . lsp-deferred) ;; use prog-mode enable all lsp, set deferred prevent block ui
 	 (lsp-mode . lsp-enable-which-key-integration))
-  :commands lsp)
+  :commands (lsp lsp-deferred))
 
 (use-package lsp-ui
   :ensure t
@@ -481,6 +493,11 @@ include =-= word
 
 #+end_src
 
+** Biome
+#+begin_src emacs-lisp
+(use-package lsp-biome
+  :vc (:url "https://github.com/cxa/lsp-biome" :rev :newest))
+#+end_src
 
 ** JSX
 
@@ -531,6 +548,34 @@ include =-= word
   (add-hook 'emacs-startup-hook (lambda ()
 				  (when (file-exists-p persp-state-default-file)
 				    (persp-state-load persp-state-default-file)))))
+
+(defun my/persp-unread-p (name)
+  (gethash name my/persp-unread))
+
+(defun my/persp-mode-line-names ()
+  (let ((current (persp-current-name)))
+    (cons current
+	  (delq nil (mapcar (lambda (name)
+			      (and (not (equal name current))
+				   (my/persp-unread-p name)
+				   name))
+			    (persp-names))))))
+
+(defun my/persp-update-modestring (orig)
+  (if persp-show-modestring
+      (let ((open (list (nth 0 persp-modestring-dividers)))
+	    (close (list (nth 1 persp-modestring-dividers)))
+	    (sep (nth 2 persp-modestring-dividers)))
+	(set-frame-parameter
+	 nil 'persp--modestring
+	 (append open
+		 (persp-intersperse
+		  (mapcar #'persp-format-name (my/persp-mode-line-names))
+		  sep)
+		 close)))
+    (funcall orig)))
+
+(advice-add 'persp-update-modestring :around #'my/persp-update-modestring)
 #+end_src
 
 ** Mark Notify Session
@@ -539,9 +584,6 @@ include =-= word
 
 (defvar my/persp-unread (make-hash-table :test #'equal)
   "Perspective names with unseen ghostel notifications")
-
-(defun my/persp-unread-p (name)
-  (gethash name my/persp-unread))
 
 (defun my/persp-clear-unread (&optional name)
   (remhash (or name (persp-current-name)) my/persp-unread)
@@ -662,6 +704,23 @@ include =-= word
       :timeout 0.25
       "k" 'evil-normal-state))
 
+  (defun my/copy-buffer-file-reference ()
+    (interactive)
+    (let* ((file (or buffer-file-name
+		     (user-error "This buffer has no file")))
+	   (reference
+	    (if (evil-visual-state-p)
+		(let* ((range (evil-visual-range))
+		       (beg (evil-range-beginning range))
+		       (end (evil-range-end range)))
+		  (format "%s:%d-%d"
+			  file
+			  (line-number-at-pos beg)
+			  (line-number-at-pos (max beg (1- end)))))
+	      file)))
+      (kill-new reference)
+      (message "Copied: %s" reference)))
+
   ;; window
   (general-def
     "s-h" 'evil-window-left
@@ -693,7 +752,8 @@ include =-= word
   (my-leader-def
     "c" '(:ignore t :which-key "Code")
     "c r" '("Rename" . lsp-rename)
-    "c a" '("Code Action" . lsp-execute-code-action))
+    "c a" '("Code Action" . lsp-execute-code-action)
+    "c p" '("Code Path" . my/copy-buffer-file-reference))
 
   ;; Terminal
   (my-leader-def
@@ -703,6 +763,12 @@ include =-= word
 			       (let ((current-prefix-arg '(4)));;C-u
 				 (call-interactively #'ghostel-project))))
     "t b" '("Terminal Buffers" . my/ghostel-list-buffers))
+
+  (general-def
+    "s-t" (lambda ()
+	    (interactive)
+	    (let ((current-prefix-arg '(4)));;C-u
+	      (call-interactively #'ghostel))))
 
   ;; Note
   (my-leader-def
@@ -718,6 +784,12 @@ include =-= word
     "n d f" '("Denote Create Link & Trigger Dired" . denote-query-filenames-link)
     "n d r" '("Denote Rename File" . denote-rename-file)
     "n d R" '("Denote Sync Filename" . denote-rename-file-using-front-matter)
+    "n d o" '("Open Denote Folder" . (lambda ()
+				       (interactive)
+				       (dired denote-directory)))
+    "n o" '("Open Beorg Folder" . (lambda ()
+				    (interactive)
+				    (dired org-directory)))
     "n c" '("Capture" . org-capture)
     "n a" '("Agenda" . org-agenda))
 
@@ -747,6 +819,6 @@ include =-= word
     "f f" '("Find File" . consult-fd) ;; gitignore
     "f F" '("Find All File" . consult-find)
     )
- )
+  )
 
 #+end_src
