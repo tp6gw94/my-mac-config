@@ -201,6 +201,8 @@ cask "hyperkey"
 cask "kitty"
 # Input method for Bopomofo (Phonetic Symbols of Mandarin Chinese)
 cask "mcbopomofo"
+# Create mock APIs in seconds
+cask "mockoon"
 # Reverse proxy, secure introspectable tunnels to localhost
 cask "ngrok"
 # Replacement for Docker Desktop
@@ -222,7 +224,9 @@ cargo "kak-tree-sitter"
 cargo "ktsctl"
 uv "cli-agent-orchestrator"
 uv "zmk"
+npm "@alibaba-group/open-code-review"
 npm "@earendil-works/pi-coding-agent"
+npm "@mockoon/cli"
 npm "@playwright/cli"
 npm "agent-browser"
 npm "corepack"
