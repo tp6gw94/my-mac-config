@@ -58,22 +58,27 @@
 #+end_src
 
 * Preference
-** Whitespce
 
+** Whitespce
 #+begin_src emacs-lisp
+    (setq-default indent-tabs-mode nil
+                  tab-width 2)
     (setq whitespace-style '(face indentation trailing))
     (global-whitespace-mode 1)
+
+    (use-package editorconfig
+      :ensure t
+      :config
+      (editorconfig-mode 1))
 #+end_src
 
 ** Styles
-
 #+begin_src emacs-lisp
   (setq line-spacing 0.2)
   (set-face-attribute 'default nil :family "Maple Mono NF CN" :height 140)
 #+end_src
 
 ** Setup
-
 #+begin_src emacs-lisp
 (setq auto-save-default nil)
 (setq make-backup-files nil)
@@ -126,7 +131,11 @@
   (setq evil-want-keybinding nil
         evil-want-integration t
         evil-want-C-u-scroll t)
-  (evil-mode 1))
+  (evil-mode 1)
+  :config
+  (evil-define-key 'insert 'global
+    (kbd "TAB") #'indent-for-tab-command
+    (kbd "<tab>") #'indent-for-tab-command))
 
 (global-set-key (kbd "M-u") #'universal-argument)
 (define-key universal-argument-map (kbd "M-u") #'universal-argument-more)
@@ -271,9 +280,7 @@ include =-= word
     ;; TAB cycle if there are only few candidates
     ;; (completion-cycle-threshold 3)
 
-    ;; Enable indentation+completion using the TAB key.
-    ;; `completion-at-point' is often bound to M-TAB.
-    (tab-always-indent 'complete)
+    (tab-always-indent t)
 
     ;; Emacs 30 and newer: Disable Ispell completion function.
     ;; Try `cape-dict' as an alternative.
@@ -395,6 +402,7 @@ include =-= word
 (use-package ghostel
   :ensure t
   :custom
+  (ghostel-max-scrollback (* 50 1024 1024))
   (mouse-drag-copy-region 'non-empty))
 
 (use-package evil-ghostel
@@ -530,9 +538,12 @@ include =-= word
 (use-package perspective
   :ensure t
   :bind
-  ("C-x C-b" . persp-list-buffers)
-  ("C-x b" . persp-switch-to-buffer*)
-  ("C-x k" . persp-kill-buffer*)
+  (("C-x C-b" . persp-list-buffers)
+   ("C-x b" . persp-switch-to-buffer*)
+   ("C-x k" . persp-kill-buffer*)
+   :map perspective-map
+   ("b" . nil)
+   ("f" . nil))
   :custom
   (persp-mode-prefix-key (kbd "s-p"))
   (persp-state-default-file
@@ -542,8 +553,38 @@ include =-= word
   :config
   (add-hook 'kill-emacs-hook #'persp-state-save)
   (add-hook 'emacs-startup-hook (lambda ()
-				  (when (file-exists-p persp-state-default-file)
-				    (persp-state-load persp-state-default-file)))))
+				                          (when (file-exists-p persp-state-default-file)
+				                            (persp-state-load persp-state-default-file)))))
+
+(defun my/persp-live-names ()
+  (seq-filter
+   (lambda (name)
+     (let ((persp (gethash name (perspectives-hash))))
+       (and persp (not (persp-killed-p persp)))))
+   (persp-names)))
+
+(defun my/persp-remove-killed ()
+  (let (names)
+    (maphash (lambda (name persp)
+               (when (persp-killed-p persp)
+                 (push name names)))
+             (perspectives-hash))
+    (dolist (name names)
+      (remhash name (perspectives-hash))
+      (when (boundp 'persp--xref-marker-ring)
+        (remhash name persp--xref-marker-ring)))
+    names))
+
+(defun my/persp-kill-cleanup (original &rest args)
+  (condition-case err
+      (apply original args)
+    (error
+     (when (my/persp-remove-killed)
+       (persp-update-modestring))
+     (signal (car err) (cdr err)))))
+
+(advice-add 'persp-kill :around #'my/persp-kill-cleanup)
+(my/persp-remove-killed)
 
 (defun my/persp-unread-p (name)
   (gethash name my/persp-unread))
@@ -551,24 +592,24 @@ include =-= word
 (defun my/persp-mode-line-names ()
   (let ((current (persp-current-name)))
     (cons current
-	  (delq nil (mapcar (lambda (name)
-			      (and (not (equal name current))
-				   (my/persp-unread-p name)
-				   name))
-			    (persp-names))))))
+	        (delq nil (mapcar (lambda (name)
+			                        (and (not (equal name current))
+				                           (my/persp-unread-p name)
+				                           name))
+			                      (my/persp-live-names))))))
 
 (defun my/persp-update-modestring (orig)
   (if persp-show-modestring
       (let ((open (list (nth 0 persp-modestring-dividers)))
-	    (close (list (nth 1 persp-modestring-dividers)))
-	    (sep (nth 2 persp-modestring-dividers)))
-	(set-frame-parameter
-	 nil 'persp--modestring
-	 (append open
-		 (persp-intersperse
-		  (mapcar #'persp-format-name (my/persp-mode-line-names))
-		  sep)
-		 close)))
+	          (close (list (nth 1 persp-modestring-dividers)))
+	          (sep (nth 2 persp-modestring-dividers)))
+	      (set-frame-parameter
+	       nil 'persp--modestring
+	       (append open
+		             (persp-intersperse
+		              (mapcar #'persp-format-name (my/persp-mode-line-names))
+		              sep)
+		             close)))
     (funcall orig)))
 
 (advice-add 'persp-update-modestring :around #'my/persp-update-modestring)
@@ -589,7 +630,8 @@ include =-= word
   (let (names)
     (maphash
      (lambda (name persp)
-       (when (memq buf (persp-buffers persp))
+       (when (and (not (persp-killed-p persp))
+		  (memq buf (persp-buffers persp)))
 	 (push name names)))
      (perspectives-hash))
     names))
@@ -605,6 +647,7 @@ include =-= word
 
 (setq ghostel-notification-function #'my/ghostel-notify-and-mark)
 (add-hook 'persp-activated-hook #'my/persp-clear-unread)
+(add-hook 'persp-killed-hook #'my/persp-clear-unread)
 
 ;; mode-line mark
 (defun my/persp-format-name-unread (orig name)
@@ -631,10 +674,11 @@ include =-= word
 		    "")))
 	     (category . perspective))
 	 (complete-with-action action
-			       (let ((last (and (persp-last) (persp-name (persp-last)))))
-				 (if last
-				     (cons last (delete last (persp-names)))
-				   (persp-names)))
+			       (let ((last (and (persp-last) (persp-name (persp-last))))
+				     (names (my/persp-live-names)))
+				 (if (member last names)
+				     (cons last (delete last names))
+				   names))
 			       str pred)))
      nil nil nil nil
      (let ((last (persp-last)))
@@ -668,16 +712,24 @@ include =-= word
 * Search
 #+begin_src emacs-lisp
 (defun my/consult-persp-buffer-list ()
-     (copy-sequence (persp-current-buffers*)))
+  (let* ((current (current-buffer))
+         (buffers (persp-buffer-list-filter (buffer-list))))
+    (append (delq current (copy-sequence buffers))
+            (when (memq current buffers) (list current)))))
 
 (use-package consult
   :ensure t
   :after perspective
   :custom
   (consult-buffer-list-function #'my/consult-persp-buffer-list)
+  :config
+  (setf (plist-get consult-source-buffer :items)
+        (lambda ()
+          (consult--buffer-query :sort nil :as #'consult--buffer-pair)))
   :bind
   (("C-x b" . consult-buffer)))
 #+end_src
+
 * Keybinding
 #+begin_src emacs-lisp
 (use-package general
@@ -740,6 +792,9 @@ include =-= word
 	    (lsp-ui-doc-glance)))
     "g d" '("Find Definitions" . lsp-ui-peek-find-definitions)
     "g r" '("Find References" . lsp-ui-peek-find-references))
+
+  (general-def 'insert
+    "C-SPC" 'completion-at-point)
 
   (general-def 'normal org-mode-map
     "RET" 'org-open-at-point)
@@ -815,6 +870,11 @@ include =-= word
     "f f" '("Find File" . consult-fd) ;; gitignore
     "f F" '("Find All File" . consult-find)
     )
-  )
+
+  (general-def perspective-map
+    "f" 'consult-fd
+    "F" 'consult-find
+    "b" 'consult-buffer)
+ )
 
 #+end_src
