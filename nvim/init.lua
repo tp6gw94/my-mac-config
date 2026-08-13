@@ -83,5 +83,5 @@ vim.pack.add({
 	gh("lewis6991/gitsigns.nvim"),
 
 	gh("mikavilpas/yazi.nvim"),
-	-- gh("obsidian-nvim/obsidian.nvim"),
+	gh("obsidian-nvim/obsidian.nvim"),
 }, { confirm = false })

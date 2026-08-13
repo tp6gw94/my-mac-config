@@ -149,6 +149,10 @@
       "rev": "0fcc83805ad11cf714a949c98c605ed717e0b83e",
       "src": "https://github.com/stevearc/oil.nvim"
     },
+    "orgmode": {
+      "rev": "f32a06d4b5399dad8bf0478c772bf6c513f02dcf",
+      "src": "https://github.com/nvim-orgmode/orgmode"
+    },
     "plenary.nvim": {
       "rev": "b9fd5226c2f76c951fc8ed5923d85e4de065e509",
       "src": "https://github.com/nvim-lua/plenary.nvim"
