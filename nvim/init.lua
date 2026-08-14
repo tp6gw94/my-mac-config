@@ -5,6 +5,13 @@ local gh = function(repo)
 	return "https://github.com/" .. repo
 end
 
+-- fix rime chinese bug
+if vim.g.neovide then
+  vim.keymap.set("i", "<C-,>", "，", { noremap = true })
+  vim.keymap.set("i", "<C-.>", "。", { noremap = true })
+  vim.keymap.set("i", "<C-/>", "？", { noremap = true })
+end
+
 vim.api.nvim_create_autocmd("PackChanged", {
 	callback = function(ev)
 		local name = ev.data.spec.name
@@ -84,4 +91,7 @@ vim.pack.add({
 
 	gh("mikavilpas/yazi.nvim"),
 	gh("obsidian-nvim/obsidian.nvim"),
+  gh("akinsho/toggleterm.nvim"),
+
+  gh("sevenc-nanashi/neov-ime.nvim")
 }, { confirm = false })

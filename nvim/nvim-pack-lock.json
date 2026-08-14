@@ -105,6 +105,10 @@
       "rev": "88c52297ed3e69ecf9f8652837888ecc727a28ee",
       "src": "https://github.com/nvim-mini/mini.surround"
     },
+    "neov-ime.nvim": {
+      "rev": "9d1dd789761fb3aadf91cdfed0cebcb750424380",
+      "src": "https://github.com/sevenc-nanashi/neov-ime.nvim"
+    },
     "neovim": {
       "rev": "cf2a288696b03d0934da713d66c6d71557b5c997",
       "src": "https://github.com/rose-pine/neovim"
@@ -176,6 +180,10 @@
     "tabby.nvim": {
       "rev": "3c130e1fcb598ce39a9c292847e32d7c3987cf11",
       "src": "https://github.com/nanozuki/tabby.nvim"
+    },
+    "toggleterm.nvim": {
+      "rev": "9a88eae817ef395952e08650b3283726786fb5fb",
+      "src": "https://github.com/akinsho/toggleterm.nvim"
     },
     "tree-sitter-manager.nvim": {
       "rev": "bb66b815aff01e87b2e26be995116be8d2f91474",

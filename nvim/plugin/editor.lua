@@ -113,6 +113,7 @@ miniclue.setup({
 		{ mode = "n", keys = "<leader>R", desc = "Kulala" },
 		{ mode = "n", keys = "<leader>w", desc = "Window" },
 		{ mode = "n", keys = "<leader>x", desc = "Trouble" },
+		{ mode = "n", keys = "<leader>t", desc = "Tab" },
 		{ mode = "v", keys = "<leader>c", desc = "Code" },
 
 		miniclue.gen_clues.builtin_completion(),
@@ -192,7 +193,6 @@ nmap_leader("e", "<cmd>Yazi<cr>", "Open yazi current file")
 nmap_leader("E", "<cmd>Yazi cwd<cr>", "Open yazi cwd")
 
 
--- <leader>fp: 開 cwd/.plan，不存在先建立
 local function open_plan_folder()
   local plan_dir = vim.fn.getcwd() .. "/.plan"
   if vim.fn.isdirectory(plan_dir) == 0 then
