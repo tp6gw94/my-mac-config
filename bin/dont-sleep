@@ -1,0 +1,48 @@
+#!/bin/sh
+set -u
+
+started_at=$(date +%s)
+child_pid=''
+
+report() {
+  ended_at=$(date +%s)
+  elapsed=$((ended_at - started_at))
+  printf 'Finished in %02dh %02dm %02ds\n' \
+    $((elapsed / 3600)) \
+    $(((elapsed % 3600) / 60)) \
+    $((elapsed % 60))
+}
+
+stop() {
+  kill "$child_pid" 2>/dev/null || true
+  wait "$child_pid" 2>/dev/null || true
+  report
+  exit 130
+}
+
+case "$(uname -s)" in
+Darwin)
+  /usr/bin/caffeinate -i -s "$@" &
+  ;;
+Linux)
+  [ "$#" -gt 0 ] || set -- sleep infinity
+  systemd-inhibit \
+    --what=sleep:handle-lid-switch \
+    --who="keep-awake" \
+    --why="User command is running" \
+    --mode=block \
+    "$@" &
+  ;;
+*)
+  echo "Unsupported OS: $(uname -s)" >&2
+  exit 1
+  ;;
+esac
+
+child_pid=$!
+trap stop INT TERM HUP
+
+status=0
+wait "$child_pid" || status=$?
+report
+exit "$status"

@@ -36,6 +36,8 @@ brew "gh"
 brew "git-delta"
 # Render markdown on the CLI
 brew "glow"
+# Agent multiplexer that lives in your terminal
+brew "herdr"
 # Tools and libraries to manipulate images in many formats
 brew "imagemagick-full"
 # C library for encoding, decoding, and manipulating JSON
@@ -224,3 +226,8 @@ cargo "kak-tree-sitter"
 cargo "ktsctl"
 uv "cli-agent-orchestrator", source: "git+https://github.com/awslabs/cli-agent-orchestrator.git@main"
 uv "zmk"
+npm "@companion-ai/alpha-hub"
+npm "@tailwindcss/language-server"
+npm "@typescript/native-preview"
+npm "bash-language-server"
+npm "corepack"

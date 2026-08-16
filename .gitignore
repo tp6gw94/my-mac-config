@@ -42,5 +42,7 @@
 !hunk/**
 zsh/.zsh_history
 zsh/.zsh_secrets
+!herdr
+!herdr/config.toml
 *.local
 .zcompdump
