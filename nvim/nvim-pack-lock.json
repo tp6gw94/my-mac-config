@@ -17,6 +17,10 @@
       "rev": "a68ffa6af98bf1fc88f33a071c51a188ec85c725",
       "src": "https://github.com/scottmckendry/cyberdream.nvim"
     },
+    "dooing": {
+      "rev": "4c4ac78088cf462398a0206e79669936a184175f",
+      "src": "https://github.com/atiladefreitas/dooing"
+    },
     "flash.nvim": {
       "rev": "fcea7ff883235d9024dc41e638f164a450c14ca2",
       "src": "https://github.com/folke/flash.nvim"

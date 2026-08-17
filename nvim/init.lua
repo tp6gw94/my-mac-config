@@ -5,11 +5,8 @@ local gh = function(repo)
 	return "https://github.com/" .. repo
 end
 
--- fix rime chinese bug
 if vim.g.neovide then
-  vim.keymap.set("i", "<C-,>", "，", { noremap = true })
-  vim.keymap.set("i", "<C-.>", "。", { noremap = true })
-  vim.keymap.set("i", "<C-/>", "？", { noremap = true })
+  vim.o.guifont = "Maple Mono NF CN:h14"
 end
 
 vim.api.nvim_create_autocmd("PackChanged", {
@@ -67,8 +64,6 @@ vim.pack.add({
 	gh("folke/lazydev.nvim"),
 	gh("folke/trouble.nvim"),
 
-	gh("nanozuki/tabby.nvim"),
-
 	gh("rebelot/kanagawa.nvim"),
 
 	gh("kevinhwang91/promise-async"),
@@ -93,5 +88,6 @@ vim.pack.add({
 	gh("obsidian-nvim/obsidian.nvim"),
   gh("akinsho/toggleterm.nvim"),
 
-  gh("sevenc-nanashi/neov-ime.nvim")
+  gh("sevenc-nanashi/neov-ime.nvim"),
+  gh("atiladefreitas/dooing")
 }, { confirm = false })

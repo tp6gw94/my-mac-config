@@ -75,7 +75,7 @@ settings = "prefix+,"
 # goto = "prefix+g"
 # new_workspace = "prefix+shift+n"
 # new_worktree = "prefix+shift+g"
-open_worktree = "prefix+alt+w"    # optional, unset by default
+# open_worktree = "prefix+alt+w"    # optional, unset by default
 # remove_worktree = ""  # optional, unset by default; opens confirmation
 # rename_workspace = "prefix+shift+w"
 # close_workspace = "prefix+shift+d"
@@ -130,13 +130,42 @@ command = "lazygit"
 width = "90%"
 height = "90%"
 
-
 [[keys.command]]
 key = "prefix+alt+n"
 type = "popup"
 command = "nvim \"$OBSIDIAN/inbox.md\""
 width = "90%"
 height = "90%"
+
+[[keys.command]]
+key = "prefix+alt+j"
+type = "plugin_action"
+command = "herdr.jump.jump"
+description = "Herdr Jump"
+
+[[keys.command]]
+key = "prefix+alt+w"
+type = "plugin_action"
+command = "herdr.jump.workspace"
+description = "Herdr Workspace"
+
+[[keys.command]]
+key = "prefix+alt+t"
+type = "plugin_action"
+command = "herdr.jump.tab"
+description = "Herdr Tab"
+
+[[keys.command]]
+key = "prefix+alt+p"
+type = "plugin_action"
+command = "herdr.jump.pane"
+description = "Herdr Pane"
+
+[[keys.command]]
+key = "prefix+alt+a"
+type = "plugin_action"
+command = "herdr.jump.agent"
+description = "Herdr Agent"
 
 # Legacy indexed shortcut config is still parsed for compatibility.
 # Prefer switch_tab, switch_workspace, and focus_agent for new configs.

@@ -165,24 +165,6 @@ vim.keymap.set({ "n", "x", "o" }, "<c-space>", function()
 	})
 end, { desc = "Treesitter incremental selection" })
 
-require("tabby").setup()
-nmap_leader("tn", "<cmd>$tabnew<cr>", "Tab new")
-nmap_leader("td", "<cmd>tabclose<cr>", "Tab close")
-nmap_leader("to", "<cmd>tabonly<cr>", "Tab only")
-nmap_leader("tr", function()
-	local tab_name = vim.fn.input("New tab name: ")
-	if tab_name == nil or tab_name == "" then
-		return
-	end
-	vim.cmd("Tabby rename_tab " .. tab_name)
-end, "Tab rename")
-nmap_leader("tj", "<cmd>Tabby jump_to_tab<cr>", "Tab jump")
-nmap_leader("t<Tab>", "<cmd>Tabby pick_window<cr>", "Tab pick")
-nmap_leader("tP", "<cmd>-tabmove", "Tab move previous")
-nmap_leader("tN", "<cmd>+tabmove", "Tab move next")
-nmap_leader("tn", "<cmd>tabn<cr>", "Tab Next")
-nmap_leader("tp", "<cmd>tabp<cr>", "Tab Prev")
-
 require("yazi").setup({
   keymaps = {
     open_file_in_horizontal_split = "<C-s>",
