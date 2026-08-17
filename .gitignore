@@ -44,5 +44,6 @@ zsh/.zsh_history
 zsh/.zsh_secrets
 !herdr
 !herdr/config.toml
+!herdr/plugins.json
 *.local
 .zcompdump

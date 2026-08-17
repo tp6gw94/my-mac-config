@@ -1,0 +1,120 @@
+[
+  {
+    "plugin_id": "herdr.jump",
+    "name": "Herdr Jump",
+    "version": "0.1.2",
+    "min_herdr_version": "0.8.0",
+    "description": "Jump to Herdr workspaces, tabs, panes, and agents",
+    "manifest_path": "/Users/todd/.config/herdr/plugins/github/herdr.jump-3e7fadc09e06/herdr-plugin.toml",
+    "plugin_root": "/Users/todd/.config/herdr/plugins/github/herdr.jump-3e7fadc09e06",
+    "enabled": true,
+    "platforms": [
+      "linux",
+      "macos",
+      "windows"
+    ],
+    "actions": [
+      {
+        "id": "agent",
+        "title": "Agent",
+        "command": [
+          "node",
+          "src/action.js"
+        ]
+      },
+      {
+        "id": "jump",
+        "title": "Jump",
+        "command": [
+          "node",
+          "src/action.js"
+        ]
+      },
+      {
+        "id": "pane",
+        "title": "Pane",
+        "command": [
+          "node",
+          "src/action.js"
+        ]
+      },
+      {
+        "id": "tab",
+        "title": "Tab",
+        "command": [
+          "node",
+          "src/action.js"
+        ]
+      },
+      {
+        "id": "workspace",
+        "title": "Workspace",
+        "command": [
+          "node",
+          "src/action.js"
+        ]
+      }
+    ],
+    "panes": [
+      {
+        "id": "agent",
+        "title": "Agent",
+        "placement": "popup",
+        "command": [
+          "node",
+          "src/picker.js",
+          "agent"
+        ]
+      },
+      {
+        "id": "jump",
+        "title": "Jump",
+        "placement": "popup",
+        "height": "100%",
+        "command": [
+          "node",
+          "src/picker.js",
+          "all"
+        ]
+      },
+      {
+        "id": "pane",
+        "title": "Pane",
+        "placement": "popup",
+        "command": [
+          "node",
+          "src/picker.js",
+          "pane"
+        ]
+      },
+      {
+        "id": "tab",
+        "title": "Tab",
+        "placement": "popup",
+        "command": [
+          "node",
+          "src/picker.js",
+          "tab"
+        ]
+      },
+      {
+        "id": "workspace",
+        "title": "Workspace",
+        "placement": "popup",
+        "command": [
+          "node",
+          "src/picker.js",
+          "workspace"
+        ]
+      }
+    ],
+    "source": {
+      "kind": "github",
+      "owner": "tp6gw94",
+      "repo": "herdr-jump",
+      "resolved_commit": "0eca88e5a544e650af05cc3e30136373e59c12eb",
+      "managed_path": "/Users/todd/.config/herdr/plugins/github/herdr.jump-3e7fadc09e06",
+      "installed_unix_ms": 1786885993078
+    }
+  }
+]
