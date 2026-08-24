@@ -88,5 +88,6 @@ vim.pack.add({
 	gh("obsidian-nvim/obsidian.nvim"),
 
   gh("sevenc-nanashi/neov-ime.nvim"),
-  gh("atiladefreitas/dooing")
+  gh("atiladefreitas/dooing"),
+  gh("YousefHadder/markdown-plus.nvim")
 }, { confirm = false })
