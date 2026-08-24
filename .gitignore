@@ -45,5 +45,7 @@ zsh/.zsh_secrets
 !herdr
 !herdr/config.toml
 !herdr/plugins.json
+!omniwm
+!omniwm/**
 *.local
 .zcompdump
