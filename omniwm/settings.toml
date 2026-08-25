@@ -856,10 +856,22 @@ monitorDisplayUUID = "F0B48A8E-BCD3-40BD-8AF0-4EAB6C1D58FD"
 monitorName = "BenQ PD2500Q"
 
 [[monitorRoutingOverrides]]
-gridColumn = 0
-gridRow = 1
+gridColumn = 1
+gridRow = 0
 monitorDisplayUUID = "37D8832A-2D66-02CA-B9F7-8F30A301B230"
 monitorName = "Built-in Retina Display"
+
+[[monitorRoutingOverrides]]
+gridColumn = 0
+gridRow = 1
+monitorDisplayUUID = "E3E91D5B-B850-439B-AC65-EE6959158AB3"
+monitorName = "RTK FHD"
+
+[[monitorRoutingOverrides]]
+gridColumn = 0
+gridRow = 0
+monitorDisplayUUID = "6FE50BB2-D0FC-4E17-8BC2-1ABCF78CA8E3"
+monitorName = "VA240-FHD"
 
 [[workspaces]]
 id = "AD36F001-C57E-41A5-AC1D-DF5249D007F0"
