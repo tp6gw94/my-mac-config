@@ -856,8 +856,8 @@ monitorDisplayUUID = "F0B48A8E-BCD3-40BD-8AF0-4EAB6C1D58FD"
 monitorName = "BenQ PD2500Q"
 
 [[monitorRoutingOverrides]]
-gridColumn = 1
-gridRow = 0
+gridColumn = 0
+gridRow = 1
 monitorDisplayUUID = "37D8832A-2D66-02CA-B9F7-8F30A301B230"
 monitorName = "Built-in Retina Display"
 
@@ -873,9 +873,21 @@ gridRow = 0
 monitorDisplayUUID = "6FE50BB2-D0FC-4E17-8BC2-1ABCF78CA8E3"
 monitorName = "VA240-FHD"
 
+[[monitorRoutingOverrides]]
+gridColumn = 1
+gridRow = 0
+monitorDisplayUUID = "86A24923-467D-48A7-9853-9304DBF16D7B"
+monitorName = "LS27A600U"
+
+[[monitorRoutingOverrides]]
+gridColumn = 0
+gridRow = 0
+monitorDisplayUUID = "391DC8CC-1B78-4520-96CF-5F73A68A3173"
+monitorName = "DELL P2319H"
+
 [[workspaces]]
 id = "AD36F001-C57E-41A5-AC1D-DF5249D007F0"
-layoutType = "niri"
+layoutType = "dwindle"
 name = "1"
 
 [workspaces.monitorAssignment]
@@ -914,16 +926,14 @@ name = "5"
 type = "main"
 
 [[workspaces]]
-displayName = "❤️"
 id = "5953F2BF-A378-4266-91B2-287174C4FA4D"
-layoutType = "dwindle"
+layoutType = "default"
 name = "6"
 
 [workspaces.monitorAssignment]
 type = "secondary"
 
 [[workspaces]]
-displayName = "🚀"
 id = "A7D5E104-6985-4516-8ED5-07F144F2A33D"
 layoutType = "niri"
 name = "7"
