@@ -184,3 +184,4 @@ end, {
 -- vim.keymap.set("n", "<leader>mc", "<cmd>CodeBlock<cr>", { buffer = 0, desc = "Markdown: Create/Edit code block" })
 
 require("markdown-plus").setup()
+require("quickdraw").setup()

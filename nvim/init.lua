@@ -89,5 +89,8 @@ vim.pack.add({
 
   gh("sevenc-nanashi/neov-ime.nvim"),
   gh("atiladefreitas/dooing"),
-  gh("YousefHadder/markdown-plus.nvim")
+  gh("YousefHadder/markdown-plus.nvim"),
+
+  gh("tp6gw94/quickdraw.nvim")
+  -- "file://" .. os.getenv('HOME') .. '/code/quickdraw.nvim'
 }, { confirm = false })

@@ -56,6 +56,8 @@ brew "lazygit"
 brew "libvterm"
 # Utility for directing compilation
 brew "make"
+# Run a Kubernetes cluster locally
+brew "minikube"
 # Polyglot runtime manager (asdf rust clone)
 brew "mise"
 # Deep clean and optimize your Mac
@@ -98,6 +100,8 @@ brew "scooter"
 brew "sevenzip"
 # Cross-shell prompt for astronauts
 brew "starship"
+# Opinionated Lua code formatter
+brew "stylua"
 # Terminal multiplexer
 brew "tmux"
 # Display directories as trees (with optional color/HTML output)
