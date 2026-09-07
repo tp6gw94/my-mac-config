@@ -75,7 +75,7 @@ settings = "prefix+,"
 # goto = "prefix+g"
 # new_workspace = "prefix+shift+n"
 # new_worktree = "prefix+shift+g"
-# open_worktree = "prefix+alt+w"    # optional, unset by default
+open_worktree = "prefix+ctrl+w"    # optional, unset by default
 # remove_worktree = ""  # optional, unset by default; opens confirmation
 # rename_workspace = "prefix+shift+w"
 # close_workspace = "prefix+shift+d"
@@ -136,6 +136,11 @@ type = "popup"
 command = "nvim \"$OBSIDIAN/inbox.md\""
 width = "90%"
 height = "90%"
+
+[[keys.command]]
+key = "prefix+alt+q"
+type = "pane"
+command = "nvim \"$ICLOUD/quicknotes/$(date +%Y-%m-%d_%H-%M-%S).md\""
 
 [[keys.command]]
 key = "prefix+alt+j"
