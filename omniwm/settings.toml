@@ -71,8 +71,8 @@ scrollModifierKey = "optionShift"
 scrollSensitivity = 5.0
 trackpadScrollStyle = "snap"
 workspaceSwipeAxis = "vertical"
-workspaceSwipeEnabled = true
-workspaceSwipeFingerCount = 2
+workspaceSwipeEnabled = false
+workspaceSwipeFingerCount = 4
 
 [hiddenBar]
 enabled = true
@@ -136,6 +136,55 @@ widthPercent = 50.0
 
 [routing]
 mode = "custom"
+
+[[routing.arrangements]]
+id = "E870DC6B-BA71-4C8E-8EB1-8E4E23977A67"
+
+[[routing.arrangements.monitors]]
+gridColumn = 1
+gridRow = 0
+monitorDisplayUUID = "38CC8731-FD10-4AE6-BF3F-0ADFD69F8FB6"
+monitorName = "DELL P2319H"
+
+[[routing.arrangements.monitors]]
+gridColumn = 0
+gridRow = 0
+monitorDisplayUUID = "F0B48A8E-BCD3-40BD-8AF0-4EAB6C1D58FD"
+monitorName = "BenQ PD2500Q"
+
+[[routing.arrangements.monitors]]
+gridColumn = 0
+gridRow = 1
+monitorDisplayUUID = "37D8832A-2D66-02CA-B9F7-8F30A301B230"
+monitorName = "Built-in Retina Display"
+
+[[routing.arrangements.monitors]]
+gridColumn = 0
+gridRow = 1
+monitorDisplayUUID = "E3E91D5B-B850-439B-AC65-EE6959158AB3"
+monitorName = "RTK FHD"
+
+[[routing.arrangements.monitors]]
+gridColumn = 0
+gridRow = 0
+monitorDisplayUUID = "6FE50BB2-D0FC-4E17-8BC2-1ABCF78CA8E3"
+monitorName = "VA240-FHD"
+
+[[routing.arrangements.monitors]]
+gridColumn = 1
+gridRow = 0
+monitorDisplayUUID = "86A24923-467D-48A7-9853-9304DBF16D7B"
+monitorName = "LS27A600U"
+
+[[routing.arrangements.monitors]]
+gridColumn = 0
+gridRow = 0
+monitorDisplayUUID = "391DC8CC-1B78-4520-96CF-5F73A68A3173"
+monitorName = "DELL P2319H"
+
+[scratchpads]
+
+[scratchpads.labels]
 
 [statusBar]
 showAppNames = true
@@ -244,19 +293,19 @@ minHeight = 320.0
 minWidth = 660.0
 
 [[hotkeys]]
-binding = "Unassigned"
+binding = "Control+Command+1"
 id = "toggleScratchpad.1"
 
 [[hotkeys]]
-binding = "Unassigned"
+binding = "Control+Option+1"
 id = "assignFocusedWindowToScratchpad.1"
 
 [[hotkeys]]
-binding = "Unassigned"
+binding = "Control+Command+2"
 id = "toggleScratchpad.2"
 
 [[hotkeys]]
-binding = "Unassigned"
+binding = "Control+Option+2"
 id = "assignFocusedWindowToScratchpad.2"
 
 [[hotkeys]]
@@ -720,11 +769,11 @@ binding = "Unassigned"
 id = "focusColumnLast"
 
 [[hotkeys]]
-binding = "Control+Option+1"
+binding = "Unassigned"
 id = "focusColumn.0"
 
 [[hotkeys]]
-binding = "Control+Option+2"
+binding = "Unassigned"
 id = "focusColumn.1"
 
 [[hotkeys]]
@@ -994,48 +1043,6 @@ id = "toggleOverview"
 [[hotkeys]]
 binding = "Unassigned"
 id = "toggleSystemStats"
-
-[[monitorRoutingOverrides]]
-gridColumn = 1
-gridRow = 0
-monitorDisplayUUID = "38CC8731-FD10-4AE6-BF3F-0ADFD69F8FB6"
-monitorName = "DELL P2319H"
-
-[[monitorRoutingOverrides]]
-gridColumn = 0
-gridRow = 0
-monitorDisplayUUID = "F0B48A8E-BCD3-40BD-8AF0-4EAB6C1D58FD"
-monitorName = "BenQ PD2500Q"
-
-[[monitorRoutingOverrides]]
-gridColumn = 0
-gridRow = 1
-monitorDisplayUUID = "37D8832A-2D66-02CA-B9F7-8F30A301B230"
-monitorName = "Built-in Retina Display"
-
-[[monitorRoutingOverrides]]
-gridColumn = 0
-gridRow = 1
-monitorDisplayUUID = "E3E91D5B-B850-439B-AC65-EE6959158AB3"
-monitorName = "RTK FHD"
-
-[[monitorRoutingOverrides]]
-gridColumn = 0
-gridRow = 0
-monitorDisplayUUID = "6FE50BB2-D0FC-4E17-8BC2-1ABCF78CA8E3"
-monitorName = "VA240-FHD"
-
-[[monitorRoutingOverrides]]
-gridColumn = 1
-gridRow = 0
-monitorDisplayUUID = "86A24923-467D-48A7-9853-9304DBF16D7B"
-monitorName = "LS27A600U"
-
-[[monitorRoutingOverrides]]
-gridColumn = 0
-gridRow = 0
-monitorDisplayUUID = "391DC8CC-1B78-4520-96CF-5F73A68A3173"
-monitorName = "DELL P2319H"
 
 [[workspaces]]
 id = "AD36F001-C57E-41A5-AC1D-DF5249D007F0"
