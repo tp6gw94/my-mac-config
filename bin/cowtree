@@ -1,0 +1,201 @@
+#!/bin/sh
+set -eu
+
+die() {
+  printf 'cowtree：%s\n' "$*" >&2
+  exit 1
+}
+
+usage() {
+  printf '%s\n' \
+    '用法：cowtree <新分支> [目的地]' \
+    '在 macOS 以 cp -cR 複製目前 Git 儲存庫（包含未提交及被忽略的檔案，但略過工作樹中的 node_modules 目錄），再只在複本建立新分支。' \
+    '複本擁有獨立的 Git 中繼資料，不是真正共享中繼資料的 git worktree。' \
+    '省略目的地時會建立來源的兄弟目錄；相對目的地以目前目錄為基準。' >&2
+  exit 2
+}
+
+# 以批次呼叫 cp，避免逐一處理檔案；find 只列出目前層級，不會進入 node_modules。
+copy_files() {
+  find "$1" -mindepth 1 -prune ! -type d \
+    -exec sh -c '
+      destination=$1
+      shift
+      cp -cR "$@" "$destination"
+    ' cowtree-copy "$2" {} +
+}
+
+copy_contents() {
+  for child in "$1"/* "$1"/.[!.]* "$1"/..?*; do
+    [ -e "$child" ] || [ -L "$child" ] || continue
+
+    if [ -d "$child" ] && [ ! -L "$child" ]; then
+      if [ "${child##*/}" = node_modules ]; then
+        case "$1" in
+          "$git_dir"|"$git_dir"/*) ;;
+          *) continue ;;
+        esac
+      fi
+      mkdir "$2/${child##*/}" || return 1
+      copy_contents "$child" "$2/${child##*/}" || return 1
+    fi
+  done
+
+  copy_files "$1" "$2"
+}
+
+[ "$#" -ge 1 ] && [ "$#" -le 2 ] || usage
+
+case "$(uname -s 2>/dev/null || printf '')" in
+  Darwin) ;;
+  *) die '此腳本需要 macOS 的 cp -cR。' ;;
+esac
+
+command -v git >/dev/null 2>&1 || die '找不到 git。'
+command -v cp >/dev/null 2>&1 || die '找不到 cp。'
+
+branch=$1
+[ -n "$branch" ] || die '新分支不可為空。'
+case "$branch" in
+  -*) die '新分支不可由連字號開頭。' ;;
+esac
+if ! git check-ref-format --branch "$branch" >/dev/null 2>&1; then
+  die "新分支名稱無效：$branch"
+fi
+
+if [ -n "${GIT_DIR:-}" ] || [ -n "${GIT_COMMON_DIR:-}" ] || [ -n "${GIT_WORK_TREE:-}" ]; then
+  die '不支援透過 GIT_DIR、GIT_COMMON_DIR 或 GIT_WORK_TREE 指定的共享 Git 目錄。'
+fi
+
+if ! repo=$(git rev-parse --show-toplevel 2>/dev/null); then
+  die '目前位置不在 Git 工作樹內。'
+fi
+if ! repo=$(cd "$repo" && pwd -P 2>/dev/null); then
+  die '無法解析來源儲存庫路徑。'
+fi
+case "$repo" in
+  *[[:cntrl:]]*) die '來源路徑不可包含控制字元。' ;;
+esac
+
+if [ ! -d "$repo/.git" ] || [ -L "$repo/.git" ]; then
+  die '不支援 .git 檔案或符號連結形式的 linked worktree。'
+fi
+if [ -e "$repo/.git/commondir" ] || [ -L "$repo/.git/commondir" ]; then
+  die '不支援含 .git/commondir 的共享 Git 目錄。'
+fi
+if git -C "$repo" config --get-all core.worktree >/dev/null 2>&1; then
+  die '不支援設定 core.worktree 的共享 Git 工作樹。'
+fi
+
+if ! git_dir=$(git -C "$repo" rev-parse --git-dir 2>/dev/null); then
+  die '無法讀取來源 Git 目錄。'
+fi
+case "$git_dir" in
+  /*) ;;
+  *) git_dir=$repo/$git_dir ;;
+esac
+if ! git_dir=$(cd "$git_dir" && pwd -P 2>/dev/null); then
+  die '無法解析來源 Git 目錄。'
+fi
+
+if ! common_dir=$(git -C "$repo" rev-parse --git-common-dir 2>/dev/null); then
+  die '無法讀取來源共享 Git 目錄。'
+fi
+case "$common_dir" in
+  /*) ;;
+  *) common_dir=$repo/$common_dir ;;
+esac
+if ! common_dir=$(cd "$common_dir" && pwd -P 2>/dev/null); then
+  die '無法解析來源共享 Git 目錄。'
+fi
+
+if ! expected_git_dir=$(cd "$repo/.git" && pwd -P 2>/dev/null); then
+  die '無法解析來源 .git 目錄。'
+fi
+if [ "$git_dir" != "$expected_git_dir" ] || [ "$git_dir" != "$common_dir" ]; then
+  die '來源使用共享 Git 目錄；請改用一般儲存庫工作樹。'
+fi
+
+if ! worktree_list=$(git -C "$repo" worktree list --porcelain 2>/dev/null); then
+  die '無法檢查來源 worktree 設定。'
+fi
+worktree_count=$(printf '%s\n' "$worktree_list" | awk '$1 == "worktree" { count++ } END { print count + 0 }')
+if [ "$worktree_count" -ne 1 ]; then
+  die '來源包含多個 worktree，為避免使用共享 metadata 已拒絕。'
+fi
+
+if ! git -C "$repo" rev-parse --verify HEAD >/dev/null 2>&1; then
+  die '來源儲存庫尚無可建立分支的提交。'
+fi
+if git -C "$repo" show-ref --verify --quiet "refs/heads/$branch"; then
+  die "來源已存在同名分支：$branch"
+fi
+
+if ! current_dir=$(pwd -P 2>/dev/null); then
+  die '無法解析目前目錄。'
+fi
+if [ "$#" -eq 2 ]; then
+  requested_destination=$2
+else
+  safe_branch=$(printf '%s' "$branch" | tr '/' '-')
+  repo_parent=${repo%/*}
+  repo_name=${repo##*/}
+  [ -n "$repo_parent" ] || repo_parent=/
+  if [ "$repo_parent" = / ]; then
+    requested_destination="/$repo_name-$safe_branch"
+  else
+    requested_destination="$repo_parent/$repo_name-$safe_branch"
+  fi
+fi
+[ -n "$requested_destination" ] || die '目的地不可為空。'
+case "$requested_destination" in
+  *[[:cntrl:]]*) die '目的地不可包含控制字元。' ;;
+esac
+
+case "$requested_destination" in
+  /*) destination_path=$requested_destination ;;
+  *) destination_path=$current_dir/$requested_destination ;;
+esac
+
+if [ -e "$destination_path" ] || [ -L "$destination_path" ]; then
+  die "目的地已存在，拒絕覆寫：$destination_path"
+fi
+destination_name=${destination_path##*/}
+destination_parent=${destination_path%/*}
+[ -n "$destination_name" ] || die '目的地名稱不可為空。'
+if [ "$destination_parent" = "$destination_path" ]; then
+  destination_parent=.
+fi
+[ -d "$destination_parent" ] || die "目的地的父目錄不存在：$destination_parent"
+if ! destination_parent=$(cd "$destination_parent" && pwd -P 2>/dev/null); then
+  die '無法解析目的地父目錄。'
+fi
+destination="$destination_parent/$destination_name"
+
+if [ -e "$destination" ] || [ -L "$destination" ]; then
+  die "目的地已存在，拒絕覆寫：$destination"
+fi
+if [ "$repo" = / ]; then
+  die "目的地不可位於來源儲存庫內：$destination"
+fi
+case "$destination/" in
+  "$repo/"*) die "目的地不可位於來源儲存庫內：$destination" ;;
+esac
+
+# 先保留目的地避免競速碰撞；失敗時保留部分目錄以免誤刪資料。
+if ! mkdir "$destination" 2>/dev/null; then
+  die "無法建立目的地，可能已被其他程序建立：$destination"
+fi
+if ! copy_contents "$repo" "$destination" >/dev/null; then
+  die "複製失敗；部分複本可能位於：$destination"
+fi
+
+# 只建立 ref 並移動 HEAD，不 checkout，且停用複製進來的 Git hooks。
+if ! git -C "$destination" -c core.hooksPath=/dev/null branch -- "$branch" >/dev/null 2>&1; then
+  die "複本建立分支失敗；部分複本可能位於：$destination"
+fi
+if ! git -C "$destination" -c core.hooksPath=/dev/null symbolic-ref HEAD "refs/heads/$branch" >/dev/null 2>&1; then
+  die "複本切換 HEAD 失敗；部分複本可能位於：$destination"
+fi
+
+printf '%s\n' "$destination"
