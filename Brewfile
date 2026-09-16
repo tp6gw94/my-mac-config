@@ -115,6 +115,8 @@ brew "zoxide"
 brew "aviator-co/tap/av", trusted: true
 # macOS sandbox wrapper for coding agents
 brew "eugene1g/safehouse/agent-safehouse", trusted: true
+# Portable daemon + CLI that bridges AI coding agents to the Moshi mobile app
+brew "rjyo/moshi/moshi-hook"
 # Anthropic's official Claude AI desktop app
 cask "claude"
 # Ghostty-based terminal with vertical tabs and notifications for AI coding agents
@@ -199,6 +201,10 @@ cask "ghostty"
 cask "hyperkey"
 # GPU-based terminal emulator
 cask "kitty"
+# Full TeX Live distribution with GUI applications
+cask "mactex"
+# Tool to create bootable USB installers
+cask "macusb"
 # Input method for Bopomofo (Phonetic Symbols of Mandarin Chinese)
 cask "mcbopomofo"
 # Neovim Client
