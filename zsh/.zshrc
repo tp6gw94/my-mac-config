@@ -22,6 +22,7 @@ alias oc="opencode"
 alias kc="kiro-cli"
 alias ppt="presenterm"
 alias md="glow"
+alias k="kubectl"
 
 export EDITOR="nvim"
 export VISUAL="nvim"
