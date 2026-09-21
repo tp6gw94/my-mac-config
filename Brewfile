@@ -1,17 +1,16 @@
 tap "anomalyco/tap"
-tap "appergb/openless", "https://github.com/Open-Less/openless.git", trusted: { casks: ["openless"] }
-tap "aviator-co/tap"
 tap "barutsrb/tap", "https://github.com/BarutSRB/homebrew-tap", trusted: { casks: ["omniwm"] }
 tap "dlvhdr/formulae"
 tap "docker/tap"
 tap "ejoffe/tap"
 tap "eugene1g/safehouse"
-tap "felixkratz/formulae"
+tap "felixkratz/formulae", "https://github.com/FelixKratz/homebrew-formulae"
 tap "kakoune-lsp/kakoune-lsp"
 tap "manaflow-ai/cmux"
 tap "nanobot-ai/tap"
-tap "nikitabobko/tap", trusted: { casks: ["aerospace"] }
-tap "stablyai/orca"
+tap "nikitabobko/tap"
+tap "rjyo/moshi", trusted: true
+tap "stablyai/orca", trusted: { casks: ["orca"] }
 # Static checker for GitHub Actions workflow files
 brew "actionlint"
 # Code searching, linting, rewriting
@@ -24,8 +23,6 @@ brew "cmake"
 brew "coreutils"
 # Diff that understands syntax
 brew "difftastic"
-# Pack, ship and run any application as a lightweight container
-brew "docker"
 # Simple, fast and user-friendly alternative to find
 brew "fd"
 # Play, record, convert, and stream many audio and video codecs
@@ -40,36 +37,38 @@ brew "gh"
 brew "git-delta"
 # Render markdown on the CLI
 brew "glow"
-# Open source programming language to build simple/reliable/efficient software
-brew "go"
 # Agent multiplexer that lives in your terminal
 brew "herdr"
 # Review-first terminal diff viewer for agent-authored changesets
 brew "hunk"
 # Tools and libraries to manipulate images in many formats
 brew "imagemagick-full"
+# C library for encoding, decoding, and manipulating JSON
+brew "jansson"
 # Lightweight and flexible command-line JSON processor
 brew "jq"
 # Lazier way to manage everything docker
 brew "lazydocker"
 # Simple terminal UI for git commands
 brew "lazygit"
+# C99 library which implements a VT220 or xterm terminal emulator
+brew "libvterm"
 # Utility for directing compilation
 brew "make"
+# Run a Kubernetes cluster locally
+brew "minikube"
 # Polyglot runtime manager (asdf rust clone)
 brew "mise"
 # Deep clean and optimize your Mac
 brew "mole"
+# Remote terminal application
+brew "mosh"
 # Lightweight PDF and XPS viewer
 brew "mupdf"
 # Incremental parsing library
 brew "tree-sitter"
 # Ambitious Vim-fork focused on extensibility and agility
 brew "neovim"
-# Search tool like grep and The Silver Searcher
-brew "ripgrep"
-# AI coding agent, built for the terminal
-brew "opencode"
 # Open Fortinet client for PPP+TLS VPN tunnel services
 brew "openfortivpn"
 # Swiss-army knife of markup format conversion
@@ -88,16 +87,18 @@ brew "rename"
 brew "resterm"
 # SVG rendering tool and library
 brew "resvg"
+# Search tool like grep and The Silver Searcher
+brew "ripgrep"
 # CLI proxy to minimize LLM token consumption
 brew "rtk"
-# Safe, concurrent, practical language
-brew "rust"
 # Interactive find and replace in the terminal
 brew "scooter"
 # 7-Zip is a file archiver with a high compression ratio
 brew "sevenzip"
 # Cross-shell prompt for astronauts
 brew "starship"
+# Opinionated Lua code formatter
+brew "stylua"
 # Terminal multiplexer
 brew "tmux"
 # Display directories as trees (with optional color/HTML output)
@@ -112,15 +113,12 @@ brew "weasyprint"
 brew "yazi"
 # Shell extension to navigate your filesystem faster
 brew "zoxide"
-brew "aviator-co/tap/av", trusted: true
 # macOS sandbox wrapper for coding agents
 brew "eugene1g/safehouse/agent-safehouse", trusted: true
 # Portable daemon + CLI that bridges AI coding agents to the Moshi mobile app
 brew "rjyo/moshi/moshi-hook"
 # Anthropic's official Claude AI desktop app
 cask "claude"
-# Ghostty-based terminal with vertical tabs and notifications for AI coding agents
-cask "cmux"
 cask "font-0xproto-nerd-font"
 cask "font-3270-nerd-font"
 cask "font-adwaita-mono-nerd-font"
@@ -215,8 +213,6 @@ cask "ngrok"
 cask "omniwm"
 # Replacement for Docker Desktop
 cask "orbstack"
-# IDE for orchestrating AI coding agents across terminals and worktrees
-cask "stablyai/orca/orca", trusted: true
 # Control your tools with a few keystrokes
 cask "raycast"
 # Build, run, and govern agents across the software development lifecycle
@@ -229,16 +225,9 @@ cask "thaw"
 cask "zettlr"
 go "cmd/go"
 go "cmd/gofmt"
-go "github.com/projectdiscovery/nuclei/v3/cmd/nuclei"
+go "github.com/wailsapp/wails/v2/cmd/wails"
 cargo "kak-tree-sitter"
 cargo "ktsctl"
-uv "cli-agent-orchestrator"
-uv "posting"
+uv "cli-agent-orchestrator", source: "git+https://github.com/awslabs/cli-agent-orchestrator.git@main"
 uv "zmk"
-npm "@alibaba-group/open-code-review"
-npm "@earendil-works/pi-coding-agent"
-npm "@mockoon/cli"
-npm "@playwright/cli"
-npm "agent-browser"
 npm "corepack"
-npm "typescript-language-server"
