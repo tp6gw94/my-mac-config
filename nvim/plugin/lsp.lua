@@ -51,6 +51,8 @@ vim.lsp.enable({
 	"yamlls",
 	"lua_ls",
 	"pyright",
+  "oxfmt",
+  "oxlint",
 	-- "vtsls",
   "tsgo",
 	"vue_ls",
