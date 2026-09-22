@@ -8,3 +8,8 @@ require("obsidian").setup({
 		},
 	},
 })
+
+require("live_server").setup({})
+require("markdown_preview").setup({
+  default_theme = "light"
+})
