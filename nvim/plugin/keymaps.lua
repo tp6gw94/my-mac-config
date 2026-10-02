@@ -39,6 +39,11 @@ nmap_leader("wp", function()
 	end
 end, "Window Pick")
 
+-- Tab
+nmap_leader("td", "<cmd>tabclose<cr>", "Tab Close")
+nmap_leader("tn", "<cmd>tabnext<cr>", "Tab Next")
+nmap_leader("tp", "<cmd>tabprevious<cr>", "Tab Previous")
+
 -- resizing splits
 vim.keymap.set("n", "<C-left>", "<cmd>resize -2<cr>")
 vim.keymap.set("n", "<C-down>", "<cmd>resize +2<cr>")

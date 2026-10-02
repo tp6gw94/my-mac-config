@@ -110,7 +110,6 @@ miniclue.setup({
 		{ mode = "n", keys = "<leader>c", desc = "Code" },
 		{ mode = "n", keys = "<leader>f", desc = "Pick" },
 		{ mode = "n", keys = "<leader>g", desc = "Git" },
-		{ mode = "n", keys = "<leader>R", desc = "Kulala" },
 		{ mode = "n", keys = "<leader>w", desc = "Window" },
 		{ mode = "n", keys = "<leader>x", desc = "Trouble" },
 		{ mode = "n", keys = "<leader>t", desc = "Tab" },
@@ -130,12 +129,6 @@ miniclue.setup({
 			border = "double",
 		},
 	},
-})
-
-require("kulala").setup({
-	global_keymaps = true,
-	global_keymaps_prefix = "<leader>R",
-	kulala_keymaps_prefix = "",
 })
 
 nmap_leader("u", "<cmd>UndotreeToggle<cr>", "Undotree")
@@ -173,17 +166,3 @@ require("yazi").setup({
 })
 nmap_leader("e", "<cmd>Yazi<cr>", "Open yazi current file")
 nmap_leader("E", "<cmd>Yazi cwd<cr>", "Open yazi cwd")
-
-
-local function open_plan_folder()
-  local plan_dir = vim.fn.getcwd() .. "/.plan"
-  if vim.fn.isdirectory(plan_dir) == 0 then
-    vim.fn.mkdir(plan_dir, "p")
-  end
-  require("yazi").yazi(nil, plan_dir)
-end
-
-vim.api.nvim_create_user_command("YaziPlan", open_plan_folder, {
-  desc = "Open yazi at cwd/.plan (mkdir if missing)",
-})
-nmap_leader("fp", open_plan_folder, "Open yazi at cwd/.plan")

@@ -17,10 +17,6 @@
       "rev": "a68ffa6af98bf1fc88f33a071c51a188ec85c725",
       "src": "https://github.com/scottmckendry/cyberdream.nvim"
     },
-    "dooing": {
-      "rev": "4c4ac78088cf462398a0206e79669936a184175f",
-      "src": "https://github.com/atiladefreitas/dooing"
-    },
     "flash.nvim": {
       "rev": "fcea7ff883235d9024dc41e638f164a450c14ca2",
       "src": "https://github.com/folke/flash.nvim"
@@ -56,10 +52,6 @@
     "kanagawa.nvim": {
       "rev": "aef7f5cec0a40dbe7f3304214850c472e2264b10",
       "src": "https://github.com/rebelot/kanagawa.nvim"
-    },
-    "kulala.nvim": {
-      "rev": "cd3eaa83b8d60533837202dede73238334d71832",
-      "src": "https://github.com/mistweaverco/kulala.nvim"
     },
     "lazydev.nvim": {
       "rev": "5231c62aa83c2f8dc8e7ba957aa77098cda1257d",

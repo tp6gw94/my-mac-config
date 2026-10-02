@@ -34,8 +34,6 @@ vim.pack.add({
 	gh("rose-pine/neovim"),
 	gh("edeneast/nightfox.nvim"),
 
-	gh("mistweaverco/kulala.nvim"),
-
 	gh("esmuellert/codediff.nvim"),
 
 	gh("romus204/tree-sitter-manager.nvim"),
@@ -88,7 +86,6 @@ vim.pack.add({
 	gh("obsidian-nvim/obsidian.nvim"),
 
   gh("sevenc-nanashi/neov-ime.nvim"),
-  gh("atiladefreitas/dooing"),
   gh("YousefHadder/markdown-plus.nvim"),
 
   gh("selimacerbas/live-server.nvim"),
