@@ -30,6 +30,10 @@ assert_file_contains() {
   fi
 }
 
+assert_file_bytes() {
+  printf '%s\n' "$2" | cmp - "$1" >/dev/null 2>&1 || fail "$3"
+}
+
 expect_failure() {
   label=$1
   shift
@@ -117,6 +121,137 @@ assert_eq "$source_branch" "$(git -C "$repo" branch --show-current)" '來源目�
 if git -C "$repo" show-ref --verify --quiet refs/heads/feature/foo; then
   fail '新分支不應出現在來源'
 fi
+
+activation_repo="$tmp/activation-source"
+mkdir "$activation_repo"
+git -C "$activation_repo" init -q -b main
+git -C "$activation_repo" config user.email cowtree-test@example.com
+git -C "$activation_repo" config user.name cowtree-test
+printf '*.ignored\n' >"$activation_repo/.gitignore"
+printf 'base modified\n' >"$activation_repo/modified"
+printf 'base removed\n' >"$activation_repo/removed"
+printf 'base staged\n' >"$activation_repo/staged"
+printf 'base dirty\n' >"$activation_repo/dirty"
+git -C "$activation_repo" add .
+git -C "$activation_repo" -c core.hooksPath=/dev/null commit -qm base
+git -C "$activation_repo" -c core.hooksPath=/dev/null checkout -qb target
+printf 'target modified\n' >"$activation_repo/modified"
+rm "$activation_repo/removed"
+printf 'target added\n' >"$activation_repo/added"
+printf 'target ignored\n' >"$activation_repo/collision.ignored"
+git -C "$activation_repo" add -A
+git -C "$activation_repo" add -f collision.ignored
+git -C "$activation_repo" -c core.hooksPath=/dev/null commit -qm target
+activation_target=$(git -C "$activation_repo" rev-parse HEAD)
+git -C "$activation_repo" -c core.hooksPath=/dev/null checkout -q main
+printf 'local staged\n' >"$activation_repo/staged"
+git -C "$activation_repo" add staged
+printf 'local dirty\n' >"$activation_repo/dirty"
+printf 'local untracked\n' >"$activation_repo/untracked"
+printf 'local ignored\n' >"$activation_repo/local.ignored"
+printf '#!/bin/sh\ntouch %s\nexit 1\n' "$hook_marker" >"$activation_repo/.git/hooks/post-checkout"
+chmod +x "$activation_repo/.git/hooks/post-checkout"
+activation_status=$(git -C "$activation_repo" status --porcelain)
+activation_head=$(git -C "$activation_repo" rev-parse HEAD)
+activation_refs=$(git -C "$activation_repo" show-ref)
+activation_index=$(git -C "$activation_repo" ls-files --stage)
+cp "$activation_repo/.git/index" "$tmp/activation.index"
+activation_copy="$tmp/activation-copy"
+(cd "$activation_repo" && "$script" target "$activation_copy") >"$tmp/activation.stdout" 2>"$tmp/activation.stderr" || fail 'Existing branch activation failed'
+assert_eq "$activation_copy" "$(cat "$tmp/activation.stdout")" 'Activation stdout'
+assert_eq target "$(git -C "$activation_copy" branch --show-current)" 'Exact existing branch'
+assert_eq "$activation_target" "$(git -C "$activation_copy" rev-parse HEAD)" 'Existing branch commit'
+assert_file_bytes "$activation_copy/modified" 'target modified' 'Tracked modified bytes'
+assert_file_bytes "$activation_copy/added" 'target added' 'Tracked added bytes'
+[ ! -e "$activation_copy/removed" ] || fail 'Tracked removed file remains'
+assert_eq 'target modified' "$(git -C "$activation_copy" show :modified)" 'Modified index bytes'
+assert_eq 'target added' "$(git -C "$activation_copy" show :added)" 'Added index bytes'
+if git -C "$activation_copy" ls-files --error-unmatch removed >/dev/null 2>&1; then
+  fail 'Removed file remains in index'
+fi
+assert_eq 'local staged' "$(git -C "$activation_copy" show :staged)" 'Staged index preserved'
+assert_file_bytes "$activation_copy/staged" 'local staged' 'Staged worktree preserved'
+assert_eq 'base dirty' "$(git -C "$activation_copy" show :dirty)" 'Unstaged index preserved'
+assert_file_bytes "$activation_copy/dirty" 'local dirty' 'Unstaged bytes preserved'
+assert_file_bytes "$activation_copy/untracked" 'local untracked' 'Untracked bytes preserved'
+assert_file_bytes "$activation_copy/local.ignored" 'local ignored' 'Ignored bytes preserved'
+assert_eq 'M  staged' "$(git -C "$activation_copy" status --porcelain -- staged)" 'Staged status preserved'
+assert_eq ' M dirty' "$(git -C "$activation_copy" status --porcelain -- dirty)" 'Unstaged status preserved'
+[ ! -e "$hook_marker" ] || fail 'Existing branch ran checkout hook'
+assert_eq "$activation_status" "$(git -C "$activation_repo" status --porcelain)" 'Activation changed source status'
+assert_eq "$activation_head" "$(git -C "$activation_repo" rev-parse HEAD)" 'Activation changed source commit'
+assert_eq main "$(git -C "$activation_repo" branch --show-current)" 'Activation changed source branch'
+assert_eq "$activation_refs" "$(git -C "$activation_repo" show-ref)" 'Activation changed source refs'
+cmp "$tmp/activation.index" "$activation_repo/.git/index" || fail 'Activation changed source index'
+assert_file_bytes "$activation_repo/modified" 'base modified' 'Activation changed source tracked bytes'
+assert_file_bytes "$activation_repo/removed" 'base removed' 'Activation removed source file'
+[ ! -e "$activation_repo/added" ] || fail 'Activation added source file'
+assert_file_bytes "$activation_repo/staged" 'local staged' 'Activation changed source staged bytes'
+assert_file_bytes "$activation_repo/dirty" 'local dirty' 'Activation changed source dirty bytes'
+assert_file_bytes "$activation_repo/untracked" 'local untracked' 'Activation changed source untracked bytes'
+assert_file_bytes "$activation_repo/local.ignored" 'local ignored' 'Activation changed source ignored bytes'
+
+current_copy="$tmp/current-copy"
+(cd "$activation_repo" && "$script" main "$current_copy") >"$tmp/current.stdout" 2>"$tmp/current.stderr" || fail 'Current branch activation failed'
+assert_eq "$current_copy" "$(cat "$tmp/current.stdout")" 'Current branch stdout'
+assert_eq main "$(git -C "$current_copy" branch --show-current)" 'Current branch name'
+assert_eq "$activation_head" "$(git -C "$current_copy" rev-parse HEAD)" 'Current branch commit'
+assert_eq "$activation_status" "$(git -C "$current_copy" status --porcelain)" 'Current branch dirty state'
+assert_eq "$activation_index" "$(git -C "$current_copy" ls-files --stage)" 'Current branch changed index entries'
+expect_failure_in_directory 'Existing branch destination collision' "$activation_repo" "$script" target "$current_copy"
+assert_file_bytes "$current_copy/dirty" 'local dirty' 'Collision changed destination'
+
+for conflict in dirty staged untracked ignored; do
+  conflict_repo="$tmp/conflict-$conflict"
+  cp -R "$activation_repo" "$conflict_repo"
+  case "$conflict" in
+    dirty|staged) conflict_file=modified ;;
+    untracked) conflict_file=added ;;
+    ignored) conflict_file=collision.ignored ;;
+  esac
+  printf 'original conflict bytes\n' >"$conflict_repo/$conflict_file"
+  if [ "$conflict" = staged ]; then
+    git -C "$conflict_repo" add "$conflict_file"
+  fi
+  conflict_status=$(git -C "$conflict_repo" status --porcelain)
+  conflict_index=$(git -C "$conflict_repo" ls-files --stage)
+  conflict_copy="$tmp/conflict-copy-$conflict"
+  expect_failure_in_directory "$conflict overwrite conflict" "$conflict_repo" "$script" target "$conflict_copy"
+  [ -d "$conflict_copy/.git" ] || fail 'Conflict copy was not retained'
+  assert_file_contains "$tmp/failure.stderr" 'error:' 'Git conflict diagnostic missing'
+  assert_file_contains "$tmp/failure.stderr" "copy retained at: $conflict_copy" 'Retained copy diagnostic missing'
+  for conflict_directory in "$conflict_repo" "$conflict_copy"; do
+    assert_file_bytes "$conflict_directory/$conflict_file" 'original conflict bytes' 'Conflict bytes overwritten'
+    assert_eq "$conflict_status" "$(git -C "$conflict_directory" status --porcelain)" 'Conflict changed status'
+    assert_eq "$activation_head" "$(git -C "$conflict_directory" rev-parse HEAD)" 'Conflict changed commit'
+    assert_eq main "$(git -C "$conflict_directory" branch --show-current)" 'Conflict changed branch'
+    assert_eq "$conflict_index" "$(git -C "$conflict_directory" ls-files --stage)" 'Conflict changed index entries'
+  done
+  [ ! -e "$hook_marker" ] || fail 'Conflict ran checkout hook'
+done
+
+git -C "$activation_repo" remote add origin "$activation_repo"
+git -C "$activation_repo" update-ref refs/remotes/origin/remote-only "$activation_target"
+remote_copy="$tmp/remote-only-copy"
+(cd "$activation_repo" && "$script" remote-only "$remote_copy") >"$tmp/remote.stdout" 2>"$tmp/remote.stderr" || fail 'Remote-only name failed to create local branch'
+assert_eq "$remote_copy" "$(cat "$tmp/remote.stdout")" 'Remote-only stdout'
+assert_eq remote-only "$(git -C "$remote_copy" branch --show-current)" 'Remote-only exact local branch'
+assert_eq "$activation_head" "$(git -C "$remote_copy" rev-parse HEAD)" 'Remote-only branch guessed remote commit'
+assert_eq "$activation_status" "$(git -C "$remote_copy" status --porcelain)" 'New branch changed dirty state'
+assert_eq "$activation_index" "$(git -C "$remote_copy" ls-files --stage)" 'New branch changed index entries'
+if git -C "$remote_copy" config --get branch.remote-only.remote >/dev/null 2>&1; then
+  fail 'Remote-only branch acquired remote tracking'
+fi
+if git -C "$activation_repo" show-ref --verify --quiet refs/heads/remote-only; then
+  fail 'Remote-only branch appeared in source'
+fi
+expect_failure_in_directory 'Branch shorthand' "$activation_repo" "$script" '@{-1}' "$tmp/shorthand-copy"
+[ ! -e "$tmp/shorthand-copy" ] || fail 'Branch shorthand created a destination'
+cp "$activation_repo/.git/index" "$tmp/pre-index-env.index"
+expect_failure_in_directory 'GIT_INDEX_FILE environment' "$activation_repo" env GIT_INDEX_FILE="$activation_repo/.git/index" "$script" target "$tmp/external-index-copy"
+[ ! -e "$tmp/external-index-copy" ] || fail 'GIT_INDEX_FILE created a destination'
+assert_file_contains "$tmp/failure.stderr" 'GIT_INDEX_FILE' 'GIT_INDEX_FILE diagnostic missing'
+cmp "$tmp/pre-index-env.index" "$activation_repo/.git/index" || fail 'GIT_INDEX_FILE changed source index'
 
 core_worktree_destination="$tmp/core-worktree-copy"
 git -C "$repo" config core.worktree "$repo"

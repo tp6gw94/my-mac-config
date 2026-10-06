@@ -8,8 +8,8 @@ die() {
 
 usage() {
   printf '%s\n' \
-    '用法：cowtree <新分支> [目的地]' \
-    '在 macOS 以 cp -cR 複製目前 Git 儲存庫（包含未提交及被忽略的檔案，但略過工作樹中的 node_modules 目錄），再只在複本建立新分支。' \
+    'Usage: cowtree <branch> [destination]' \
+    'Copy the current Git repository with macOS cp -cR, including dirty and ignored files but excluding worktree node_modules directories; activate an existing local branch or create a new branch only in the copy.' \
     '複本擁有獨立的 Git 中繼資料，不是真正共享中繼資料的 git worktree。' \
     '省略目的地時會建立來源的兄弟目錄；相對目的地以目前目錄為基準。' >&2
   exit 2
@@ -55,16 +55,17 @@ command -v git >/dev/null 2>&1 || die '找不到 git。'
 command -v cp >/dev/null 2>&1 || die '找不到 cp。'
 
 branch=$1
-[ -n "$branch" ] || die '新分支不可為空。'
+[ -n "$branch" ] || die 'Branch must not be empty.'
 case "$branch" in
-  -*) die '新分支不可由連字號開頭。' ;;
+  -*) die 'Branch must not start with a hyphen.' ;;
 esac
-if ! git check-ref-format --branch "$branch" >/dev/null 2>&1; then
-  die "新分支名稱無效：$branch"
+if ! git check-ref-format --branch "$branch" >/dev/null 2>&1 ||
+   ! git check-ref-format "refs/heads/$branch" >/dev/null 2>&1; then
+  die "Invalid branch name: $branch"
 fi
 
-if [ -n "${GIT_DIR:-}" ] || [ -n "${GIT_COMMON_DIR:-}" ] || [ -n "${GIT_WORK_TREE:-}" ]; then
-  die '不支援透過 GIT_DIR、GIT_COMMON_DIR 或 GIT_WORK_TREE 指定的共享 Git 目錄。'
+if [ -n "${GIT_DIR:-}" ] || [ -n "${GIT_COMMON_DIR:-}" ] || [ -n "${GIT_WORK_TREE:-}" ] || [ -n "${GIT_INDEX_FILE:-}" ]; then
+  die 'GIT_DIR, GIT_COMMON_DIR, GIT_WORK_TREE, and GIT_INDEX_FILE environment overrides are not supported.'
 fi
 
 if ! repo=$(git rev-parse --show-toplevel 2>/dev/null); then
@@ -127,9 +128,6 @@ fi
 if ! git -C "$repo" rev-parse --verify HEAD >/dev/null 2>&1; then
   die '來源儲存庫尚無可建立分支的提交。'
 fi
-if git -C "$repo" show-ref --verify --quiet "refs/heads/$branch"; then
-  die "來源已存在同名分支：$branch"
-fi
 
 if ! current_dir=$(pwd -P 2>/dev/null); then
   die '無法解析目前目錄。'
@@ -190,12 +188,30 @@ if ! copy_contents "$repo" "$destination" >/dev/null; then
   die "複製失敗；部分複本可能位於：$destination"
 fi
 
-# 只建立 ref 並移動 HEAD，不 checkout，且停用複製進來的 Git hooks。
-if ! git -C "$destination" -c core.hooksPath=/dev/null branch -- "$branch" >/dev/null 2>&1; then
-  die "複本建立分支失敗；部分複本可能位於：$destination"
+if git -C "$destination" show-ref --verify --quiet "refs/heads/$branch"; then
+  branch_kind=ExistingLocal
+else
+  ref_status=$?
+  case "$ref_status" in
+    1) branch_kind=NewLocal ;;
+    *) die "Local branch lookup failed; copy retained at: $destination" ;;
+  esac
 fi
-if ! git -C "$destination" -c core.hooksPath=/dev/null symbolic-ref HEAD "refs/heads/$branch" >/dev/null 2>&1; then
-  die "複本切換 HEAD 失敗；部分複本可能位於：$destination"
-fi
+
+case "$branch_kind" in
+  ExistingLocal)
+    if ! git -C "$destination" -c core.hooksPath=/dev/null checkout --no-guess --no-overwrite-ignore --no-recurse-submodules "$branch" -- >/dev/null; then
+      die "Existing local branch activation failed; copy retained at: $destination"
+    fi
+    ;;
+  NewLocal)
+    if ! git -C "$destination" -c core.hooksPath=/dev/null branch -- "$branch" >/dev/null 2>&1; then
+      die "New local branch creation failed; copy retained at: $destination"
+    fi
+    if ! git -C "$destination" -c core.hooksPath=/dev/null symbolic-ref HEAD "refs/heads/$branch" >/dev/null 2>&1; then
+      die "Branch HEAD activation failed; copy retained at: $destination"
+    fi
+    ;;
+esac
 
 printf '%s\n' "$destination"
