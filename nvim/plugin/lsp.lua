@@ -43,9 +43,22 @@ local cucumber_ls_config = {
 }
 vim.lsp.config("cucumber_language_server", cucumber_ls_config)
 
+vim.lsp.config("fallow", {
+	cmd = { "fallow-lsp" },
+	filetypes = { "javascript", "typescript", "javascriptreact", "typescriptreact" },
+	root_markers = { ".fallowrc.json", "package.json", ".git" },
+	init_options = {
+		-- Every issue type is enabled by default. List only the ones you
+		-- want to turn off; any key you omit stays enabled.
+		issueTypes = {
+			["circular-dependencies"] = false,
+		},
+	},
+})
 
 vim.lsp.enable({
   -- "markdown_oxide",
+  "fallow",
   "ty",
 	"bashls",
 	"yamlls",
