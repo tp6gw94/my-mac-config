@@ -8,10 +8,15 @@ die() {
 
 usage() {
   printf '%s\n' \
-    'Usage: cowtree <branch> [destination]' \
+    'Usage: cowtree <branch> [destination] [--herdr]' \
+    '  cowtree <branch> --herdr' \
+    '  cowtree <branch> ../custom-path --herdr' \
+    '  cowtree <branch> -- <literal destination>' \
     'Copy the current Git repository with macOS cp -cR, including dirty and ignored files but excluding worktree node_modules directories; activate an existing local branch or create a new branch only in the copy.' \
     '複本擁有獨立的 Git 中繼資料，不是真正共享中繼資料的 git worktree。' \
-    '省略目的地時會建立來源的兄弟目錄；相對目的地以目前目錄為基準。' >&2
+    '省略目的地時會建立來源的兄弟目錄；相對目的地以目前目錄為基準。' \
+    '--herdr creates and focuses a Herdr workspace at the copy after branch activation; requires HERDR_ENV=1.' \
+    'Everything after -- is a literal destination; --herdr after -- is not a flag.' >&2
   exit 2
 }
 
@@ -44,7 +49,31 @@ copy_contents() {
   copy_files "$1" "$2"
 }
 
-[ "$#" -ge 1 ] && [ "$#" -le 2 ] || usage
+[ "$#" -ge 1 ] || usage
+
+branch=$1
+shift
+
+workspace_mode=CopyOnly
+destination_kind=DefaultSibling
+tail_state=Options
+
+for argument in "$@"; do
+  case "$tail_state:$argument" in
+    Options:--herdr)
+      [ "$workspace_mode" = CopyOnly ] || usage
+      workspace_mode=FocusedHerdr
+      ;;
+    Options:--)
+      tail_state=Literal
+      ;;
+    *)
+      [ "$destination_kind" = DefaultSibling ] || usage
+      destination_kind=Explicit
+      requested_destination=$argument
+      ;;
+  esac
+done
 
 case "$(uname -s 2>/dev/null || printf '')" in
   Darwin) ;;
@@ -54,7 +83,6 @@ esac
 command -v git >/dev/null 2>&1 || die '找不到 git。'
 command -v cp >/dev/null 2>&1 || die '找不到 cp。'
 
-branch=$1
 [ -n "$branch" ] || die 'Branch must not be empty.'
 case "$branch" in
   -*) die 'Branch must not start with a hyphen.' ;;
@@ -132,9 +160,7 @@ fi
 if ! current_dir=$(pwd -P 2>/dev/null); then
   die '無法解析目前目錄。'
 fi
-if [ "$#" -eq 2 ]; then
-  requested_destination=$2
-else
+if [ "$destination_kind" = DefaultSibling ]; then
   safe_branch=$(printf '%s' "$branch" | tr '/' '-')
   repo_parent=${repo%/*}
   repo_name=${repo##*/}
@@ -180,6 +206,11 @@ case "$destination/" in
   "$repo/"*) die "目的地不可位於來源儲存庫內：$destination" ;;
 esac
 
+if [ "$workspace_mode" = FocusedHerdr ]; then
+  [ "${HERDR_ENV:-}" = 1 ] || die 'HERDR_ENV=1 is required for --herdr.'
+  command -v herdr >/dev/null 2>&1 || die 'herdr is not available on PATH.'
+fi
+
 # 先保留目的地避免競速碰撞；失敗時保留部分目錄以免誤刪資料。
 if ! mkdir "$destination" 2>/dev/null; then
   die "無法建立目的地，可能已被其他程序建立：$destination"
@@ -213,5 +244,11 @@ case "$branch_kind" in
     fi
     ;;
 esac
+
+if [ "$workspace_mode" = FocusedHerdr ]; then
+  if ! herdr workspace create --cwd "$destination" --label "$destination_name" --focus >/dev/null; then
+    die "Herdr workspace creation failed; copy retained at: $destination"
+  fi
+fi
 
 printf '%s\n' "$destination"

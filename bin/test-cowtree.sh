@@ -25,7 +25,7 @@ assert_file_contains() {
   file=$1
   text=$2
   label=$3
-  if ! grep -F "$text" "$file" >/dev/null 2>&1; then
+  if ! grep -F -- "$text" "$file" >/dev/null 2>&1; then
     fail "$label"
   fi
 }
@@ -294,5 +294,193 @@ if ! git -C "$repo" -c core.hooksPath=/dev/null worktree add -q -b linked/test "
 fi
 expect_failure_in_directory 'linked worktree' "$linked" "$script" linked/copy "$tmp/linked-copy"
 git -C "$repo" worktree remove -f "$linked" >/dev/null 2>&1 || fail '清理 linked worktree 測試資料失敗'
+
+herdr_stub_dir="$tmp/herdr-stub"
+mkdir -p "$herdr_stub_dir"
+cat >"$herdr_stub_dir/herdr" <<'HERDR_STUB'
+#!/bin/sh
+set -eu
+
+log=${COWTREE_HERDR_LOG:?}
+index=0
+cwd=
+previous=
+for argument in "$@"; do
+  index=$((index + 1))
+  printf 'arg%s=%s\n' "$index" "$argument" >>"$log"
+  if [ "$previous" = --cwd ]; then
+    cwd=$argument
+  fi
+  previous=$argument
+done
+printf 'argc=%s\n' "$index" >>"$log"
+printf 'branch_at_call=%s\n' "$(git -C "$cwd" branch --show-current 2>/dev/null || printf 'none')" >>"$log"
+[ -z "${COWTREE_HERDR_STDOUT:-}" ] || printf '%s\n' "$COWTREE_HERDR_STDOUT"
+[ -z "${COWTREE_HERDR_STDERR:-}" ] || printf '%s\n' "$COWTREE_HERDR_STDERR" >&2
+if [ "${COWTREE_HERDR_FAIL:-0}" = 1 ]; then
+  exit 7
+fi
+exit 0
+HERDR_STUB
+chmod +x "$herdr_stub_dir/herdr"
+
+stub_stdout=
+stub_stderr=
+
+run_herdr() {
+  directory=$1
+  log=$2
+  shift 2
+  (cd "$directory" && env \
+    PATH="$herdr_stub_dir:$PATH" \
+    HERDR_ENV=1 \
+    COWTREE_HERDR_LOG="$log" \
+    COWTREE_HERDR_STDOUT="${stub_stdout:-}" \
+    COWTREE_HERDR_STDERR="${stub_stderr:-}" \
+    COWTREE_HERDR_FAIL=0 \
+    "$script" "$@") >"$tmp/herdr.stdout" 2>"$tmp/herdr.stderr"
+}
+
+write_herdr_expected_log() {
+  expected_file=$1
+  destination=$2
+  label=$3
+  branch_name=$4
+  printf 'arg1=workspace\narg2=create\narg3=--cwd\narg4=%s\narg5=--label\narg6=%s\narg7=--focus\nargc=7\nbranch_at_call=%s\n' \
+    "$destination" "$label" "$branch_name" >"$expected_file"
+}
+
+expect_exit() {
+  label=$1
+  expected_status=$2
+  directory=$3
+  shift 3
+  status=0
+  (cd "$directory" && "$@") >"$tmp/failure.stdout" 2>"$tmp/failure.stderr" || status=$?
+  [ "$status" -eq "$expected_status" ] || fail "$label should exit $expected_status（actual $status）"
+  [ ! -s "$tmp/failure.stdout" ] || fail "$label should not write stdout"
+}
+
+default_herdr_branch=feature/herdr-default
+default_herdr_destination="$tmp/project-feature-herdr-default"
+default_herdr_log="$tmp/herdr-default.log"
+stub_stdout='herdr-output-noise'
+stub_stderr='herdr-stderr-marker'
+if ! run_herdr "$repo" "$default_herdr_log" "$default_herdr_branch" --herdr; then
+  fail "Default Herdr run failed：$(cat "$tmp/herdr.stderr")"
+fi
+stub_stdout=
+stub_stderr=
+assert_file_bytes "$tmp/herdr.stdout" "$default_herdr_destination" 'Default Herdr stdout'
+assert_file_contains "$tmp/herdr.stderr" 'herdr-stderr-marker' 'Herdr stderr was not preserved'
+assert_eq "$default_herdr_branch" "$(git -C "$default_herdr_destination" branch --show-current)" 'Default Herdr branch'
+write_herdr_expected_log "$tmp/herdr-expected.log" "$default_herdr_destination" 'project-feature-herdr-default' "$default_herdr_branch"
+cmp "$tmp/herdr-expected.log" "$default_herdr_log" || fail 'Default Herdr invocation contract changed'
+
+special_herdr_branch=feature/herdr-special
+special_herdr_destination="$tmp/herdr copy \$quoted*"
+special_herdr_log="$tmp/herdr-special.log"
+if ! run_herdr "$repo" "$special_herdr_log" "$special_herdr_branch" "$special_herdr_destination" --herdr; then
+  fail "Special destination Herdr run failed：$(cat "$tmp/herdr.stderr")"
+fi
+assert_file_bytes "$tmp/herdr.stdout" "$special_herdr_destination" 'Special destination Herdr stdout'
+assert_eq "$special_herdr_branch" "$(git -C "$special_herdr_destination" branch --show-current)" 'Special destination Herdr branch'
+write_herdr_expected_log "$tmp/herdr-expected.log" "$special_herdr_destination" "herdr copy \$quoted*" "$special_herdr_branch"
+cmp "$tmp/herdr-expected.log" "$special_herdr_log" || fail 'Special destination Herdr invocation contract changed'
+
+literal_herdr_branch=feature/herdr-literal
+literal_herdr_destination="$tmp/herdr literal"
+literal_herdr_log="$tmp/herdr-literal.log"
+if ! run_herdr "$repo" "$literal_herdr_log" "$literal_herdr_branch" --herdr -- "$literal_herdr_destination"; then
+  fail "Literal destination Herdr run failed：$(cat "$tmp/herdr.stderr")"
+fi
+assert_file_bytes "$tmp/herdr.stdout" "$literal_herdr_destination" 'Literal destination Herdr stdout'
+assert_eq "$literal_herdr_branch" "$(git -C "$literal_herdr_destination" branch --show-current)" 'Literal destination Herdr branch'
+write_herdr_expected_log "$tmp/herdr-expected.log" "$literal_herdr_destination" 'herdr literal' "$literal_herdr_branch"
+cmp "$tmp/herdr-expected.log" "$literal_herdr_log" || fail 'Literal destination Herdr invocation contract changed'
+
+existing_herdr_destination="$tmp/herdr-existing"
+existing_herdr_log="$tmp/herdr-existing.log"
+if ! run_herdr "$activation_repo" "$existing_herdr_log" target "$existing_herdr_destination" --herdr; then
+  fail "Existing branch Herdr run failed：$(cat "$tmp/herdr.stderr")"
+fi
+assert_file_bytes "$tmp/herdr.stdout" "$existing_herdr_destination" 'Existing branch Herdr stdout'
+assert_eq target "$(git -C "$existing_herdr_destination" branch --show-current)" 'Existing branch Herdr branch'
+write_herdr_expected_log "$tmp/herdr-expected.log" "$existing_herdr_destination" 'herdr-existing' target
+cmp "$tmp/herdr-expected.log" "$existing_herdr_log" || fail 'Existing branch Herdr invocation contract changed'
+
+unflagged_herdr_log="$tmp/herdr-unflagged.log"
+if ! run_herdr "$repo" "$unflagged_herdr_log" feature/herdr-unflagged "$tmp/herdr-unflagged"; then
+  fail "Unflagged run failed：$(cat "$tmp/herdr.stderr")"
+fi
+assert_file_bytes "$tmp/herdr.stdout" "$tmp/herdr-unflagged" 'Unflagged stdout'
+[ ! -e "$unflagged_herdr_log" ] || fail 'Unflagged run called herdr'
+
+missing_env_destination="$tmp/herdr-missing-env"
+missing_env_log="$tmp/herdr-missing-env.log"
+expect_exit 'Unset HERDR_ENV' 1 "$repo" env -u HERDR_ENV PATH="$herdr_stub_dir:$PATH" COWTREE_HERDR_LOG="$missing_env_log" "$script" feature/herdr-missing-env "$missing_env_destination" --herdr
+assert_file_contains "$tmp/failure.stderr" 'HERDR_ENV=1 is required' 'Unset HERDR_ENV diagnostic missing'
+[ ! -e "$missing_env_destination" ] || fail 'Unset HERDR_ENV created destination'
+[ ! -e "$missing_env_log" ] || fail 'Unset HERDR_ENV called herdr'
+
+for bad_env in true 01 ''; do
+  bad_env_destination="$tmp/herdr-bad-env-$bad_env"
+  bad_env_log="$tmp/herdr-bad-env-$bad_env.log"
+  expect_exit "HERDR_ENV=$bad_env" 1 "$repo" env PATH="$herdr_stub_dir:$PATH" HERDR_ENV="$bad_env" COWTREE_HERDR_LOG="$bad_env_log" "$script" feature/herdr-bad-env "$bad_env_destination" --herdr
+  assert_file_contains "$tmp/failure.stderr" 'HERDR_ENV=1 is required' 'Invalid HERDR_ENV diagnostic missing'
+  [ ! -e "$bad_env_destination" ] || fail 'Invalid HERDR_ENV created destination'
+  [ ! -e "$bad_env_log" ] || fail 'Invalid HERDR_ENV called herdr'
+done
+
+no_cli_destination="$tmp/herdr-no-cli"
+no_cli_log="$tmp/herdr-no-cli.log"
+expect_exit 'Missing herdr CLI' 1 "$repo" env PATH=/usr/bin:/bin HERDR_ENV=1 COWTREE_HERDR_LOG="$no_cli_log" "$script" feature/herdr-no-cli "$no_cli_destination" --herdr
+assert_file_contains "$tmp/failure.stderr" 'herdr is not available on PATH' 'Missing herdr CLI diagnostic missing'
+[ ! -e "$no_cli_destination" ] || fail 'Missing herdr CLI created destination'
+[ ! -e "$no_cli_log" ] || fail 'Missing herdr CLI ran herdr'
+
+fail_herdr_branch=feature/herdr-fail
+fail_herdr_destination="$tmp/herdr-fail"
+fail_herdr_log="$tmp/herdr-fail.log"
+expect_exit 'Herdr creation failure' 1 "$repo" env PATH="$herdr_stub_dir:$PATH" HERDR_ENV=1 COWTREE_HERDR_LOG="$fail_herdr_log" COWTREE_HERDR_STDOUT='herdr-failure-noise' COWTREE_HERDR_STDERR='herdr-failure-stderr' COWTREE_HERDR_FAIL=1 "$script" "$fail_herdr_branch" "$fail_herdr_destination" --herdr
+assert_file_contains "$tmp/failure.stderr" 'herdr-failure-stderr' 'Herdr failure stderr was not preserved'
+assert_file_contains "$tmp/failure.stderr" "copy retained at: $fail_herdr_destination" 'Herdr failure retained copy diagnostic missing'
+assert_eq "$fail_herdr_branch" "$(git -C "$fail_herdr_destination" branch --show-current)" 'Herdr failure lost branch'
+write_herdr_expected_log "$tmp/herdr-expected.log" "$fail_herdr_destination" 'herdr-fail' "$fail_herdr_branch"
+cmp "$tmp/herdr-expected.log" "$fail_herdr_log" || fail 'Herdr failure invocation contract changed'
+
+conflict_herdr_log="$tmp/herdr-conflict.log"
+expect_exit 'Herdr checkout conflict' 1 "$tmp/conflict-dirty" env PATH="$herdr_stub_dir:$PATH" HERDR_ENV=1 COWTREE_HERDR_LOG="$conflict_herdr_log" "$script" target "$tmp/herdr-conflict-copy" --herdr
+assert_file_contains "$tmp/failure.stderr" "copy retained at: $tmp/herdr-conflict-copy" 'Herdr conflict retained copy diagnostic missing'
+[ -d "$tmp/herdr-conflict-copy/.git" ] || fail 'Herdr conflict did not retain copy'
+[ ! -e "$conflict_herdr_log" ] || fail 'Herdr checkout conflict called herdr'
+
+collision_herdr_log="$tmp/herdr-collision.log"
+expect_exit 'Herdr destination collision' 1 "$repo" env PATH="$herdr_stub_dir:$PATH" HERDR_ENV=1 COWTREE_HERDR_LOG="$collision_herdr_log" "$script" feature/herdr-collision "$collision" --herdr
+assert_file_contains "$tmp/failure.stderr" "目的地已存在，拒絕覆寫：$collision" 'Herdr collision diagnostic missing'
+[ ! -e "$collision_herdr_log" ] || fail 'Herdr destination collision called herdr'
+assert_file_bytes "$collision/sentinel" keep 'Herdr destination collision changed destination'
+
+expect_exit 'Missing branch' 2 "$tmp" "$script"
+expect_exit 'Duplicate --herdr' 2 "$tmp" "$script" feature/herdr-duplicate --herdr --herdr
+expect_exit 'Excess destination operand' 2 "$tmp" "$script" feature/herdr-excess "$tmp/herdr-excess-one" "$tmp/herdr-excess-two"
+expect_exit 'Destination after literal tail' 2 "$tmp" "$script" feature/herdr-literal-excess "$tmp/herdr-literal-excess" -- "$tmp/herdr-literal-excess-extra"
+assert_file_contains "$tmp/failure.stderr" '--herdr' 'Usage text should mention --herdr'
+[ ! -e "$tmp/herdr-excess-one" ] || fail 'Usage failure created a destination'
+
+empty_herdr_log="$tmp/herdr-empty.log"
+expect_exit 'Empty destination with --herdr' 1 "$repo" env PATH="$herdr_stub_dir:$PATH" HERDR_ENV=1 COWTREE_HERDR_LOG="$empty_herdr_log" "$script" feature/herdr-empty '' --herdr
+assert_file_contains "$tmp/failure.stderr" '目的地不可為空。' 'Empty destination diagnostic missing'
+[ ! -e "$empty_herdr_log" ] || fail 'Empty destination called herdr'
+
+literal_flag_log="$tmp/herdr-literal-flag.log"
+expect_exit 'Literal --herdr destination inside source' 1 "$repo" env PATH="$herdr_stub_dir:$PATH" HERDR_ENV=1 COWTREE_HERDR_LOG="$literal_flag_log" "$script" feature/herdr-literal-flag -- --herdr
+assert_file_contains "$tmp/failure.stderr" '目的地不可位於來源儲存庫內' 'Literal source-inside rejection missing'
+[ ! -e "$literal_flag_log" ] || fail 'Literal --herdr destination called herdr'
+[ ! -e "$repo/--herdr" ] || fail 'Literal destination created inside source'
+
+expect_exit 'Dash destination inside source' 1 "$repo" "$script" feature/herdr-dash --unknown-flag
+assert_file_contains "$tmp/failure.stderr" '目的地不可位於來源儲存庫內' 'Dash destination literal rejection missing'
+[ ! -e "$repo/--unknown-flag" ] || fail 'Dash destination created inside source'
 
 printf 'cowtree 測試通過\n'
