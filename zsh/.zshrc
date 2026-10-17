@@ -9,6 +9,7 @@ eval "$(zoxide init zsh)"
 eval "$(mise activate zsh)"
 
 source $XDG_CONFIG_HOME/zsh/functions/brew-auto-dump.sh
+fpath=("$XDG_CONFIG_HOME/zsh/completions" $fpath)
 autoload -U compinit; compinit
 
 alias pn="pnpm"

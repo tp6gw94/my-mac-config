@@ -1,3 +1,4 @@
+tap "abue-ammar/tinycast", trusted: true
 tap "anomalyco/tap"
 tap "barutsrb/tap", "https://github.com/BarutSRB/homebrew-tap", trusted: { casks: ["omniwm"] }
 tap "dlvhdr/formulae"
@@ -119,6 +120,8 @@ brew "eugene1g/safehouse/agent-safehouse", trusted: true
 brew "rjyo/moshi/moshi-hook"
 # Anthropic's official Claude AI desktop app
 cask "claude"
+# OpenAI's coding agent that runs in your terminal
+cask "codex"
 cask "font-0xproto-nerd-font"
 cask "font-3270-nerd-font"
 cask "font-adwaita-mono-nerd-font"
@@ -213,21 +216,25 @@ cask "ngrok"
 cask "omniwm"
 # Replacement for Docker Desktop
 cask "orbstack"
-# Control your tools with a few keystrokes
-cask "raycast"
 # Build, run, and govern agents across the software development lifecycle
 cask "docker/tap/sbx", trusted: true
 # Rime input method engine
 cask "squirrel-app"
 # Menu bar manager
 cask "thaw"
+# Tiny, fully native launcher, hotkeys, and clipboard history
+cask "abue-ammar/tinycast/tinycast", trusted: true
 # Open-source markdown editor
 cask "zettlr"
 go "cmd/go"
 go "cmd/gofmt"
+go "sigs.k8s.io/kind"
 go "github.com/wailsapp/wails/v2/cmd/wails"
 cargo "kak-tree-sitter"
 cargo "ktsctl"
 uv "cli-agent-orchestrator", source: "git+https://github.com/awslabs/cli-agent-orchestrator.git@main"
 uv "zmk"
+npm "@anthropic-ai/claude-code"
 npm "corepack"
+npm "fallow"
+npm "qpw"
