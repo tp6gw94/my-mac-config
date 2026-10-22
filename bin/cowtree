@@ -8,15 +8,16 @@ die() {
 
 usage() {
   printf '%s\n' \
-    'Usage: cowtree <branch> [destination] [--herdr]' \
+    'Usage: cowtree <branch> [destination] [--herdr] [--base <ref>]' \
     '  cowtree <branch> --herdr' \
     '  cowtree <branch> ../custom-path --herdr' \
     '  cowtree <branch> -- <literal destination>' \
     'Copy the current Git repository with macOS cp -cR, including dirty and ignored files but excluding worktree node_modules directories; activate an existing local branch or create a new branch only in the copy.' \
     '複本擁有獨立的 Git 中繼資料，不是真正共享中繼資料的 git worktree。' \
     '省略目的地時會建立來源的兄弟目錄；相對目的地以目前目錄為基準。' \
+    '--base <ref> creates a new branch at any commit-ish <ref>, resolved in the source repository and used literally, and discards uncommitted and untracked non-ignored source changes in the copy.' \
     '--herdr creates and focuses a Herdr workspace at the copy after branch activation; requires HERDR_ENV=1.' \
-    'Everything after -- is a literal destination; --herdr after -- is not a flag.' >&2
+    'Everything after -- is a literal destination; --herdr and --base after -- are not flags.' >&2
   exit 2
 }
 
@@ -41,6 +42,24 @@ copy_contents() {
           *) continue ;;
         esac
       fi
+      if [ "$child" -ef "$git_dir/worktrees" ]; then
+        continue
+      fi
+      if [ -f "$child/.git" ] && [ ! -L "$child/.git" ]; then
+        case "$1" in
+          "$git_dir"|"$git_dir"/*) ;;
+          *)
+            child_common=$(git -C "$child" rev-parse --git-common-dir 2>/dev/null) || continue
+            case "$child_common" in
+              /*) ;;
+              *) child_common=$child/$child_common ;;
+            esac
+            if [ "$child_common" -ef "$git_dir" ]; then
+              continue
+            fi
+            ;;
+        esac
+      fi
       mkdir "$2/${child##*/}" || return 1
       copy_contents "$child" "$2/${child##*/}" || return 1
     fi
@@ -57,9 +76,23 @@ shift
 workspace_mode=CopyOnly
 destination_kind=DefaultSibling
 tail_state=Options
+base_ref=
+base_pending=
 
 for argument in "$@"; do
+  if [ -n "$base_pending" ]; then
+    case "$argument" in
+      ''|-*) usage ;;
+    esac
+    base_ref=$argument
+    base_pending=
+    continue
+  fi
   case "$tail_state:$argument" in
+    Options:--base)
+      [ -z "$base_ref" ] || usage
+      base_pending=Pending
+      ;;
     Options:--herdr)
       [ "$workspace_mode" = CopyOnly ] || usage
       workspace_mode=FocusedHerdr
@@ -74,6 +107,7 @@ for argument in "$@"; do
       ;;
   esac
 done
+[ -z "$base_pending" ] || usage
 
 case "$(uname -s 2>/dev/null || printf '')" in
   Darwin) ;;
@@ -145,17 +179,36 @@ if [ "$git_dir" != "$expected_git_dir" ] || [ "$git_dir" != "$common_dir" ]; the
   die '來源使用共享 Git 目錄；請改用一般儲存庫工作樹。'
 fi
 
-if ! worktree_list=$(git -C "$repo" worktree list --porcelain 2>/dev/null); then
-  die '無法檢查來源 worktree 設定。'
-fi
-worktree_count=$(printf '%s\n' "$worktree_list" | awk '$1 == "worktree" { count++ } END { print count + 0 }')
-if [ "$worktree_count" -ne 1 ]; then
-  die '來源包含多個 worktree，為避免使用共享 metadata 已拒絕。'
-fi
-
 if ! git -C "$repo" rev-parse --verify HEAD >/dev/null 2>&1; then
   die '來源儲存庫尚無可建立分支的提交。'
 fi
+
+if [ -n "$base_ref" ]; then
+  if ! base_object=$(git -C "$repo" rev-parse --verify --quiet "$base_ref") ||
+     ! base_commit=$(git -C "$repo" rev-parse --verify --quiet "$base_object^{commit}"); then
+    die "Invalid base ref: $base_ref"
+  fi
+fi
+
+branch_status=0
+git -C "$repo" show-ref --verify --quiet "refs/heads/$branch" || branch_status=$?
+case "$branch_status:${base_ref:+Base}" in
+  0:)
+    branch_kind=ExistingLocal
+    ;;
+  0:Base)
+    die "Branch already exists locally; --base only creates new branches: $branch"
+    ;;
+  1:)
+    branch_kind=NewLocal
+    ;;
+  1:Base)
+    branch_kind=NewLocalFromBase
+    ;;
+  *)
+    die "Local branch lookup failed: $branch"
+    ;;
+esac
 
 if ! current_dir=$(pwd -P 2>/dev/null); then
   die '無法解析目前目錄。'
@@ -219,16 +272,6 @@ if ! copy_contents "$repo" "$destination" >/dev/null; then
   die "複製失敗；部分複本可能位於：$destination"
 fi
 
-if git -C "$destination" show-ref --verify --quiet "refs/heads/$branch"; then
-  branch_kind=ExistingLocal
-else
-  ref_status=$?
-  case "$ref_status" in
-    1) branch_kind=NewLocal ;;
-    *) die "Local branch lookup failed; copy retained at: $destination" ;;
-  esac
-fi
-
 case "$branch_kind" in
   ExistingLocal)
     if ! git -C "$destination" -c core.hooksPath=/dev/null checkout --no-guess --no-overwrite-ignore --no-recurse-submodules "$branch" -- >/dev/null; then
@@ -241,6 +284,17 @@ case "$branch_kind" in
     fi
     if ! git -C "$destination" -c core.hooksPath=/dev/null symbolic-ref HEAD "refs/heads/$branch" >/dev/null 2>&1; then
       die "Branch HEAD activation failed; copy retained at: $destination"
+    fi
+    ;;
+  NewLocalFromBase)
+    if ! git -C "$destination" -c core.hooksPath=/dev/null branch -- "$branch" "$base_commit" >/dev/null; then
+      die "New local branch creation failed; copy retained at: $destination"
+    fi
+    if ! git -C "$destination" clean -ffdq >/dev/null; then
+      die "Base cleanup failed; copy retained at: $destination"
+    fi
+    if ! git -C "$destination" -c core.hooksPath=/dev/null checkout --force --no-recurse-submodules "$branch" -- >/dev/null; then
+      die "Base branch activation failed; copy retained at: $destination"
     fi
     ;;
 esac

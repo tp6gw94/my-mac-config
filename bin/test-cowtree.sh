@@ -57,6 +57,17 @@ expect_failure_in_directory() {
   fi
 }
 
+expect_exit() {
+  label=$1
+  expected_status=$2
+  directory=$3
+  shift 3
+  status=0
+  (cd "$directory" && "$@") >"$tmp/failure.stdout" 2>"$tmp/failure.stderr" || status=$?
+  [ "$status" -eq "$expected_status" ] || fail "${label} should exit ${expected_status}（actual ${status}）"
+  [ ! -s "$tmp/failure.stdout" ] || fail "$label should not write stdout"
+}
+
 tmp=$(mktemp -d "${TMPDIR:-/tmp}/cowtree-test.XXXXXX")
 tmp=$(cd "$tmp" && pwd -P)
 trap 'rm -rf "$tmp"' EXIT HUP INT TERM
@@ -245,6 +256,132 @@ fi
 if git -C "$activation_repo" show-ref --verify --quiet refs/heads/remote-only; then
   fail 'Remote-only branch appeared in source'
 fi
+
+git -C "$activation_repo" tag -a annotated-base -m 'annotated base' "$activation_target"
+base_source_status=$(git -C "$activation_repo" status --porcelain)
+base_source_refs=$(git -C "$activation_repo" show-ref)
+cp "$activation_repo/.git/index" "$tmp/base-source.index"
+
+base_branch=feature/base-local
+base_copy="$tmp/base-local-copy"
+(cd "$activation_repo" && "$script" "$base_branch" "$base_copy" --base target) >"$tmp/base.stdout" 2>"$tmp/base.stderr" || fail "--base 建立分支失敗：$(cat "$tmp/base.stderr")"
+assert_eq "$base_copy" "$(cat "$tmp/base.stdout")" '--base stdout'
+assert_eq "$base_branch" "$(git -C "$base_copy" branch --show-current)" '--base 分支名稱錯誤'
+assert_eq "$activation_target" "$(git -C "$base_copy" rev-parse HEAD)" '--base 應以 base 提交為 HEAD'
+assert_eq '' "$(git -C "$base_copy" status --porcelain)" '--base 複本應保持乾淨'
+assert_file_bytes "$base_copy/local.ignored" 'local ignored' '--base 未保留被忽略檔案'
+[ ! -e "$base_copy/untracked" ] || fail '--base 未丟棄未追蹤檔案'
+assert_file_bytes "$base_copy/staged" 'base staged' '--base 未丟棄已暫存變更'
+assert_file_bytes "$base_copy/dirty" 'base dirty' '--base 未丟棄未暫存變更'
+assert_file_bytes "$base_copy/modified" 'target modified' '--base 未取用 base 內容'
+assert_file_bytes "$base_copy/added" 'target added' '--base 未取用 base 新增檔案'
+[ ! -e "$base_copy/removed" ] || fail '--base 未套用 base 刪除'
+if git -C "$base_copy" rev-parse --abbrev-ref "$base_branch@{upstream}" >/dev/null 2>&1; then
+  fail '--base 分支不應有 upstream'
+fi
+assert_eq "$base_source_status" "$(git -C "$activation_repo" status --porcelain)" '--base 改變了來源狀態'
+assert_eq "$activation_head" "$(git -C "$activation_repo" rev-parse HEAD)" '--base 改變了來源提交'
+assert_eq main "$(git -C "$activation_repo" branch --show-current)" '--base 改變了來源分支'
+assert_eq "$base_source_refs" "$(git -C "$activation_repo" show-ref)" '--base 改變了來源 refs'
+cmp "$tmp/base-source.index" "$activation_repo/.git/index" || fail '--base 改變了來源 index'
+assert_file_bytes "$activation_repo/staged" 'local staged' '--base 改變了來源已暫存檔案'
+assert_file_bytes "$activation_repo/dirty" 'local dirty' '--base 改變了來源未暫存檔案'
+assert_file_bytes "$activation_repo/untracked" 'local untracked' '--base 改變了來源未追蹤檔案'
+assert_file_bytes "$activation_repo/local.ignored" 'local ignored' '--base 改變了來源忽略檔案'
+if git -C "$activation_repo" show-ref --verify --quiet "refs/heads/$base_branch"; then
+  fail '--base 分支出現在來源'
+fi
+
+remote_base_branch=feature/base-remote
+remote_base_copy="$tmp/base-remote-copy"
+(cd "$activation_repo" && "$script" "$remote_base_branch" "$remote_base_copy" --base origin/remote-only) >"$tmp/base-remote.stdout" 2>"$tmp/base-remote.stderr" || fail "--base 遠端追蹤 ref 失敗：$(cat "$tmp/base-remote.stderr")"
+assert_eq "$remote_base_copy" "$(cat "$tmp/base-remote.stdout")" '--base 遠端追蹤 stdout'
+assert_eq "$remote_base_branch" "$(git -C "$remote_base_copy" branch --show-current)" '--base 遠端追蹤分支名稱'
+assert_eq "$activation_target" "$(git -C "$remote_base_copy" rev-parse HEAD)" '--base 遠端追蹤提交'
+assert_eq '' "$(git -C "$remote_base_copy" status --porcelain)" '--base 遠端追蹤複本應保持乾淨'
+if git -C "$remote_base_copy" rev-parse --abbrev-ref "$remote_base_branch@{upstream}" >/dev/null 2>&1; then
+  fail '--base 遠端追蹤 ref 不應設定 upstream'
+fi
+if git -C "$remote_base_copy" config --get "branch.$remote_base_branch.remote" >/dev/null 2>&1; then
+  fail '--base 遠端追蹤 ref 不應有 branch 遠端設定'
+fi
+
+regex_base_branch=feature/base-regex
+regex_base_copy="$tmp/base-regex-copy"
+(cd "$activation_repo" && "$script" "$regex_base_branch" "$regex_base_copy" --base ':/^target') >"$tmp/base-regex.stdout" 2>"$tmp/base-regex.stderr" || fail "--base 提交訊息 regex 失敗：$(cat "$tmp/base-regex.stderr")"
+assert_eq "$activation_target" "$(git -C "$regex_base_copy" rev-parse HEAD)" '--base 提交訊息 regex 應解析到該提交'
+
+tag_base_branch=feature/base-annotated-tag
+tag_base_copy="$tmp/base-annotated-tag-copy"
+(cd "$activation_repo" && "$script" "$tag_base_branch" "$tag_base_copy" --base annotated-base) >"$tmp/base-annotated-tag.stdout" 2>"$tmp/base-annotated-tag.stderr" || fail "--base annotated tag 失敗：$(cat "$tmp/base-annotated-tag.stderr")"
+assert_eq "$activation_target" "$(git -C "$tag_base_copy" rev-parse HEAD)" '--base annotated tag 應解析到其提交'
+
+literal_base_branch=feature/base-literal
+literal_base_copy="$tmp/base literal"
+(cd "$activation_repo" && "$script" "$literal_base_branch" --base main -- "$literal_base_copy") >"$tmp/base-literal.stdout" 2>"$tmp/base-literal.stderr" || fail "--base 搭配 -- 失敗：$(cat "$tmp/base-literal.stderr")"
+assert_eq "$literal_base_copy" "$(cat "$tmp/base-literal.stdout")" '--base 搭配 -- stdout'
+assert_eq "$literal_base_branch" "$(git -C "$literal_base_copy" branch --show-current)" '--base 搭配 -- 分支名稱'
+assert_eq "$activation_head" "$(git -C "$literal_base_copy" rev-parse HEAD)" '--base 搭配 -- 提交'
+assert_eq '' "$(git -C "$literal_base_copy" status --porcelain)" '--base 搭配 -- 應保持乾淨'
+assert_file_bytes "$literal_base_copy/local.ignored" 'local ignored' '--base 搭配 -- 未保留被忽略檔案'
+
+invalid_base_copy="$tmp/base-invalid-copy"
+expect_failure_in_directory '無效 base ref' "$activation_repo" "$script" feature/base-invalid "$invalid_base_copy" --base no-such-ref
+[ ! -e "$invalid_base_copy" ] || fail '無效 base ref 拒絕後仍建立了目錄'
+assert_file_contains "$tmp/failure.stderr" 'no-such-ref' '無效 base ref 診斷未指出 ref'
+
+existing_base_copy="$tmp/base-existing-copy"
+expect_failure_in_directory '既有分支搭配 --base' "$activation_repo" "$script" target "$existing_base_copy" --base main
+[ ! -e "$existing_base_copy" ] || fail '既有分支搭配 --base 拒絕後仍建立了目錄'
+
+assert_eq "$base_source_status" "$(git -C "$activation_repo" status --porcelain)" '--base 失敗改變了來源狀態'
+assert_eq "$base_source_refs" "$(git -C "$activation_repo" show-ref)" '--base 失敗改變了來源 refs'
+
+git -C "$activation_repo" branch feature "$activation_target"
+ref_conflict_copy="$tmp/base-ref-conflict-copy"
+expect_failure_in_directory 'ref 衝突的 --base' "$activation_repo" "$script" feature/x "$ref_conflict_copy" --base "$activation_target"
+assert_file_bytes "$ref_conflict_copy/untracked" 'local untracked' '--base 建立 ref 失敗後不應清理未追蹤檔案'
+git -C "$activation_repo" branch -D feature >/dev/null || fail '清理 ref 衝突測試分支失敗'
+
+ignore_repo="$tmp/ignore-source"
+mkdir "$ignore_repo"
+git -C "$ignore_repo" init -q -b main
+git -C "$ignore_repo" config user.email cowtree-test@example.com
+git -C "$ignore_repo" config user.name cowtree-test
+printf '*.log\n' >"$ignore_repo/.gitignore"
+printf 'tracked\n' >"$ignore_repo/tracked.txt"
+git -C "$ignore_repo" add .
+git -C "$ignore_repo" -c core.hooksPath=/dev/null commit -qm base
+ignore_base=$(git -C "$ignore_repo" rev-parse HEAD)
+printf '*.log\n.env\ndist/\n' >"$ignore_repo/.gitignore"
+git -C "$ignore_repo" add .gitignore
+git -C "$ignore_repo" -c core.hooksPath=/dev/null commit -qm rules
+printf 'secret\n' >"$ignore_repo/.env"
+mkdir "$ignore_repo/dist"
+printf 'build\n' >"$ignore_repo/dist/x"
+printf 'notes\n' >"$ignore_repo/notes.txt"
+git -C "$ignore_repo" init -q "$ignore_repo/nested-repo"
+ignore_copy="$tmp/ignore-base-copy"
+(cd "$ignore_repo" && "$script" feature/ignore-base "$ignore_copy" --base "$ignore_base") >"$tmp/ignore.stdout" 2>"$tmp/ignore.stderr" || fail "--base 忽略規則測試失敗：$(cat "$tmp/ignore.stderr")"
+assert_eq "$ignore_copy" "$(cat "$tmp/ignore.stdout")" '--base 忽略規則 stdout'
+assert_eq "$ignore_base" "$(git -C "$ignore_copy" rev-parse HEAD)" '--base 應停在 base 提交'
+assert_file_bytes "$ignore_copy/.gitignore" '*.log' '--base 應使用 base 的 .gitignore'
+assert_file_bytes "$ignore_copy/.env" secret '來源忽略的 .env 未保留'
+assert_file_bytes "$ignore_copy/dist/x" build '來源忽略的 dist 內容未保留'
+[ ! -e "$ignore_copy/notes.txt" ] || fail '--base 未丟棄未追蹤檔案'
+[ ! -e "$ignore_copy/nested-repo" ] || fail '--base 未丟棄未追蹤的巢狀 git 儲存庫'
+assert_eq '' "$(git -C "$ignore_copy" status --porcelain --untracked-files=no)" '--base 複本不應有已追蹤變更'
+
+expect_exit 'Missing --base value' 2 "$tmp" "$script" feature/base-missing "$tmp/base-missing-copy" --base
+[ ! -e "$tmp/base-missing-copy" ] || fail '缺少 --base 值仍建立了目錄'
+expect_exit 'Duplicate --base' 2 "$tmp" "$script" feature/base-duplicate "$tmp/base-duplicate-copy" --base main --base target
+[ ! -e "$tmp/base-duplicate-copy" ] || fail '重複 --base 仍建立了目錄'
+expect_exit 'Dash base ref' 2 "$tmp" "$script" feature/base-dash "$tmp/base-dash-copy" --base -x
+[ ! -e "$tmp/base-dash-copy" ] || fail '以連字號開頭的 base ref 仍建立了目錄'
+assert_file_contains "$tmp/failure.stderr" '--base' '用法說明應提到 --base'
+expect_exit 'Literal --base destination' 1 "$repo" "$script" feature/base-literal-flag -- --base
+assert_file_contains "$tmp/failure.stderr" '目的地不可位於來源儲存庫內' '字面 --base 應視為目的地'
+[ ! -e "$repo/--base" ] || fail '字面 --base 目的地被建立'
 expect_failure_in_directory 'Branch shorthand' "$activation_repo" "$script" '@{-1}' "$tmp/shorthand-copy"
 [ ! -e "$tmp/shorthand-copy" ] || fail 'Branch shorthand created a destination'
 cp "$activation_repo/.git/index" "$tmp/pre-index-env.index"
@@ -292,8 +429,119 @@ linked="$tmp/linked-worktree"
 if ! git -C "$repo" -c core.hooksPath=/dev/null worktree add -q -b linked/test "$linked" HEAD; then
   fail '建立 linked worktree 測試資料失敗'
 fi
+linked_source_worktrees=$(git -C "$repo" worktree list --porcelain)
+linked_branch_commit=$(git -C "$repo" rev-parse linked/test)
+linked_copy="$tmp/linked-source-copy"
+if ! (cd "$repo" && "$script" linked/test "$linked_copy") >"$tmp/linked-source.stdout" 2>"$tmp/linked-source.stderr"; then
+  fail "含 linked worktree 的來源複製失敗：$(cat "$tmp/linked-source.stderr")"
+fi
+assert_eq "$linked_copy" "$(cat "$tmp/linked-source.stdout")" '含 linked worktree 的來源 stdout'
+assert_eq linked/test "$(git -C "$linked_copy" branch --show-current)" 'linked worktree 分支應可在複本啟用'
+assert_eq "$linked_branch_commit" "$(git -C "$linked_copy" rev-parse HEAD)" 'linked worktree 分支提交'
+assert_eq 1 "$(git -C "$linked_copy" worktree list --porcelain | grep -c '^worktree ')" '複本應只有一個 worktree'
+[ ! -e "$linked_copy/.git/worktrees" ] || fail '複本不應包含 linked worktree metadata'
+assert_eq "$linked_source_worktrees" "$(git -C "$repo" worktree list --porcelain)" '來源 worktree 清單被改變'
+[ -f "$linked/.git" ] || fail '來源 linked worktree 被移除'
 expect_failure_in_directory 'linked worktree' "$linked" "$script" linked/copy "$tmp/linked-copy"
+[ ! -e "$tmp/linked-copy" ] || fail '從 linked worktree 執行拒絕後仍建立了目錄'
 git -C "$repo" worktree remove -f "$linked" >/dev/null 2>&1 || fail '清理 linked worktree 測試資料失敗'
+
+inside_worktree="$repo/.worktrees/inside"
+if ! git -C "$repo" -c core.hooksPath=/dev/null worktree add -q -b linked/inside "$inside_worktree" HEAD; then
+  fail '建立來源內 linked worktree 測試資料失敗'
+fi
+inside_source_worktrees=$(git -C "$repo" worktree list --porcelain)
+inside_copy="$tmp/inside-worktree-copy"
+if ! (cd "$repo" && "$script" feature/inside-worktree "$inside_copy") >"$tmp/inside.stdout" 2>"$tmp/inside.stderr"; then
+  fail "來源內 linked worktree 的來源複製失敗：$(cat "$tmp/inside.stderr")"
+fi
+assert_eq "$inside_copy" "$(cat "$tmp/inside.stdout")" '來源內 linked worktree 的來源 stdout'
+assert_eq feature/inside-worktree "$(git -C "$inside_copy" branch --show-current)" '來源內 linked worktree 的複本分支'
+[ ! -e "$inside_copy/.worktrees/inside" ] || fail '複本不應包含來源內的 linked worktree'
+assert_eq 1 "$(git -C "$inside_copy" worktree list --porcelain | grep -c '^worktree ')" '複本應只有一個 worktree'
+inside_base_copy="$tmp/inside-worktree-base-copy"
+if ! (cd "$repo" && "$script" feature/inside-worktree-base "$inside_base_copy" --base main) >"$tmp/inside-base.stdout" 2>"$tmp/inside-base.stderr"; then
+  fail "來源內 linked worktree 的 --base 複製失敗：$(cat "$tmp/inside-base.stderr")"
+fi
+assert_eq "$inside_base_copy" "$(cat "$tmp/inside-base.stdout")" '來源內 linked worktree 的 --base stdout'
+assert_eq feature/inside-worktree-base "$(git -C "$inside_base_copy" branch --show-current)" '來源內 linked worktree 的 --base 分支'
+[ ! -e "$inside_base_copy/.worktrees/inside" ] || fail '--base 複本不應包含來源內的 linked worktree'
+assert_eq 1 "$(git -C "$inside_base_copy" worktree list --porcelain | grep -c '^worktree ')" '--base 複本應只有一個 worktree'
+assert_eq '' "$(git -C "$inside_base_copy" status --porcelain)" '來源內 linked worktree 的 --base 複本應保持乾淨'
+assert_eq "$inside_source_worktrees" "$(git -C "$repo" worktree list --porcelain)" '複製後來源 worktree 清單被改變'
+[ -f "$inside_worktree/.git" ] || fail '來源內的 linked worktree 被移除'
+git -C "$repo" worktree remove -f "$inside_worktree" >/dev/null 2>&1 || fail '清理來源內 linked worktree 測試資料失敗'
+
+moved_worktree="$repo/.worktrees/moved-a"
+if ! git -C "$repo" -c core.hooksPath=/dev/null worktree add -q -b linked/moved "$moved_worktree" HEAD; then
+  fail '建立搬移 linked worktree 測試資料失敗'
+fi
+moved_index="$repo/.git/worktrees/moved-a/index"
+[ -f "$moved_index" ] || fail '搬移 linked worktree 測試資料缺少 per-worktree index'
+cp "$moved_index" "$tmp/moved-worktree.index"
+mv "$moved_worktree" "$repo/.worktrees/moved-b"
+moved_source_worktrees=$(git -C "$repo" worktree list --porcelain)
+printf '%s\n' "$moved_source_worktrees" >"$tmp/moved-worktree.list"
+assert_file_contains "$tmp/moved-worktree.list" "worktree $moved_worktree" '搬移後 worktree 清單應保留舊路徑'
+
+moved_copy="$tmp/moved-worktree-copy"
+if ! (cd "$repo" && "$script" feature/moved-worktree "$moved_copy") >"$tmp/moved.stdout" 2>"$tmp/moved.stderr"; then
+  fail "搬移 linked worktree 的來源複製失敗：$(cat "$tmp/moved.stderr")"
+fi
+assert_eq "$moved_copy" "$(cat "$tmp/moved.stdout")" '搬移 linked worktree 的 stdout'
+assert_eq feature/moved-worktree "$(git -C "$moved_copy" branch --show-current)" '搬移 linked worktree 的複本分支'
+[ ! -e "$moved_copy/.worktrees/moved-b" ] || fail '複本不應包含以 mv 搬移的 linked worktree'
+[ ! -e "$moved_copy/.git/worktrees" ] || fail '搬移 linked worktree 的複本不應包含 worktree metadata'
+assert_eq 1 "$(git -C "$moved_copy" worktree list --porcelain | grep -c '^worktree ')" '搬移 linked worktree 的複本應只有一個 worktree'
+assert_eq "$moved_source_worktrees" "$(git -C "$repo" worktree list --porcelain)" '搬移 linked worktree 的複製改變了來源 worktree 清單'
+cmp "$tmp/moved-worktree.index" "$moved_index" || fail '搬移 linked worktree 的複製改變了來源 per-worktree index'
+[ -f "$repo/.worktrees/moved-b/.git" ] || fail '來源搬移後的 linked worktree 被移除'
+
+moved_base_copy="$tmp/moved-worktree-base-copy"
+if ! (cd "$repo" && "$script" feature/moved-worktree-base "$moved_base_copy" --base main) >"$tmp/moved-base.stdout" 2>"$tmp/moved-base.stderr"; then
+  fail "搬移 linked worktree 的 --base 複製失敗：$(cat "$tmp/moved-base.stderr")"
+fi
+assert_eq "$moved_base_copy" "$(cat "$tmp/moved-base.stdout")" '搬移 linked worktree 的 --base stdout'
+assert_eq feature/moved-worktree-base "$(git -C "$moved_base_copy" branch --show-current)" '搬移 linked worktree 的 --base 複本分支'
+[ ! -e "$moved_base_copy/.worktrees/moved-b" ] || fail '--base 複本不應包含以 mv 搬移的 linked worktree'
+[ ! -e "$moved_base_copy/.git/worktrees" ] || fail '--base 搬移 linked worktree 的複本不應包含 worktree metadata'
+assert_eq 1 "$(git -C "$moved_base_copy" worktree list --porcelain | grep -c '^worktree ')" '--base 搬移 linked worktree 的複本應只有一個 worktree'
+assert_eq '' "$(git -C "$moved_base_copy" status --porcelain)" '--base 搬移 linked worktree 的複本應保持乾淨'
+assert_eq "$moved_source_worktrees" "$(git -C "$repo" worktree list --porcelain)" '--base 搬移 linked worktree 的複製改變了來源 worktree 清單'
+cmp "$tmp/moved-worktree.index" "$moved_index" || fail '--base 搬移 linked worktree 的複製改變了來源 per-worktree index'
+rm -rf "$repo/.worktrees/moved-b"
+git -C "$repo" worktree prune >/dev/null 2>&1 || fail '清理搬移 linked worktree 測試資料失敗'
+
+case_worktree="$repo/.worktrees/case"
+if ! git -C "$repo" -c core.hooksPath=/dev/null worktree add -q -b linked/case "$case_worktree" HEAD; then
+  fail '建立大小寫 linked worktree 測試資料失敗'
+fi
+printf 'gitdir: %s/PROJECT/.git/worktrees/case\n' "$tmp" >"$case_worktree/.git"
+case_copy="$tmp/case-worktree-copy"
+if ! (cd "$repo" && "$script" feature/case-worktree "$case_copy") >/dev/null 2>"$tmp/case.stderr"; then
+  fail "大小寫不同的 linked worktree 來源複製失敗：$(cat "$tmp/case.stderr")"
+fi
+[ ! -e "$case_copy/.worktrees/case" ] || fail '複本不應包含 .git 路徑大小寫不同的 linked worktree'
+git -C "$repo" worktree remove -f "$case_worktree" >/dev/null 2>&1 || fail '清理大小寫 linked worktree 測試資料失敗'
+
+other_repo="$tmp/other-repo"
+mkdir "$other_repo"
+git -C "$other_repo" init -q -b main
+git -C "$other_repo" config user.email cowtree-test@example.com
+git -C "$other_repo" config user.name cowtree-test
+printf 'other\n' >"$other_repo/other.txt"
+git -C "$other_repo" add .
+git -C "$other_repo" -c core.hooksPath=/dev/null commit -qm other
+mkdir "$repo/other-repo-link"
+printf 'gitdir: %s/.git\n' "$other_repo" >"$repo/other-repo-link/.git"
+printf 'linked other\n' >"$repo/other-repo-link/payload.txt"
+other_link_copy="$tmp/other-repo-link-copy"
+if ! (cd "$repo" && "$script" feature/other-repo-link "$other_link_copy") >"$tmp/other-link.stdout" 2>"$tmp/other-link.stderr"; then
+  fail "指向其他儲存庫 git dir 的巢狀目錄複製失敗：$(cat "$tmp/other-link.stderr")"
+fi
+[ -f "$other_link_copy/other-repo-link/.git" ] || fail '指向其他儲存庫 git dir 的巢狀目錄未被複製'
+assert_file_bytes "$other_link_copy/other-repo-link/payload.txt" 'linked other' '指向其他儲存庫 git dir 的巢狀目錄內容未保留'
+rm -rf "$repo/other-repo-link"
 
 herdr_stub_dir="$tmp/herdr-stub"
 mkdir -p "$herdr_stub_dir"
@@ -350,17 +598,6 @@ write_herdr_expected_log() {
     "$destination" "$label" "$branch_name" >"$expected_file"
 }
 
-expect_exit() {
-  label=$1
-  expected_status=$2
-  directory=$3
-  shift 3
-  status=0
-  (cd "$directory" && "$@") >"$tmp/failure.stdout" 2>"$tmp/failure.stderr" || status=$?
-  [ "$status" -eq "$expected_status" ] || fail "$label should exit $expected_status（actual $status）"
-  [ ! -s "$tmp/failure.stdout" ] || fail "$label should not write stdout"
-}
-
 default_herdr_branch=feature/herdr-default
 default_herdr_destination="$tmp/project-feature-herdr-default"
 default_herdr_log="$tmp/herdr-default.log"
@@ -408,6 +645,19 @@ assert_file_bytes "$tmp/herdr.stdout" "$existing_herdr_destination" 'Existing br
 assert_eq target "$(git -C "$existing_herdr_destination" branch --show-current)" 'Existing branch Herdr branch'
 write_herdr_expected_log "$tmp/herdr-expected.log" "$existing_herdr_destination" 'herdr-existing' target
 cmp "$tmp/herdr-expected.log" "$existing_herdr_log" || fail 'Existing branch Herdr invocation contract changed'
+
+base_herdr_branch=feature/base-herdr
+base_herdr_destination="$tmp/activation-source-feature-base-herdr"
+base_herdr_log="$tmp/herdr-base.log"
+if ! run_herdr "$activation_repo" "$base_herdr_log" "$base_herdr_branch" --base target --herdr; then
+  fail "Base Herdr run failed：$(cat "$tmp/herdr.stderr")"
+fi
+assert_file_bytes "$tmp/herdr.stdout" "$base_herdr_destination" 'Base Herdr stdout'
+assert_eq "$base_herdr_branch" "$(git -C "$base_herdr_destination" branch --show-current)" 'Base Herdr branch'
+assert_eq "$activation_target" "$(git -C "$base_herdr_destination" rev-parse HEAD)" 'Base Herdr commit'
+assert_eq '' "$(git -C "$base_herdr_destination" status --porcelain)" 'Base Herdr copy should stay clean'
+write_herdr_expected_log "$tmp/herdr-expected.log" "$base_herdr_destination" 'activation-source-feature-base-herdr' "$base_herdr_branch"
+cmp "$tmp/herdr-expected.log" "$base_herdr_log" || fail 'Base Herdr invocation contract changed'
 
 unflagged_herdr_log="$tmp/herdr-unflagged.log"
 if ! run_herdr "$repo" "$unflagged_herdr_log" feature/herdr-unflagged "$tmp/herdr-unflagged"; then
