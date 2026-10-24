@@ -3,7 +3,7 @@ monitorDwindleOverrides = []
 monitorGapOverrides = []
 monitorNiriOverrides = []
 monitorOrientationOverrides = []
-schemaVersion = 3
+schemaVersion = 4
 
 [appearance]
 mode = "automatic"
@@ -21,6 +21,7 @@ red = 0.08458520228437894
 
 [clipboard]
 historyEnabled = true
+ignoredTypes = []
 maxItemBytes = 8388608
 maxItems = 200
 maxTotalBytes = 67108864
@@ -53,6 +54,7 @@ right = 0.0
 top = 0.0
 
 [general]
+animationSpeed = 1.0
 animationsEnabled = true
 defaultLayoutType = "niri"
 hotkeysEnabled = true
@@ -97,11 +99,16 @@ alwaysCenterSingleColumn = false
 centerFocusedColumn = "never"
 containerPrimarySpanPresets = [0.3333333333333333, 0.5, 0.6666666666666666]
 defaultContainerPrimarySpan = 0.5
+edgeGaps = true
 infiniteLoop = false
 singleWindowFit = "fill"
 visibleContainerCount = 2
 
 [overview]
+enabled = true
+invertScrollDirection = false
+matchFocusBorder = true
+mouseScrollSpeed = 1.0
 zoom = 1.0
 
 [overview.backdrop]
@@ -196,10 +203,14 @@ monitorName = "DELL P2319H"
 
 [statusBar]
 showAppNames = true
+showIcon = true
 showWorkspaceName = true
 useWorkspaceId = true
 
 [workspaceBar]
+autoHide = false
+autoHideHideDelayMilliseconds = 0.0
+autoHideRevealDelayMilliseconds = 0.0
 backgroundOpacity = 0.1
 deduplicateAppIcons = false
 enabled = true
@@ -207,8 +218,11 @@ excludedBundleIDs = []
 height = 24.0
 hideEmptyWorkspaces = false
 hideInNativeFullscreen = false
+hoverPreviewsEnabled = true
 notchActiveZoneWidth = 180.0
 notchMode = "moveBelowMenuBar"
+notificationBadgeRefreshIntervalSeconds = 5.0
+notificationBadges = "off"
 position = "overlappingMenuBar"
 reserveLayoutSpace = false
 revealHoldMilliseconds = 200.0
@@ -1017,6 +1031,10 @@ binding = "Hyper+Shift+R"
 id = "raiseAllFloatingWindows"
 
 [[hotkeys]]
+binding = "Unassigned"
+id = "toggleFloatingFocus"
+
+[[hotkeys]]
 binding = "Hyper+Shift+F"
 id = "rescueOffscreenWindows"
 
@@ -1031,6 +1049,14 @@ id = "closeFocusedWindow"
 [[hotkeys]]
 binding = "Unassigned"
 id = "openMenuAnywhere"
+
+[[hotkeys]]
+binding = "Unassigned"
+id = "setWindowMark"
+
+[[hotkeys]]
+binding = "Unassigned"
+id = "removeWindowMark"
 
 [[hotkeys]]
 binding = "Unassigned"
