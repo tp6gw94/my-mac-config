@@ -8,8 +8,9 @@ die() {
 
 usage() {
   printf '%s\n' \
-    'Usage: cowtree <branch> [destination] [--herdr] [--base <ref>]' \
+    'Usage: cowtree <branch> [destination] [--herdr | --rex] [--base <ref>]' \
     '  cowtree <branch> --herdr' \
+    '  cowtree <branch> --rex' \
     '  cowtree <branch> ../custom-path --herdr' \
     '  cowtree <branch> -- <literal destination>' \
     'Copy the current Git repository with macOS cp -cR, including dirty and ignored files but excluding worktree node_modules directories; activate an existing local branch or create a new branch only in the copy.' \
@@ -17,7 +18,8 @@ usage() {
     '省略目的地時會建立來源的兄弟目錄；相對目的地以目前目錄為基準。' \
     '--base <ref> creates a new branch at any commit-ish <ref>, resolved in the source repository and used literally, and discards uncommitted and untracked non-ignored source changes in the copy.' \
     '--herdr creates and focuses a Herdr workspace at the copy after branch activation; requires HERDR_ENV=1.' \
-    'Everything after -- is a literal destination; --herdr and --base after -- are not flags.' >&2
+    '--rex opens and focuses a new Rex tab at the copy in the current session after branch activation; requires REX_SESSION.' \
+    'Everything after -- is a literal destination; --herdr, --rex, and --base after -- are not flags.' >&2
   exit 2
 }
 
@@ -96,6 +98,10 @@ for argument in "$@"; do
     Options:--herdr)
       [ "$workspace_mode" = CopyOnly ] || usage
       workspace_mode=FocusedHerdr
+      ;;
+    Options:--rex)
+      [ "$workspace_mode" = CopyOnly ] || usage
+      workspace_mode=FocusedRex
       ;;
     Options:--)
       tail_state=Literal
@@ -263,6 +269,10 @@ if [ "$workspace_mode" = FocusedHerdr ]; then
   [ "${HERDR_ENV:-}" = 1 ] || die 'HERDR_ENV=1 is required for --herdr.'
   command -v herdr >/dev/null 2>&1 || die 'herdr is not available on PATH.'
 fi
+if [ "$workspace_mode" = FocusedRex ]; then
+  [ -n "${REX_SESSION:-}" ] || die 'REX_SESSION is required for --rex.'
+  command -v rex >/dev/null 2>&1 || die 'rex is not available on PATH.'
+fi
 
 # 先保留目的地避免競速碰撞；失敗時保留部分目錄以免誤刪資料。
 if ! mkdir "$destination" 2>/dev/null; then
@@ -299,10 +309,17 @@ case "$branch_kind" in
     ;;
 esac
 
-if [ "$workspace_mode" = FocusedHerdr ]; then
-  if ! herdr workspace create --cwd "$destination" --label "$destination_name" --focus >/dev/null; then
-    die "Herdr workspace creation failed; copy retained at: $destination"
-  fi
-fi
+case "$workspace_mode" in
+  FocusedHerdr)
+    if ! herdr workspace create --cwd "$destination" --label "$destination_name" --focus >/dev/null; then
+      die "Herdr workspace creation failed; copy retained at: $destination"
+    fi
+    ;;
+  FocusedRex)
+    if ! rex window new -s "$REX_SESSION" "$branch" -c "$destination" >/dev/null; then
+      die "Rex tab creation failed; copy retained at: $destination"
+    fi
+    ;;
+esac
 
 printf '%s\n' "$destination"
