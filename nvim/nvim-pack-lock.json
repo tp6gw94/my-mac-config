@@ -174,7 +174,7 @@
       "src": "https://github.com/kevinhwang91/promise-async"
     },
     "quickdraw.nvim": {
-      "rev": "2e1483e3ad6456dff1196d76b682e5b67b224084",
+      "rev": "af7a86f65896b256d4544860fc80e6d20a15b553",
       "src": "https://github.com/tp6gw94/quickdraw.nvim"
     },
     "rainbow-delimiters.nvim": {
