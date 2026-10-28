@@ -72,14 +72,68 @@ rex.action{
   end,
 }
 
+local attention_states = { blocked = true, done = true, error = true }
+
+rex.action{
+  name = "focus_next_attention",
+  title = "Focus Next Pane Needing Attention",
+  run = function(ctx)
+    local terminal = "com.superlogical.terminal"
+    local candidates = {}
+    local current_index = 0
+    for _, session in ipairs(assert(rex.call("session.list")).sessions) do
+      local attached = session.session_id ~= ctx.session_id
+      if attached then
+        assert(rex.session.attach{ session_id = session.session_id })
+      end
+      local blocks = assert(rex.session.list_blocks{ session_id = session.session_id }).blocks
+      if attached then
+        rex.session.detach{ session_id = session.session_id }
+      end
+      for _, block in ipairs(blocks) do
+        if block.block_id == ctx.block_id then
+          current_index = #candidates
+        end
+        if block.creator_name == terminal and block.placement == "placed" then
+          local status = rex.call(terminal .. ".program_status", {
+            session_id = session.session_id,
+            block_id = block.block_id,
+          })
+          for _, record in ipairs(status and status.records or {}) do
+            if attention_states[record.state] and block.block_id ~= ctx.block_id then
+              table.insert(candidates, { session_id = session.session_id, block = block })
+              break
+            end
+          end
+        end
+      end
+    end
+    if #candidates == 0 then
+      return { found = false }
+    end
+    local target = candidates[current_index % #candidates + 1]
+    rex.client.queue("session.select", {
+      session_id = target.session_id,
+      window_id = target.block.window_id,
+    })
+    assert(rex.session.focus_block{ session_id = target.session_id, block_id = target.block.block_id })
+    return { found = true, block_id = target.block.block_id }
+  end,
+}
+
 rex.bind("ctrl+a>s", "pane.split", { direction = "down" })
 rex.bind("ctrl+a>v", "pane.split", { direction = "right" })
 rex.bind("ctrl+a>z", "pane.zoom")
 rex.bind("ctrl+a>shift+s", "session.switch")
+rex.bind("ctrl+a>ctrl+f", "session.next")
+rex.bind("ctrl+a>ctrl+b", "session.previous")
+rex.bind("ctrl+a>u", "focus_next_attention")
 rex.bind("ctrl+a>shift+n", "session.new")
 rex.bind("ctrl+a>shift+d", "session.close")
 rex.bind("ctrl+a>c", "client.tab.new")
 rex.bind("ctrl+a>r", "client.config.reload")
+rex.bind("ctrl+a>ctrl+n", "client.tab.next")
+rex.bind("ctrl+a>ctrl+p", "client.tab.previous")
 rex.bind("ctrl+a>x", "pane.close")
 rex.bind("ctrl+a>shift+x", "client.tab.close")
 rex.bind("ctrl+a>shift+r", "session.rename")
