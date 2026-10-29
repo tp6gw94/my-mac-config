@@ -10,7 +10,6 @@ eval "$(mise activate zsh)"
 
 source $XDG_CONFIG_HOME/zsh/functions/brew-auto-dump.sh
 fpath=("$XDG_CONFIG_HOME/zsh/completions" $fpath)
-autoload -U compinit; compinit
 
 alias pn="pnpm"
 alias lg="lazygit"
@@ -103,8 +102,6 @@ zinit light-mode for \
     zdharma-continuum/zinit-annex-patch-dl \
     zdharma-continuum/zinit-annex-rust
 
-# bun completions
-[ -s "/Users/todd/.bun/_bun" ] && source "/Users/todd/.bun/_bun"
 # The following lines have been added by Docker Desktop to enable Docker CLI completions.
 fpath=(/Users/todd/.docker/completions $fpath)
 autoload -Uz compinit
