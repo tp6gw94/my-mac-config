@@ -50,10 +50,72 @@ vim.keymap.set("n", "<C-down>", "<cmd>resize +2<cr>")
 vim.keymap.set("n", "<C-up>", "<cmd>vertical resize -2<cr>")
 vim.keymap.set("n", "<C-right>", "<cmd>vertical resize +2<cr>")
 -- moving between splits
-vim.keymap.set("n", "<C-h>", "<C-w>h")
-vim.keymap.set("n", "<C-j>", "<C-w>j")
-vim.keymap.set("n", "<C-k>", "<C-w>k")
-vim.keymap.set("n", "<C-l>", "<C-w>l")
+local rex_directions = {
+	h = "left",
+	j = "down",
+	k = "up",
+	l = "right",
+}
+
+local focus_pending = false
+
+local function request_focus(session_id, source_block_id, direction)
+	if focus_pending then
+		return
+	end
+	focus_pending = true
+	local ok, err = pcall(vim.system, {
+		"rex",
+		"--autostart=false",
+		"do",
+		"-s",
+		session_id,
+		"-b",
+		source_block_id,
+		"focus_from_source",
+		"direction=" .. direction,
+	}, { text = true }, function(result)
+		vim.schedule(function()
+			focus_pending = false
+			if result.code ~= 0 or result.signal ~= 0 then
+				vim.notify(
+					("Rex focus failed (exit %d, signal %d): %s"):format(
+						result.code,
+						result.signal,
+						vim.trim(result.stderr)
+					),
+					vim.log.levels.ERROR
+				)
+			end
+		end)
+	end)
+	if not ok then
+		focus_pending = false
+		vim.notify("Rex focus failed: " .. err, vim.log.levels.ERROR)
+	end
+end
+
+local function move_window(key)
+	local window = vim.fn.win_getid()
+	vim.cmd("wincmd " .. vim.v.count1 .. key)
+	if vim.fn.win_getid() ~= window or not vim.env.REX_SESSION then
+		return
+	end
+	if not vim.env.REX_BLOCK or vim.env.REX_BLOCK == "" then
+		vim.notify("Rex focus failed: REX_BLOCK is not set", vim.log.levels.ERROR)
+		return
+	end
+	request_focus(vim.env.REX_SESSION, vim.env.REX_BLOCK, rex_directions[key])
+end
+
+for key in pairs(rex_directions) do
+	vim.keymap.set("n", "<C-" .. key .. ">", function()
+		move_window(key)
+	end)
+	vim.keymap.set("n", "<C-w>" .. key, function()
+		move_window(key)
+	end)
+end
 
 -- Paths
 nmap_leader("cp", "<cmd>CopyRelPath<cr>", "Copy relative path")
