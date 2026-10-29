@@ -26,7 +26,19 @@ local focus_directions = {
   l = "right",
 }
 
-local function focus_pane(request, forward_nvim)
+local terminal = "com.superlogical.terminal"
+
+local function nvim_has_neighbor(block_id, key)
+  local status = rex.block.call(terminal, "program_status", { block_id = block_id })
+  for _, record in ipairs(status and status.records or {}) do
+    if record.id == "nvim-nav" then
+      return (record.msg or ""):find(key, 1, true) ~= nil
+    end
+  end
+  return true
+end
+
+local function focus_pane(request, nvim_key)
   local view, view_err = rex.session.view({ session_id = request.session_id })
   if not view then
     error(view_err)
@@ -41,13 +53,17 @@ local function focus_pane(request, forward_nvim)
   if focused_block_id ~= request.source_block_id then
     return true
   end
-  if forward_nvim then
+  if nvim_key then
     local process, process_err =
-      rex.block.call("com.superlogical.terminal", "process", { block_id = request.source_block_id })
+      rex.block.call(terminal, "process", { block_id = request.source_block_id })
     if not process then
       error(process_err)
     end
-    if process.foreground and process.foreground.name == "nvim" then
+    if
+      process.foreground
+      and process.foreground.name == "nvim"
+      and nvim_has_neighbor(request.source_block_id, nvim_key)
+    then
       return false
     end
   end
@@ -81,7 +97,7 @@ for key, direction in pairs(focus_directions) do
       session_id = ctx.session_id,
       source_block_id = ctx.block_id,
       direction = direction,
-    }, true)
+    }, key)
   end)
 end
 rex.bind("alt+n", "client.tab.next")

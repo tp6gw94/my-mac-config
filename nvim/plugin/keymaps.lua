@@ -108,6 +108,33 @@ local function move_window(key)
 	request_focus(vim.env.REX_SESSION, vim.env.REX_BLOCK, rex_directions[key])
 end
 
+local function report_neighbors()
+	local keys = "hjkl"
+	if vim.api.nvim_get_mode().mode == "n" then
+		keys = ""
+		for key in pairs(rex_directions) do
+			if vim.fn.winnr(key) ~= vim.fn.winnr() then
+				keys = keys .. key
+			end
+		end
+	end
+	vim.api.nvim_ui_send("\27]7501;id=nvim-nav:state=idle:msg=" .. vim.base64.encode(keys) .. "\27\\")
+end
+
+if vim.env.REX_SESSION then
+	local group = vim.api.nvim_create_augroup("rex_nav", {})
+	vim.api.nvim_create_autocmd(
+		{ "VimEnter", "WinEnter", "WinNew", "WinClosed", "WinResized", "VimResized", "TabEnter", "ModeChanged", "FocusGained" },
+		{ group = group, callback = vim.schedule_wrap(report_neighbors) }
+	)
+	vim.api.nvim_create_autocmd("VimLeavePre", {
+		group = group,
+		callback = function()
+			vim.api.nvim_ui_send("\27]7501;id=nvim-nav:state=clear\27\\")
+		end,
+	})
+end
+
 for key in pairs(rex_directions) do
 	vim.keymap.set("n", "<C-" .. key .. ">", function()
 		move_window(key)
