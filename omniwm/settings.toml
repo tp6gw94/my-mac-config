@@ -198,6 +198,63 @@ gridRow = 0
 monitorDisplayUUID = "391DC8CC-1B78-4520-96CF-5F73A68A3173"
 monitorName = "DELL P2319H"
 
+[[routing.arrangements]]
+id = "E830F711-F438-4C67-92EA-1F3C2201FF7E"
+
+[[routing.arrangements.monitors]]
+gridColumn = 1
+gridRow = 0
+monitorDisplayUUID = "37D8832A-2D66-02CA-B9F7-8F30A301B230"
+monitorName = "Built-in Retina Display"
+
+[[routing.arrangements.monitors]]
+gridColumn = 0
+gridRow = 1
+monitorDisplayUUID = "E3E91D5B-B850-439B-AC65-EE6959158AB3"
+monitorName = "RTK FHD"
+
+[[routing.arrangements.monitors]]
+gridColumn = 0
+gridRow = 0
+monitorDisplayUUID = "6FE50BB2-D0FC-4E17-8BC2-1ABCF78CA8E3"
+monitorName = "VA240-FHD"
+
+[[routing.arrangements]]
+id = "D48549D8-348E-4DA3-B56E-9D302A85D8C4"
+
+[[routing.arrangements.monitors]]
+gridColumn = 0
+gridRow = 1
+monitorDisplayUUID = "37D8832A-2D66-02CA-B9F7-8F30A301B230"
+monitorName = "Built-in Retina Display"
+
+[[routing.arrangements.monitors]]
+gridColumn = 0
+gridRow = 0
+monitorDisplayUUID = "6FE50BB2-D0FC-4E17-8BC2-1ABCF78CA8E3"
+monitorName = "VA240-FHD"
+
+[[routing.arrangements]]
+id = "A7F0400C-B1F3-4667-8E4E-05CAF23659F3"
+
+[[routing.arrangements.monitors]]
+gridColumn = 1
+gridRow = 1
+monitorDisplayUUID = "EE37B9B4-B187-4FA0-9FD4-AD29A4190701"
+monitorName = "RTK FHD"
+
+[[routing.arrangements.monitors]]
+gridColumn = 0
+gridRow = 1
+monitorDisplayUUID = "37D8832A-2D66-02CA-B9F7-8F30A301B230"
+monitorName = "Built-in Retina Display"
+
+[[routing.arrangements.monitors]]
+gridColumn = 0
+gridRow = 0
+monitorDisplayUUID = "F0B48A8E-BCD3-40BD-8AF0-4EAB6C1D58FD"
+monitorName = "BenQ PD2500Q"
+
 [scratchpads]
 
 [scratchpads.labels]
