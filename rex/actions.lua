@@ -74,8 +74,9 @@ rex.action{
 
 rex.action{
   name = "jump",
-  title = "Jump To Agent Or Tab",
-  run = function(ctx)
-    return open_float{ "sh", "-c", [[exec "$HOME/.config/rex/jump/jump.sh" "$1"]], "jump", ctx.block_id }
+  title = "Jump To Agent, Tab, Or Pane",
+  args = { mode = "string" },
+  run = function(ctx, args)
+    return open_float{ "sh", "-c", [[exec "$HOME/.config/rex/jump/jump.sh" "$1" "$2"]], "jump", args.mode, ctx.block_id }
   end,
 }

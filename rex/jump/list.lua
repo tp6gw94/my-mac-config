@@ -106,7 +106,13 @@ local function host_name(name)
 end
 
 local function sources(hosts, block_id)
-  local list = { { api = rex, route = "local", tag = "", excluded_block = block_id } }
+  local list = { {
+    api = rex,
+    route = "local",
+    tag = "",
+    excluded_block = block_id,
+    picker_block = os.getenv("REX_BLOCK"),
+  } }
   if not hosts then return list end
 
   local status = rex.call("server.status")
@@ -319,7 +325,37 @@ local function tab_rows(source)
   return rows
 end
 
-local MODES = { agents = agent_rows, tabs = tab_rows }
+local function pane_rows(source)
+  local rows = {}
+  for _, session in ipairs(sessions(source.api)) do
+    local view = view_for(source.api, session.session_id)
+    local label = session_label(view, session)
+    for _, entry in ipairs(view_blocks(view)) do
+      local block = entry.block
+      if block.creator_name == terminal
+        and block.block_id ~= source.excluded_block
+        and block.block_id ~= source.picker_block then
+        table.insert(rows, {
+          session_id = session.session_id,
+          window_id = entry.window.window_id,
+          block_id = block.block_id,
+          kind = "pane",
+          route = source.route,
+          session = label,
+          tail = segments{
+            block_dir_display(source.api, session.session_id, block.block_id),
+            window_name(entry.window),
+            source.tag,
+            block_title(source.api, session.session_id, block.block_id),
+          },
+        })
+      end
+    end
+  end
+  return rows
+end
+
+local MODES = { agents = agent_rows, tabs = tab_rows, panes = pane_rows }
 
 local mode = rex.args.mode or "agents"
 local filter = rex.args.filter

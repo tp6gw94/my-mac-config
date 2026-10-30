@@ -27,33 +27,38 @@ read_state() {
   esac
   case "$prompt" in
     Tabs) mode=tabs ;;
+    Panes) mode=panes ;;
     Agents:*) filter=${prompt#Agents:} ;;
   esac
   printf '%s %s %s\n' "$mode" "$hosts" "$filter"
 }
 
-reload() {
-  local mode=$1 filter=$2 hosts=$3 origin=$4 prompt=Agents
-  if [ "$mode" = tabs ]; then
-    prompt=Tabs
-  elif [ "$filter" != all ]; then
-    prompt="Agents:$filter"
-  fi
+prompt_for() {
+  local mode=$1 filter=$2 hosts=$3 prompt=Agents
+  case "$mode" in
+    tabs) prompt=Tabs ;;
+    panes) prompt=Panes ;;
+    *) [ "$filter" = all ] || prompt="Agents:$filter" ;;
+  esac
   if [ "$hosts" = on ]; then
     prompt="$prompt +hosts"
   fi
+  printf '%s' "$prompt"
+}
 
-  printf "reload-sync(%s list %s '%s' %s %s)+change-prompt(%s )" "$SELF" "$mode" "$origin" "$filter" "$hosts" "$prompt"
+reload() {
+  local mode=$1 filter=$2 hosts=$3 origin=$4
+  printf "reload-sync(%s list %s '%s' %s %s)+change-prompt(%s )" "$SELF" "$mode" "$origin" "$filter" "$hosts" "$(prompt_for "$mode" "$filter" "$hosts")"
 }
 
 toggle() {
   local origin=${1:-} mode hosts _
   read -r mode hosts _ <<< "$(read_state)"
-  if [ "$mode" = tabs ]; then
-    reload agents all "$hosts" "$origin"
-  else
-    reload tabs all "$hosts" "$origin"
-  fi
+  case "$mode" in
+    agents) reload tabs all "$hosts" "$origin" ;;
+    tabs) reload panes all "$hosts" "$origin" ;;
+    panes) reload agents all "$hosts" "$origin" ;;
+  esac
 }
 
 filter_state() {
@@ -87,8 +92,8 @@ focus() {
 }
 
 pick() {
-  local origin=${1:-} rows selected
-  if ! rows=$(list agents "$origin"); then
+  local mode=$1 origin=${2:-} rows selected
+  if ! rows=$(list "$mode" "$origin"); then
     await_key "List failed."
     exit 1
   fi
@@ -97,7 +102,7 @@ pick() {
     --delimiter "$TAB" \
     --with-nth 6.. \
     --ansi \
-    --prompt 'Agents ' \
+    --prompt "$(prompt_for "$mode" all off) " \
     --header-lines 1 \
     --preview "$SELF capture {1} {3} {5}" \
     --preview-window 'down,50%,wrap' \
@@ -116,5 +121,5 @@ case "${1:-}" in
     shift
     "$verb" "$@"
     ;;
-  *) pick "${1:-}" ;;
+  *) pick "${1:-agents}" "${2:-}" ;;
 esac

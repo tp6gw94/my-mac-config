@@ -70,7 +70,7 @@ local function find_window(match)
 end
 
 local target, window_id
-if kind == "agent" then
+if kind == "agent" or kind == "pane" then
   target = block
   window_id = find_window(function(candidate) return holds_block(candidate, block) end)
 elseif kind == "tab" then
@@ -91,6 +91,6 @@ assert(dest.call("client.perform", {
   origin = "cli",
 }))
 
-if kind == "agent" then
+if kind == "agent" or kind == "pane" then
   assert(dest.session.focus_block{ session_id = session, block_id = block })
 end

@@ -18,7 +18,7 @@ rex.bind("ctrl+a>g>h", "hunk_diff")
 rex.bind("ctrl+a>n>o", "obsidian_inbox_float")
 rex.bind("ctrl+a>n>q", "quicknote_float")
 
-rex.bind("ctrl+a>f", "pane.float")
+rex.bind("ctrl+a>shift+f", "pane.float")
 local focus_directions = {
   h = "left",
   j = "down",
@@ -113,4 +113,6 @@ rex.bind("alt+down", "pane.resize", { direction = "down" })
 rex.bind("alt+up", "pane.resize", { direction = "up" })
 rex.bind("alt+right", "pane.resize", { direction = "right" })
 
-rex.bind("ctrl+a>a", "jump")
+rex.bind("ctrl+a>f>a", "jump", { mode = "agents" })
+rex.bind("ctrl+a>f>t", "jump", { mode = "tabs" })
+rex.bind("ctrl+a>f>p", "jump", { mode = "panes" })
