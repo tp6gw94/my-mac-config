@@ -7,6 +7,8 @@ import { tabBar } from "./tabs.js";
 const ICON = "mods/subagent/layers.svg";
 const SPINNER = "mods/subagent/spinner.svg";
 const PANEL = "subagent-panel";
+const SESSIONS = "pi-sessions-panel";
+const SESSIONS_ICON = "mods/pi-sessions/history.svg";
 const POLL_MS = 2000;
 const ENTRIES_SHOWN = 12;
 
@@ -19,11 +21,24 @@ function find(node, id) {
   return null;
 }
 
-const panelShown = () => {
-  const node = find(layout(), PANEL);
+const shownFor = (id) => {
+  const node = find(layout(), id);
   return Boolean(node) && !node.hidden;
 };
+const panelShown = () => shownFor(PANEL);
 const mono = () => settings().font_family ?? "JetBrains Mono";
+
+function toggle(panel, label, icon, badge = 0) {
+  const t = theme();
+  const on = shownFor(panel);
+  return h_flex().id(`${panel}-toggle`).h(26).px(8).gap(5).flex_none().items_center().rounded(6).text_size(12)
+    .bg(on ? t.selected : t.chrome).text_color(on || badge ? t.foreground : t.muted).hover((s) => s.bg(t.hover))
+    .on_mouse_down("left", (_e, cx) => cx.stop_propagation())
+    .on_click(() => run("layout.toggle", { id: panel }))
+    .child(svg(icon).size(14))
+    .child(label)
+    .when(badge > 0, (el) => el.child(div().px(5).rounded(4).bg(t.raised).text_color(t.working).child(String(badge))));
+}
 
 function duration(ms) {
   const s = Math.max(0, Math.floor(ms / 1000));
@@ -142,16 +157,10 @@ export default class Subagent extends View {
 
   renderTopbar() {
     const t = theme();
-    const cwd = focused()?.cwd;
-    const count = this.running.filter((task) => inside(task.cwd, cwd)).length;
-    const shown = panelShown();
-    return tabBar(this, t, h_flex().id("subagent-toggle").h(26).px(8).gap(5).flex_none().items_center().rounded(6).text_size(12)
-      .bg(shown ? t.selected : t.chrome).text_color(shown || count ? t.foreground : t.muted).hover((s) => s.bg(t.hover))
-      .on_mouse_down("left", (_e, cx) => cx.stop_propagation())
-      .on_click(() => run("layout.toggle", { id: PANEL }))
-      .child(svg(ICON).size(14))
-      .child("Subagent")
-      .when(count > 0, (el) => el.child(div().px(5).rounded(4).bg(t.raised).text_color(t.working).child(String(count)))));
+    const count = this.running.filter((task) => inside(task.cwd, focused()?.cwd)).length;
+    return tabBar(this, t, h_flex().gap(3).items_center()
+      .child(toggle(SESSIONS, "Sessions", SESSIONS_ICON))
+      .child(toggle(PANEL, "Subagent", ICON, count)));
   }
 
   renderPanel(cx) {

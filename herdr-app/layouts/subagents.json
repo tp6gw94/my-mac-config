@@ -134,6 +134,19 @@
               "min": 320,
               "max": 1000,
               "hidden": true
+            },
+            {
+              "id": "pi-sessions-panel",
+              "type": "block",
+              "content": {
+                "mod": "pi-sessions"
+              },
+              "size": {
+                "px": 420
+              },
+              "min": 320,
+              "max": 900,
+              "hidden": true
             }
           ],
           "padding": 8,
