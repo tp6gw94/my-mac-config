@@ -1,0 +1,8 @@
+{
+  "place": "none",
+  "title": "Space jump",
+  "overlay": {
+    "kind": "dialog",
+    "width": 600
+  }
+}

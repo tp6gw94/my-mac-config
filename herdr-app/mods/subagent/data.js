@@ -1,15 +1,14 @@
-import { exec, readTextFile, home } from "herdr";
+import { exec, hc, readTextFile, home } from "herdr";
 
 export const ACTIVE = ["queued", "starting", "running", "waiting_input", "cancelling"];
 const ACTIVE_PATTERN = `"status":"(${ACTIVE.join("|")})"`;
 const SESSION_TAIL_BYTES = 600000;
-const RECENT_SCAN = 40;
+const RECENT_SCAN = 20;
 const RECENT_SHOWN = 10;
 
 const tasksRoot = () => `${home()}/.pi/agent/rpc-subagents/data/tasks`;
 export const viewerPath = () => `${home()}/.pi/agent/git/github.com/tp6gw94/pi-extras/extensions/rpc-subagents/viewer.mjs`;
 
-export const inside = (cwd, dir) => Boolean(dir) && (cwd === dir || cwd.startsWith(dir.endsWith("/") ? dir : `${dir}/`));
 const started = (task) => task.startedAt ?? task.createdAt;
 
 async function readStates(files) {
@@ -24,15 +23,24 @@ export async function runningTasks() {
   return (await readStates(lines(found.stdout))).filter((task) => ACTIVE.includes(task.status));
 }
 
-export async function folderTasks(dir) {
-  const script = 'grep -rlF --include=state.json "$1" "$2" | xargs -r ls -t | head -n "$3"; grep -rlE --include=state.json "$4" "$2"';
-  const found = await exec("sh", ["-c", script, "sh", `"cwd":${JSON.stringify(dir).slice(0, -1)}`, tasksRoot(), String(RECENT_SCAN), ACTIVE_PATTERN]);
-  const tasks = (await readStates(lines(found.stdout))).filter((task) => inside(task.cwd, dir));
+export async function allTasks() {
+  const script = 'ls -t "$1"/*/state.json | head -n "$2"; grep -rlE --include=state.json "$3" "$1"';
+  const found = await exec("sh", ["-c", script, "sh", tasksRoot(), String(RECENT_SCAN), ACTIVE_PATTERN]);
+  const tasks = await readStates(lines(found.stdout));
   return {
     running: tasks.filter((task) => ACTIVE.includes(task.status)).sort((a, b) => started(a) - started(b)),
     recent: tasks.filter((task) => !ACTIVE.includes(task.status))
       .sort((a, b) => (b.finishedAt ?? started(b)) - (a.finishedAt ?? started(a))).slice(0, RECENT_SHOWN),
   };
+}
+
+export async function foregroundPids(addresses) {
+  const pids = new Map();
+  await Promise.all(addresses.map(async (address) => {
+    const pid = JSON.parse((await hc(["get", address, "--json"])).stdout).foreground?.pid;
+    if (pid) pids.set(pid, address);
+  }));
+  return pids;
 }
 
 const textOf = (content) => typeof content === "string" ? content

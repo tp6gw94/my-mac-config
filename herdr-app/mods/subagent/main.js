@@ -1,7 +1,7 @@
-import { View, div, svg } from "gpui-kit";
+import { View, div, svg, image } from "gpui-kit";
 import { h_flex, v_flex, TextView } from "gpui-base";
-import { hc, focused, theme, props, run, layout, settings, openOverlay } from "herdr";
-import { ACTIVE, inside, runningTasks, folderTasks, loadSession, toolSummary, viewerPath } from "./data.js";
+import { hc, agents, theme, props, run, layout, settings, openOverlay } from "herdr";
+import { ACTIVE, runningTasks, allTasks, foregroundPids, loadSession, toolSummary, viewerPath } from "./data.js";
 import { tabBar } from "./tabs.js";
 
 const ICON = "mods/subagent/layers.svg";
@@ -62,6 +62,7 @@ function clip(text, maxLines, fromEnd = false) {
 }
 
 const started = (task) => task.startedAt ?? task.createdAt;
+const lastActive = (task) => task.finishedAt ?? started(task);
 const runTime = (task) => (task.finishedAt ?? Date.now()) - started(task);
 const statusLabel = (status) => status.replace("_", " ");
 
@@ -97,8 +98,8 @@ export default class Subagent extends View {
     if (role.bar) return;
     this.running = [];
     this.recent = [];
-    this.count = 0;
-    this.dir = undefined;
+    this.owners = new Map();
+    this.ownersKey = null;
     this.open = new Set();
     this.promptOpen = new Set();
     this.allEntries = new Set();
@@ -125,12 +126,16 @@ export default class Subagent extends View {
   }
 
   async refreshPanel() {
-    const dir = this.dir;
-    if (!dir) { this.running = []; this.recent = []; return; }
-    const { running, recent } = await folderTasks(dir);
-    if (dir !== this.dir) return;
+    const addresses = agents().map((agent) => agent.address);
+    const { running, recent } = await allTasks();
     this.running = running;
     this.recent = recent;
+    const unresolved = [...new Set(running.map((task) => task.ownerPid))].filter((pid) => !this.owners.has(pid)).sort();
+    const key = JSON.stringify([addresses, unresolved]);
+    if (key !== this.ownersKey) {
+      this.ownersKey = key;
+      this.owners = await foregroundPids(addresses);
+    }
     const stale = [...running, ...recent].filter((task) => this.open.has(task.taskId)
       && (!this.sessions[task.taskId] || this.sessions[task.taskId].status !== task.status || ACTIVE.includes(task.status)));
     await Promise.all(stale.map(async (task) => {
@@ -151,39 +156,81 @@ export default class Subagent extends View {
   render(cx) {
     const role = props() ?? {};
     if (role.bar) return this.renderBar(role);
-    if (role.panel) return this.renderPanel(cx);
+    if (role.panel) return this.renderPanel();
     return this.renderTopbar();
   }
 
   renderTopbar() {
     const t = theme();
-    const count = this.running.filter((task) => inside(task.cwd, focused()?.cwd)).length;
+    const count = this.running.length;
     return tabBar(this, t, h_flex().gap(3).items_center()
       .child(toggle(SESSIONS, "Sessions", SESSIONS_ICON))
       .child(toggle(PANEL, "Subagent", ICON, count)));
   }
 
-  renderPanel(cx) {
-    const t = theme();
-    const dir = focused()?.cwd ?? null;
-    if (dir !== this.dir) {
-      this.dir = dir;
-      this.running = [];
-      this.recent = [];
-      this.refresh(cx);
+  groups() {
+    const live = agents();
+    const order = new Map(live.map((agent, i) => [agent.address, i]));
+    const groups = new Map();
+    for (const task of [...this.running, ...this.recent]) {
+      const id = task.ownerId ?? `pid-${task.ownerPid}`;
+      if (!groups.has(id)) groups.set(id, { id, pid: task.ownerPid, tasks: [] });
+      groups.get(id).tasks.push(task);
     }
-    const section = (label, tasks) => v_flex().flex_none().gap(6)
-      .child(div().px(2).text_size(11.5).font_semibold().text_color(t.muted).child(label))
-      .children(tasks.map((task) => this.card(task, t)));
+    return [...groups.values()].map((group) => {
+      const address = this.owners.get(group.pid);
+      return {
+        ...group,
+        agent: live.find((agent) => agent.address === address),
+        running: group.tasks.filter((task) => ACTIVE.includes(task.status)).length,
+        latest: Math.max(...group.tasks.map(lastActive)),
+      };
+    }).sort((a, b) => (order.get(a.agent?.address) ?? Infinity) - (order.get(b.agent?.address) ?? Infinity)
+      || (b.running > 0) - (a.running > 0) || b.latest - a.latest);
+  }
+
+  renderPanel() {
+    const t = theme();
+    const groups = this.groups();
     return v_flex().id("subagent-panel").size_full().min_h(0).rounded(10).overflow_hidden().bg(t.background).border_1().border_color(t.border).text_color(t.foreground).text_size(13)
       .child(h_flex().h(42).flex_none().px(14).gap(8).items_center().border_b(1).border_color(t.border)
         .child(div().font_semibold().child("Subagents"))
-        .child(div().px(5).py(1).rounded(4).border_1().border_color(t.border).text_size(10).text_color(t.muted).child(`${this.running.length} running`))
-        .child(div().flex_1().min_w(0).text_size(11.5).text_color(t.dim).text_ellipsis_start().whitespace_nowrap().overflow_hidden().child(dir ?? "")))
-      .child(v_flex().id("subagent-scroll").flex_1().min_h(0).overflow_y_scrollbar().p(10).gap(16)
-        .child(section("Running", this.running)
-          .when(this.running.length === 0, (el) => el.child(div().px(2).text_size(12.5).text_color(t.dim).child(dir ? "No subagents running in this folder." : "Focus a terminal to see its folder's subagents."))))
-        .when(this.recent.length > 0, (el) => el.child(section("Recent", this.recent))));
+        .child(div().px(5).py(1).rounded(4).border_1().border_color(t.border).text_size(10).text_color(t.muted).child(`${this.running.length} running`)))
+      .child(v_flex().id("subagent-scroll").flex_1().min_h(0).overflow_y_scrollbar().p(10).gap(14)
+        .when(groups.length === 0, (el) => el.child(div().px(2).text_size(12.5).text_color(t.dim).child("No subagents yet. Tasks started with rpc_subagents_run show up here under the agent that started them.")))
+        .children(groups.map((group) => this.group(group, t))));
+  }
+
+  group(group, t) {
+    const tasks = [...group.tasks].sort((a, b) => ACTIVE.includes(b.status) - ACTIVE.includes(a.status)
+      || (ACTIVE.includes(a.status) ? started(a) - started(b) : lastActive(b) - lastActive(a)));
+    return v_flex().flex_none()
+      .child(this.ownerRow(group, t))
+      .child(v_flex().pl(14).children(tasks.map((task, i) => {
+        const last = i === tasks.length - 1;
+        return h_flex().items_start()
+          .child(v_flex().w(10).flex_none().self_stretch()
+            .child(div().h(18).flex_none().border_l(1.5).border_b(1.5).rounded_bl(6).border_color(t.input))
+            .when(!last, (el) => el.child(div().flex_1().border_l(1.5).border_color(t.input))))
+          .child(div().flex_1().min_w(0).pl(6).pt(6).child(this.card(task, t)));
+      })));
+  }
+
+  ownerRow(group, t) {
+    const agent = group.agent;
+    const program = agent?.program;
+    const label = agent ? agent.space_name : group.running > 0 ? "Outside Herdr" : "Ended session";
+    const detail = agent ? [agent.tab_name, agent.address].join(" · ") : `pid ${group.pid}`;
+    return h_flex().id(`owner-${group.id}`).h(28).px(8).gap(8).items_center().rounded(7)
+      .when(Boolean(agent?.focused), (el) => el.bg(t.raised))
+      .when(Boolean(agent), (el) => el.hover((s) => s.bg(t.hover)).on_click(() => run("agent.focus", { terminal: agent.address })))
+      .child(program?.icon ? (program.tint ? svg(program.icon).size(14).flex_none().text_color(t.foreground) : image(program.icon).size(14).flex_none())
+        : div().size(7).mx(3.5).flex_none().rounded(4).border(1.5).border_color(t.dim))
+      .child(div().flex_none().max_w(200).truncate().font_semibold().text_color(agent ? t.foreground : t.muted).child(label))
+      .child(div().flex_1().min_w(0).truncate().text_size(11.5).text_color(t.dim).child(detail))
+      .when(group.running > 0, (el) => el.child(div().px(5).rounded(4).bg(t.raised).text_size(11).text_color(t.working).child(String(group.running))))
+      .when(agent?.status === "working", (el) => el.child(svg(SPINNER).size(12).flex_none().text_color(t.working).spin(900)))
+      .when(agent?.status === "blocked", (el) => el.child(div().size(7).flex_none().rounded(4).bg(t.blocked)));
   }
 
   card(task, t) {
@@ -222,6 +269,8 @@ export default class Subagent extends View {
       ["Task", id],
     ].filter(([, value]) => value);
     return v_flex().px(12).pt(10).pb(12).gap(14).border_t(1).border_color(t.border)
+      .child(h_flex().gap(6)
+        .child(textButton(`viewer-${id}`, "Open live log", t, (_e, cx) => cx.spawn(async () => openViewer(task)))))
       .child(v_flex().gap(4).text_size(12)
         .children(meta.map(([label, value]) => h_flex().gap(10).items_start()
           .child(div().w(64).flex_none().text_color(t.dim).child(label))
@@ -230,9 +279,7 @@ export default class Subagent extends View {
           .child(div().w(64).flex_none().text_color(t.dim).child("Error"))
           .child(div().flex_1().min_w(0).text_color(t.ansi1).child(task.error)))))
       .child(session ? this.promptBlock(task, session, t) : div().text_size(12).text_color(t.dim).child("Loading session…"))
-      .when(Boolean(session), (el) => el.child(this.output(task, session, t)))
-      .child(h_flex().gap(6)
-        .child(textButton(`viewer-${id}`, "Open live log", t, (_e, cx) => cx.spawn(async () => openViewer(task)))));
+      .when(Boolean(session), (el) => el.child(this.output(task, session, t)));
   }
 
   promptBlock(task, session, t) {
@@ -254,23 +301,24 @@ export default class Subagent extends View {
   output(task, session, t) {
     const id = task.taskId;
     const all = this.allEntries.has(id);
-    const entries = all ? session.entries : session.entries.slice(-ENTRIES_SHOWN);
-    const hidden = session.entries.length - entries.length;
+    const shown = all ? session.entries : session.entries.slice(-ENTRIES_SHOWN);
+    const hidden = session.entries.length - shown.length;
     const last = session.entries[session.entries.length - 1];
     const waiting = ACTIVE.includes(task.status) && !(last?.kind === "tool" && !last.result);
     return v_flex().gap(8)
       .child(h_flex().items_center().gap(6)
         .child(div().flex_1().text_size(11.5).font_semibold().text_color(t.muted).child("Output"))
-        .when(hidden > 0, (el) => el.child(textButton(`entries-toggle-${id}`, `Show ${hidden} earlier`, t, (_e, cx) => {
-          this.allEntries.add(id);
-          cx.notify();
-        })))
-        .when(hidden === 0 && session.clipped, (el) => el.child(div().text_size(11.5).text_color(t.dim).child("Earlier output is in the live log"))))
-      .when(session.entries.length === 0 && !waiting, (el) => el.child(div().text_size(12).text_color(t.dim).child("No output yet.")))
-      .children(entries.map((entry, i) => this.entry(task, entry, `${id}-${hidden + i}`, t)))
+        .when(session.entries.length > 1, (el) => el.child(div().text_size(11.5).text_color(t.dim).child("Newest first"))))
       .when(waiting, (el) => el.child(h_flex().gap(7).items_center().text_size(12).text_color(t.muted)
         .child(svg(SPINNER).size(12).text_color(t.working).spin(900))
-        .child(task.status === "waiting_input" ? "Waiting for input" : "Working…")));
+        .child(task.status === "waiting_input" ? "Waiting for input" : "Working…")))
+      .when(session.entries.length === 0 && !waiting, (el) => el.child(div().text_size(12).text_color(t.dim).child("No output yet.")))
+      .children(shown.map((entry, i) => this.entry(task, entry, `${id}-${hidden + i}`, t)).reverse())
+      .when(hidden > 0, (el) => el.child(h_flex().child(textButton(`entries-toggle-${id}`, `Show ${hidden} earlier`, t, (_e, cx) => {
+        this.allEntries.add(id);
+        cx.notify();
+      }))))
+      .when(hidden === 0 && session.clipped, (el) => el.child(div().text_size(11.5).text_color(t.dim).child("Earlier output is in the live log")));
   }
 
   entry(task, entry, key, t) {

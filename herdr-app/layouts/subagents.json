@@ -17,7 +17,7 @@
             "mod": "workspace-chrome"
           },
           "size": {
-            "px": 46
+            "px": 40
           },
           "window_drag": true
         },
@@ -64,7 +64,7 @@
         }
       ],
       "size": {
-        "px": 268
+        "px": 232
       },
       "min": 44,
       "max": 480,
@@ -82,7 +82,7 @@
             "mod": "subagent"
           },
           "size": {
-            "px": 42
+            "px": 36
           },
           "window_drag": true
         },
@@ -101,7 +101,7 @@
                       "mod": "pane"
                     },
                     "reveal": "always",
-                    "height": 30,
+                    "height": 26,
                     "position": "top"
                   },
                   "background": "background",
@@ -113,8 +113,8 @@
                     "width": 1,
                     "color": "accent"
                   },
-                  "radius": 10,
-                  "gap": 8,
+                  "radius": 8,
+                  "gap": 4,
                   "lone": true
                 }
               }
@@ -149,8 +149,8 @@
               "hidden": true
             }
           ],
-          "padding": 8,
-          "gap": 8
+          "padding": 4,
+          "gap": 4
         },
         {
           "id": "status",
@@ -159,7 +159,7 @@
             "mod": "workspace-status"
           },
           "size": {
-            "px": 28
+            "px": 24
           }
         }
       ],
@@ -168,8 +168,8 @@
   ],
   "background": "canvas",
   "terminal_padding": [
-    14,
-    12
+    10,
+    8
   ],
   "divider": {
     "width": 1,
@@ -178,6 +178,6 @@
   "titlebar": "none",
   "traffic_lights": [
     12,
-    16
+    13
   ]
 }

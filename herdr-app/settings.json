@@ -1,9 +1,10 @@
 {
-  "zoom": 1,
+  "zoom": 1.0,
   "sounds": {
     "enabled": true
   },
-  "minimum_contrast": 1,
   "font": "Maple Mono NF CN",
+  "font_ligatures": false,
+  "minimum_contrast": 1.0,
   "theme": "catppuccin-latte"
 }
