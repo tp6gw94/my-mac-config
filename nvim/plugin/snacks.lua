@@ -1,6 +1,21 @@
 local utils = require("core.utils")
 local nmap_leader = utils.nmap_leader
 
+if vim.env.HC_TERMINAL_SOCKET then
+	vim.env.SNACKS_SSH = "1"
+	local terminal = require("snacks.image.terminal")
+	local size = terminal.size
+	terminal.size = function()
+		local dim = size()
+		if dim.width == 0 then
+			dim.cell_width, dim.cell_height = 17, 43
+			dim.width, dim.height = dim.columns * dim.cell_width, dim.rows * dim.cell_height
+			dim.scale = dim.cell_width / 8
+		end
+		return dim
+	end
+end
+
 require("snacks").setup({
 	bigfile = { enabled = true },
 	bufdelete = { enabled = true },
