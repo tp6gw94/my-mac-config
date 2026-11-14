@@ -61,6 +61,12 @@ require("snacks").setup({
 	scroll = { enabled = false },
 })
 
+local image = require("snacks.image.image")
+local image_ready = image.ready
+function image:ready()
+	return not self:failed() and image_ready(self)
+end
+
 local lsp_layout = {
 	preset = "vertical",
 	layout = {
