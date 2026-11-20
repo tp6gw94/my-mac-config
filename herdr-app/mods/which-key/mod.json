@@ -1,0 +1,8 @@
+{
+  "place": "none",
+  "title": "Which key",
+  "overlay": {
+    "kind": "dialog",
+    "width": 680
+  }
+}
