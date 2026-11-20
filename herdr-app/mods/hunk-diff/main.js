@@ -17,7 +17,7 @@ export default class HunkDiff extends View {
       return;
     }
     cx.spawn(async () => {
-      await hc(["run", "--bg", "--json", "--rm", "--no-parent", "--label", `herdr.space=${f.space}`, "--label", `herdr.tab=${this.tab}`, "--cwd", f.cwd || home(), "--", "hunk", "diff"]);
+      await hc(["run", "--bg", "--json", "--rm", "--no-parent", "--label", `herdr.space=${f.space}`, "--label", `herdr.tab=${this.tab}`, "--cwd", f.cwd || home(), "--", "zsh", "-lic", "exec hunk diff"]);
     });
   }
 
