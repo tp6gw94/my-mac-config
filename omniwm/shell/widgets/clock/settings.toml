@@ -1,0 +1,9 @@
+[options.date]
+type = "boolean"
+title = "Show date"
+default = true
+
+[options.icon]
+type = "boolean"
+title = "Show calendar icon"
+default = false

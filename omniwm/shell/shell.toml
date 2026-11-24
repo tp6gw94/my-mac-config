@@ -1,0 +1,28 @@
+profile = "default"
+
+[profiles]
+
+[profiles.celestial]
+center = ["active-window"]
+leading = ["apple-menu", "app-menu", "omniwm", "workspaces", "scratchpads"]
+theme = "native"
+trailing = ["media", "notifications", "volume", "wifi", "battery-details", "control-center", "system-stats", "clock"]
+
+[profiles.celestial.widgets]
+
+[profiles.celestial.widgets.clock]
+date = false
+
+[profiles.default]
+center = ["active-window"]
+leading = ["apple-menu", "omniwm", "app-menu", "workspaces", "scratchpads", "media"]
+trailing = ["notifications", "volume", "wifi", "battery-details", "control-center", "system-stats", "clock"]
+
+[profiles.default.widgets]
+
+[profiles.default.widgets.active-window]
+maxWidth = 160.0
+
+[profiles.default.workspaceBar]
+fullWidth = true
+position = "overlappingMenuBar"
