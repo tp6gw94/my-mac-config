@@ -1,0 +1,14 @@
+{
+  "place": "none",
+  "title": "Todd Spaces",
+  "overlay": {
+    "kind": "popup",
+    "width": 2,
+    "height": 2,
+    "frame": "none"
+  },
+  "cloned_from": {
+    "name": "spaces",
+    "version": "0.1.17"
+  }
+}

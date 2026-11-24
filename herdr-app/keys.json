@@ -115,6 +115,10 @@
     "ctrl-shift-k": "pane.swap:up",
     "ctrl-shift-l": "pane.swap:right"
   },
+  "layout:todd-layout": {
+    "ctrl-a j": "mod.open:todd-spaces",
+    "ctrl-a p": "mod.open:pane-jump"
+  },
   "terminal": {
     "cmd-c": "terminal.copy",
     "cmd-v": "terminal.paste",

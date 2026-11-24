@@ -1,0 +1,14 @@
+{
+  "place": "none",
+  "title": "Pane jump",
+  "overlay": {
+    "kind": "popup",
+    "width": 2,
+    "height": 2,
+    "frame": "none"
+  },
+  "cloned_from": {
+    "name": "pane",
+    "version": "0.1.17"
+  }
+}

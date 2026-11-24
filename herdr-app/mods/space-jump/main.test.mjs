@@ -4,6 +4,7 @@ import test from "node:test";
 import { createContext, SourceTextModule, SyntheticModule } from "node:vm";
 
 const source = await readFile(new URL("./main.js", import.meta.url), "utf8");
+const sidebarSource = await readFile(new URL("../todd-spaces/main.js", import.meta.url), "utf8");
 
 function element() {
   const node = { nodes: [], handlers: {} };
@@ -15,7 +16,10 @@ function element() {
       if (key === "when") return (condition, apply) => condition ? apply(proxy) : proxy;
       if (key === "id") return (id) => { node.elementId = id; return proxy; };
       if (key === "track_focus") return (handle) => { node.focus = handle; return proxy; };
-      if (key.startsWith("on_")) return (handler) => { node.handlers[key] = handler; return proxy; };
+      if (key.startsWith("on_")) return (...args) => {
+        node.handlers[args.length === 2 ? `${key}:${args[0]}` : key] = args.at(-1);
+        return proxy;
+      };
       return () => proxy;
     },
   });
@@ -31,7 +35,7 @@ function content(node) {
   return typeof node === "string" ? node : node.nodes.map(content).join("");
 }
 
-async function open(count) {
+async function open(count, { sidebar = false, width = 232 } = {}) {
   let items = Array.from({ length: count }, (_, index) => ({
     id: `sp${index}`,
     name: `Space ${index}`,
@@ -41,6 +45,9 @@ async function open(count) {
     active: index === 0,
   }));
   let focused;
+  let view;
+  let hostProps = {};
+  const sharedValues = new Map();
   const closed = [];
   const commands = [];
   let now = 0;
@@ -52,28 +59,48 @@ async function open(count) {
       return handle;
     },
   };
-  const context = createContext({ Date: { now: () => now } });
+  const context = createContext({ Date: { now: () => now }, localStorage: { getItem: () => null } });
   const modules = {
-    "gpui-kit": { View: class {}, div: element },
-    "gpui-base": { h_flex: element, v_flex: element },
+    "gpui-kit": { View: class {}, div: element, svg: element },
+    "gpui-base": { h_flex: element, v_flex: element, ScrollHandle: { new: () => ({ scroll_to_item() {} }) } },
     herdr: {
-      closeOverlay: (id) => closed.push(id),
+      closeOverlay(id) {
+        closed.push(id);
+        view.close();
+      },
+      checking: () => true,
+      exec() {},
+      hc() {},
       home: () => "/home/todd",
-      props: () => ({ overlay: "space-jump" }),
+      layout: () => ({ id: "sidebar", size: { px: width } }),
+      machines: () => [],
+      openOverlay() {},
+      panes: () => [],
+      props: () => hostProps,
       run: (name, args) => commands.push({ name, args: structuredClone(args) }),
+      setShared: (key, value) => sharedValues.set(key, structuredClone(value)),
+      shared: (key) => sharedValues.get(key),
       spaces: () => items,
       theme: () => ({}),
+      watchFolder() {},
+      window: () => ({}),
     },
   };
-  const mod = new SourceTextModule(source, { context });
-  await mod.link((name) => {
-    const exports = modules[name];
-    return new SyntheticModule(Object.keys(exports), function () {
-      for (const [key, value] of Object.entries(exports)) this.setExport(key, value);
-    }, { context });
-  });
-  await mod.evaluate();
-  const view = new mod.namespace.default();
+  async function instantiate(code) {
+    const mod = new SourceTextModule(code, { context });
+    await mod.link((name) => {
+      const exports = modules[name];
+      return new SyntheticModule(Object.keys(exports), function () {
+        for (const [key, value] of Object.entries(exports)) this.setExport(key, value);
+      }, { context });
+    });
+    await mod.evaluate();
+    return new mod.namespace.default();
+  }
+  const spacesView = sidebar ? await instantiate(sidebarSource) : null;
+  spacesView?.init({}, cx);
+  view = await instantiate(source);
+  hostProps = { overlay: "space-jump", sidebar };
   view.init({}, cx);
   const tree = () => view.render();
   const byId = (id) => walk(tree()).find((node) => node.elementId === id);
@@ -84,6 +111,12 @@ async function open(count) {
     items: () => items,
     update: (next) => { items = next; },
     isFocused: () => tree().focus === focused,
+    sidebarRow(id) { return walk(spacesView.render()).find((node) => node.elementId === `space-${id}`); },
+    clickSpace(id) {
+      this.sidebarRow(id).handlers["on_mouse_down:left"]({}, cx);
+      this.sidebarRow(id).handlers["on_mouse_up:left"]({}, cx);
+    },
+    outside() { tree().handlers.on_mouse_down_out({}, cx); },
     rows: () => walk(tree()).filter((node) => /^space-jump-sp\d+$/.test(node.elementId)),
     click(id) { byId(id).handlers.on_click?.({}, cx); },
     resize(width) { tree().handlers.on_size_change?.({ width, height: 480 }, cx); },
@@ -123,6 +156,34 @@ test("a hint switches directly to its space and dismisses the overlay", async ()
   app.key("s");
   assert.deepEqual(app.commands, [{ name: "space.select", args: { id: "sp1" } }]);
   assert.deepEqual(app.closed, ["space-jump"]);
+});
+
+test("sidebar mode puts the hints on existing space rows and jumps without a dialog", async () => {
+  const app = await open(4, { sidebar: true });
+  assert.equal(app.isFocused(), true);
+  assert.equal(content(app.tree()), "");
+  assert.deepEqual([0, 1, 2, 3].map((i) => content(app.sidebarRow(`sp${i}`))), [
+    "SSpace 0a", "SSpace 1s", "SSpace 2d", "SSpace 3f",
+  ]);
+  app.key("x");
+  app.key("d");
+  assert.deepEqual(app.commands, [{ name: "space.select", args: { id: "sp2" } }]);
+  assert.equal(content(app.sidebarRow("sp2")), "SSpace 2");
+});
+
+test("clicking a sidebar row while hints are showing also selects the space", async () => {
+  const app = await open(4, { sidebar: true });
+  app.clickSpace("sp1");
+  assert.deepEqual(app.commands, [{ name: "space.select", args: { id: "sp1" } }]);
+  assert.equal(content(app.sidebarRow("sp1")), "SSpace 1");
+});
+
+test("the narrow sidebar shows a hint instead of the space number until it is dismissed", async () => {
+  const app = await open(4, { sidebar: true, width: 44 });
+  assert.equal(content(app.sidebarRow("sp1")), "s");
+  app.outside();
+  assert.match(content(app.sidebarRow("sp1")), /^2/);
+  assert.deepEqual(app.commands, []);
 });
 
 test("large lists have unique, equal-length hints without prefix collisions", async () => {

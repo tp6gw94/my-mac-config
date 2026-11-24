@@ -1,7 +1,8 @@
 import { View, div } from "gpui-kit";
 import { h_flex, v_flex } from "gpui-base";
-import { closeOverlay, home, props, run, spaces, theme } from "herdr";
+import { closeOverlay, home, props, run, setShared, shared, spaces, theme } from "herdr";
 
+const SIDEBAR_KEY = "space-jump.sidebar";
 const HINT_KEYS = "asdfghjklqwertyuiopzxcvbnm";
 const ROW_HEIGHT = 44;
 const ROW_GAP = 4;
@@ -25,6 +26,9 @@ function labelSpaces(items) {
 
 export default class SpaceJump extends View {
   init(_props, cx) {
+    const { overlay, sidebar } = props() ?? {};
+    this.overlay = overlay;
+    this.sidebar = sidebar;
     this.targets = labelSpaces(spaces());
     this.prefix = "";
     this.page = 0;
@@ -34,10 +38,22 @@ export default class SpaceJump extends View {
     this.wheelTurned = false;
     this.handle = cx.focus_handle();
     this.handle.focus();
+    if (this.sidebar) {
+      this.hints = Object.fromEntries(this.targets.map(({ id, hint }) => [id, hint]));
+      this.showHints();
+    }
+  }
+
+  showHints() {
+    setShared(SIDEBAR_KEY, { overlay: this.overlay, hints: this.hints, prefix: this.prefix });
+  }
+
+  close() {
+    if (this.sidebar && shared(SIDEBAR_KEY)?.overlay === this.overlay) setShared(SIDEBAR_KEY, null);
   }
 
   dismiss() {
-    closeOverlay(props().overlay);
+    closeOverlay(this.overlay);
   }
 
   select(id) {
@@ -45,10 +61,10 @@ export default class SpaceJump extends View {
     run("space.select", { id });
   }
 
-  rows() {
+  rows(prefix = this.prefix) {
     const live = new Map(spaces().map((space) => [space.id, space]));
     return this.targets
-      .filter((target) => live.has(target.id) && target.hint.startsWith(this.prefix))
+      .filter((target) => live.has(target.id) && target.hint.startsWith(prefix))
       .map((target) => ({ ...live.get(target.id), hint: target.hint }));
   }
 
@@ -97,26 +113,33 @@ export default class SpaceJump extends View {
     const { control, alt, platform } = event.modifiers;
     if (control || alt || platform) return;
     const key = event.key.toLowerCase();
-    if (key === "up" || key === "pageup") {
+    if (!this.sidebar && (key === "up" || key === "pageup")) {
       this.turnPage(-1, cx);
       return;
     }
-    if (key === "down" || key === "pagedown") {
+    if (!this.sidebar && (key === "down" || key === "pagedown")) {
       this.turnPage(1, cx);
       return;
     }
-    if (event.keystroke === "backspace" && this.prefix) this.prefix = this.prefix.slice(0, -1);
-    else if (!event.is_held && key.length === 1 && HINT_KEYS.includes(key)) this.prefix += key;
+    let prefix;
+    if (event.keystroke === "backspace" && this.prefix) prefix = this.prefix.slice(0, -1);
+    else if (!event.is_held && key.length === 1 && HINT_KEYS.includes(key)) prefix = this.prefix + key;
     else return;
 
-    const rows = this.rows();
-    const match = rows.find((space) => space.hint === this.prefix);
+    const rows = this.rows(prefix);
+    if (this.sidebar && !rows.length) return;
+    this.prefix = prefix;
+    const match = rows.find((space) => space.hint === prefix);
     if (match) {
       this.select(match.id);
       return;
     }
-    this.page = 0;
-    cx.notify();
+    if (this.sidebar) {
+      this.showHints();
+    } else {
+      this.page = 0;
+      cx.notify();
+    }
   }
 
   entry(space, localHome, t) {
@@ -152,6 +175,11 @@ export default class SpaceJump extends View {
   }
 
   render() {
+    if (this.sidebar) {
+      return div().id("space-jump-sidebar").size_full().track_focus(this.handle)
+        .on_key_down((event, cx) => this.keyDown(event, cx))
+        .on_mouse_down_out(() => this.dismiss());
+    }
     const t = theme();
     const rows = this.rows();
     const { columns, pageSize, pageCount, page } = this.pagination(rows.length);
