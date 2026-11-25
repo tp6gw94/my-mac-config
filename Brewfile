@@ -222,8 +222,8 @@ cask "docker/tap/sbx", trusted: true
 cask "squirrel-app"
 # Menu bar manager
 cask "thaw"
-# Tiny, fully native launcher, hotkeys, and clipboard history
-cask "abue-ammar/tinycast/tinycast", trusted: true
+# Application launcher and productivity tool
+cask "tinycast"
 # Open-source markdown editor
 cask "zettlr"
 go "cmd/go"
@@ -234,7 +234,3 @@ cargo "kak-tree-sitter"
 cargo "ktsctl"
 uv "cli-agent-orchestrator", source: "git+https://github.com/awslabs/cli-agent-orchestrator.git@main"
 uv "zmk"
-npm "@anthropic-ai/claude-code"
-npm "corepack"
-npm "fallow"
-npm "qpw"
