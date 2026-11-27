@@ -86,7 +86,10 @@ herdr-app/mods/workspace-chrome/
 herdr-app/mods/workspace-status/
 herdr-app/mods/worktree/
 !omniwm
-!omniwm/**
+!omniwm/shell/widgets/
+!omniwm/shell/omniwm.d.luau
+!omniwm/shell/shell.toml
+!omniwm/settings.toml
 !rex
 !rex/**
 *.local
