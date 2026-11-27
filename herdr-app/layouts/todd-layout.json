@@ -40,7 +40,7 @@
               "id": "agents",
               "type": "block",
               "content": {
-                "mod": "agents"
+                "mod": "todd-agents"
               },
               "size": {
                 "weight": 1
@@ -160,6 +160,16 @@
           },
           "size": {
             "px": 24
+          }
+        },
+        {
+          "id": "terminal-float-toggle",
+          "type": "block",
+          "content": {
+            "mod": "terminal-float-toggle"
+          },
+          "size": {
+            "px": 0
           }
         }
       ],

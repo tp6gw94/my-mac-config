@@ -56,6 +56,8 @@ zsh/.zsh_secrets
 !herdr-app/themes/*.json
 !herdr-app/mods
 !herdr-app/mods/**
+!herdr-app/mods/todd-agents/
+!herdr-app/mods/todd-agents/*
 herdr-app/layouts/main.json
 herdr-app/layouts/terminals.json
 herdr-app/layouts/win98.json
